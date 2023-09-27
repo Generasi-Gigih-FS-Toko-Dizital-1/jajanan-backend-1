@@ -7,7 +7,7 @@ services:
       - .:/app
       - /app/node_modules
     command:
-      - "yarn start"
+      - "yarn test && yarn build && yarn start"
   ds-1:
     image: mongo:latest
     ports:

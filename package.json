@@ -1,9 +1,10 @@
 {
   "scripts": {
-    "start": "yarn build && node ./dist/src/App.js",
+    "start": "node ./dist/src/App.js",
     "build": "tsc --build",
     "dev": "nodemon --legacy-watch --watch ./src --ext ts --exec \"yarn start\"",
-    "test": "nyc ts-mocha --parallel --watch ./test/**/*.spec.ts"
+    "test": "nyc ts-mocha --parallel ./test/**/*.spec.ts",
+    "test-watch": "nyc ts-mocha --parallel --watch ./test/**/*.spec.ts"
   },
   "dependencies": {
     "async-wait-until": "^2.0.12",
