@@ -7,7 +7,7 @@ services:
       - .:/app
       - /app/node_modules
     command:
-      - "yarn test && yarn build && yarn start"
+      - "yarn test-once && yarn build && yarn start"
   ds-1:
     image: postgres:latest
     ports:
