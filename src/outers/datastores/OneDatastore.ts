@@ -1,8 +1,7 @@
-import * as os from 'os'
-import mongoose, {type Mongoose} from 'mongoose'
+import { PrismaClient } from '@prisma/client'
 
 export default class OneDatastore {
-  db: Mongoose | undefined
+  db: PrismaClient | undefined
 
   connect = async (): Promise<void> => {
     const host = process.env.DS_1_HOST
@@ -15,12 +14,12 @@ export default class OneDatastore {
       throw new Error('Port is undefined.')
     }
 
-    const username = process.env.DS_1_ROOT_USERNAME
-    if (username === undefined) {
-      throw new Error('Username is undefined.')
+    const user = process.env.DS_1_USER
+    if (user === undefined) {
+      throw new Error('User is undefined.')
     }
 
-    const password = process.env.DS_1_ROOT_PASSWORD
+    const password = process.env.DS_1_PASSWORD
     if (password === undefined) {
       throw new Error('Password is undefined.')
     }
@@ -30,18 +29,14 @@ export default class OneDatastore {
       throw new Error('Database is undefined.')
     }
 
-    const url = `mongodb://${username}:${password}@${host}:${port}/${database}?authSource=admin`
+    const url = `postgresql://${user}:${password}@${host}:${port}/${database}`
 
-    await mongoose.connect(
-      url,
-      {
-        maxPoolSize: os.cpus().length
-      }
-    )
-    this.db = mongoose
+    this.db = new PrismaClient({ datasourcesUrl: url })
   }
 
   disconnect = async (): Promise<void> => {
-    await mongoose.disconnect()
+    if (this.db === undefined) {
+      throw new Error('Database is undefined.')
+    }
   }
 }

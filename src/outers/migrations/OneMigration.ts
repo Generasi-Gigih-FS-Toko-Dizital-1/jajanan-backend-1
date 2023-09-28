@@ -8,12 +8,10 @@ export default class OneMigration {
   }
 
   up = async (): Promise<void> => {
-
     console.log('One migration up.')
   }
 
   down = async (): Promise<void> => {
-
     console.log('One migration down.')
   }
 }
