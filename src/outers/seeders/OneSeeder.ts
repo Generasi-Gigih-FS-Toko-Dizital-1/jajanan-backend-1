@@ -9,7 +9,7 @@ export default class OneSeeder {
   }
 
   up = async (): Promise<void> => {
-    this.oneDatastore.client?.user.createMany({
+    await this.oneDatastore.client?.user.createMany({
       data: [
         {
           id: randomUUID(),
@@ -47,6 +47,7 @@ export default class OneSeeder {
   }
 
   down = async (): Promise<void> => {
+    await this.oneDatastore.client?.user.deleteMany()
     console.log('One seeder down.')
   }
 }

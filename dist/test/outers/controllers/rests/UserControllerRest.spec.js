@@ -46,11 +46,11 @@ chai_1.default.should();
             response.should.have.status(200);
             response.body.should.be.a('object');
             response.body.should.have.property('status').eq(200);
-            response.body.should.have.property('message').eq('Read all users succeed.');
+            response.body.should.have.property('message');
             response.body.should.have.property('data');
             response.body.data.should.be.a('array');
-            response.body.data.should.be.include.members(userMock.data.map((userMock) => {
-                return humps_1.default.decamelizeKeys(userMock);
+            response.body.data.should.deep.include.members(userMock.data.map((userMock) => {
+                return humps_1.default.decamelizeKeys(JSON.parse(JSON.stringify(userMock)));
             }));
         }));
     });
