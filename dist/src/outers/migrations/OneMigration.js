@@ -21,4 +21,4 @@ class OneMigration {
     }
 }
 exports.default = OneMigration;
-//# sourceMappingURL=OneMigration.js.map
+//# sourceMappingURL=OneSeeder.js.map

@@ -1,16 +1,41 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const User_1 = __importDefault(require("../../src/inners/models/entities/User"));
-const mongoose_1 = require("mongoose");
 const crypto_1 = require("crypto");
 class UserMock {
     constructor() {
         this.data = [
-            new User_1.default(`username${(0, crypto_1.randomUUID)()}`, 'password0', 'https://placehold.co/400x400?text=pictureUrl0', new mongoose_1.Types.ObjectId().toString()),
-            new User_1.default(`username${(0, crypto_1.randomUUID)()}`, 'password1', 'https://placehold.co/400x400?text=pictureUrl0', new mongoose_1.Types.ObjectId().toString())
+            {
+                id: (0, crypto_1.randomUUID)(),
+                fullName: 'fulName0',
+                address: 'address0',
+                email: 'email0',
+                password: 'password0',
+                username: 'username0',
+                balance: 0,
+                gender: 'MALE',
+                experience: 0,
+                lastLatitude: 0,
+                lastLongitude: 0,
+                updatedAt: new Date(),
+                createdAt: new Date(),
+                deletedAt: null
+            },
+            {
+                id: (0, crypto_1.randomUUID)(),
+                fullName: 'fulName1',
+                address: 'address1',
+                email: 'email1',
+                password: 'password1',
+                username: 'username1',
+                balance: 1,
+                gender: 'MALE',
+                experience: 1,
+                lastLatitude: 1,
+                lastLongitude: 1,
+                updatedAt: new Date(),
+                createdAt: new Date(),
+                deletedAt: null
+            }
         ];
     }
 }

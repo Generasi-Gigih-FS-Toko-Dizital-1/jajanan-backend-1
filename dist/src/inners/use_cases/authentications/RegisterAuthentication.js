@@ -12,18 +12,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const User_1 = __importDefault(require("../../models/entities/User"));
 const Result_1 = __importDefault(require("../../models/value_objects/Result"));
-const mongoose_1 = require("mongoose");
+const crypto_1 = require("crypto");
 class RegisterAuthentication {
     constructor(userManagement) {
         this.registerByUsernameAndPassword = (request) => __awaiter(this, void 0, void 0, function* () {
-            if (request.username === undefined) {
-                throw new mongoose_1.Error('Username is undefined.');
-            }
-            if (request.password === undefined) {
-                throw new mongoose_1.Error('Password is undefined.');
-            }
             let isUserFound;
             try {
                 yield this.userManagement.readOneByUsername(request.username);
@@ -35,7 +28,22 @@ class RegisterAuthentication {
             if (isUserFound) {
                 return new Result_1.default(409, 'Register by username and password failed, username already exists.', null);
             }
-            const toCreateUser = new User_1.default(request.username, request.password, '');
+            const toCreateUser = {
+                id: (0, crypto_1.randomUUID)(),
+                fullName: request.fullName,
+                address: request.address,
+                email: request.email,
+                password: request.password,
+                username: request.username,
+                balance: request.balance,
+                gender: request.gender,
+                experience: request.experience,
+                lastLatitude: request.lastLatitude,
+                lastLongitude: request.lastLongitude,
+                updatedAt: new Date(),
+                createdAt: new Date(),
+                deletedAt: null
+            };
             const createdUser = yield this.userManagement.createOne(toCreateUser);
             return new Result_1.default(201, 'Register by username and password succeed.', createdUser.data);
         });

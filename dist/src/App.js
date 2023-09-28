@@ -21,7 +21,7 @@ const socket_io_1 = __importDefault(require("socket.io"));
 const http_1 = __importDefault(require("http"));
 const CaseExpressMiddleware_1 = __importDefault(require("./outers/middlewares/CaseExpressMiddleware"));
 const cors_1 = __importDefault(require("cors"));
-const OneMigration_1 = __importDefault(require("./outers/migrations/OneMigration"));
+const OneSeeder_1 = __importDefault(require("./outers/seeders/OneSeeder"));
 let app;
 let io;
 let server;
@@ -45,7 +45,7 @@ const main = () => __awaiter(void 0, void 0, void 0, function* () {
         console.log('Error connecting to one datastore: ', error);
     }
     if (process.env.NODE_ENV !== 'test') {
-        const oneMigration = new OneMigration_1.default(oneDatastore);
+        const oneMigration = new OneSeeder_1.default(oneDatastore);
         yield oneMigration.down();
         yield oneMigration.up();
     }

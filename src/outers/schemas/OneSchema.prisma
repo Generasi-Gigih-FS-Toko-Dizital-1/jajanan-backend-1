@@ -1,15 +1,11 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+datasource db {
+  provider = "postgresql"
+  url      = env("DS_1_URL")
+}
 
-// datasource db {
-//   provider = "postgresql"
-//   url      = env("DATABASE_URL")
-//   directUrl = env("DIRECT_URL")
-// }
-
-// generator client {
-//   provider = "prisma-client-js"
-// }
+generator client {
+  provider = "prisma-client-js"
+}
 
 enum Gender {
   MALE
@@ -28,51 +24,51 @@ enum Payment {
 
 model User {
   id String @id
-  fullname String @db.VarChar(50)
+  fullName String @db.VarChar(50)
   address String @db.VarChar(50)
   email String @db.VarChar(50)
   password String
   username String @db.VarChar(50)
   balance Float
   gender Gender?
-  exp Int
+  experience Int
   lastLatitude Float
   lastLongitude Float
   updatedAt DateTime
   createdAt DateTime
   deletedAt DateTime?
-  notificationHistory NotificationHistory[]
-  topupHistory TopupHistory[]
-  transactionHistory TransactionHistory[]
+  notificationHistories NotificationHistory[]
+  topUpHistories TopUpHistory[]
+  transactionHistories TransactionHistory[]
   userSubscriptions UserSubscription[]
 }
 
 model Vendor {
   id String @id
-  fullname String @db.VarChar(50)
+  fullName String @db.VarChar(50)
   address String @db.VarChar(50)
   email String @db.VarChar(50)
   password String
   username String @db.VarChar(50)
   balance Float
   gender Gender?
-  exp Int
+  experience Int
   lastLatitude Float
   lastLongitude Float
-  jajanImage String @db.VarChar(50)
+  jajanImageUrl String @db.VarChar(50)
   jajanName String @db.VarChar(50)
   jajanDescription String
   status Status
   updatedAt DateTime
   createdAt DateTime
   deletedAt DateTime?
-  notificationHistory NotificationHistory[]
-  jajanItems jajanItem[]
+  notificationHistories NotificationHistory[]
+  jajanItems JajanItem[]
 }
 
 model Admin {
   id String @id
-  fullname String @db.VarChar(50)
+  fullName String @db.VarChar(50)
   email String @db.VarChar(50)
   password String
   gender Gender?
@@ -81,59 +77,59 @@ model Admin {
   deletedAt DateTime?
 }
 
-model jajanItem {
+model JajanItem {
   id String @id
   vendorId String
-  jajanItemName String @db.VarChar(50)
-  price Int
+  vendor Vendor @relation(fields: [vendorId], references: [id])
   categoryId String
-  image String @db.VarChar(50)
+  category Category @relation(fields: [categoryId], references: [id])
+  name String @db.VarChar(50)
+  price Int
+  imageUrl String @db.VarChar(50)
   updatedAt DateTime
   createdAt DateTime
-  deletedAt DateTime?
-  vendor Vendor @relation(fields: [vendorId], references: [id])
-  transactionHistory TransactionHistory[]
-  category Category @relation(fields: [categoryId], references: [id])
+  deletedAt DateTime
+  transactionHistories TransactionHistory[]
 }
 
 model Category {
   id String @id
   categoryName String @db.VarChar(50)
-  icon String @db.VarChar(50)
+  iconUrl String @db.VarChar(50)
   updatedAt DateTime
   createdAt DateTime
   deletedAt DateTime?
-  jajanItem jajanItem[]
+  jajanItems JajanItem[]
   userSubscriptions UserSubscription[]
 }
 
 model NotificationHistory {
   id String @id
   userId String
+  user User  @relation(fields: [userId], references: [id])
   vendorId String
+  vendor Vendor @relation(fields: [vendorId], references: [id])
   updatedAt DateTime
   createdAt DateTime
   deletedAt DateTime?
-  user User  @relation(fields: [userId], references: [id])
-  vendor Vendor @relation(fields: [vendorId], references: [id])
 }
 
-model TopupHistory {
+model TopUpHistory {
   id String @id
   userId String
+  user User  @relation(fields: [userId], references: [id])
   amount Float
   media String @db.VarChar(50)
   updatedAt DateTime
   createdAt DateTime
   deletedAt DateTime?
-  user User  @relation(fields: [userId], references: [id])
 }
 
 model UserLevel {
   id String @id
   levelName String @db.VarChar(50)
-  minimumExp Int
-  icon String @db.VarChar(50)
+  minimumExperience Int
+  iconUrl String @db.VarChar(50)
   updatedAt DateTime
   createdAt DateTime
   deletedAt DateTime?
@@ -142,8 +138,8 @@ model UserLevel {
 model VendorLevel {
   id String @id
   levelName String @db.VarChar(50)
-  minimumExp Int
-  icon String @db.VarChar(50)
+  minimumExperience Int
+  iconUrl String @db.VarChar(50)
   updatedAt DateTime
   createdAt DateTime
   deletedAt DateTime?
@@ -163,8 +159,8 @@ model UserSubscription {
 model TransactionHistory {
   id String @id
   userId String
-  amount Int
   jajanItemId String
+  amount Int
   paymentType Payment
   lastLatitude Float
   lastLongitude Float
@@ -172,5 +168,5 @@ model TransactionHistory {
   createdAt DateTime
   deletedAt DateTime?
   user User @relation(fields: [userId], references: [id])
-  jajanItem jajanItem @relation(fields: [jajanItemId], references: [id])
+  jajanItem JajanItem @relation(fields: [jajanItemId], references: [id])
 }

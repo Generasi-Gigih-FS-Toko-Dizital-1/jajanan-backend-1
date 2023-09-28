@@ -7,4 +7,4 @@ class RegisterByUsernameAndPasswordRequest {
     }
 }
 exports.default = RegisterByUsernameAndPasswordRequest;
-//# sourceMappingURL=RegisterByUsernameAndPasswordRequest.js.map
+//# sourceMappingURL=UserRegister.js.map

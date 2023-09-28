@@ -1,13 +1,13 @@
-import {type Request, type Response, type Router} from 'express'
+import { type Request, type Response, type Router } from 'express'
 
-import type User from '../../../inners/models/entities/User'
 import Result from '../../../inners/models/value_objects/Result'
 import type RegisterAuthentication from '../../../inners/use_cases/authentications/RegisterAuthentication'
 import type LoginAuthentication from '../../../inners/use_cases/authentications/LoginAuthentication'
 import type LoginByUsernameAndPasswordRequest
-    from '../../../inners/models/value_objects/requests/authentications/LoginByUsernameAndPasswordRequest'
-import type RegisterByUsernameAndPasswordRequest
-    from '../../../inners/models/value_objects/requests/authentications/RegisterByUsernameAndPasswordRequest'
+  from '../../../inners/models/value_objects/requests/authentications/LoginByUsernameAndPasswordRequest'
+import type UserRegister
+  from '../../../inners/models/value_objects/requests/authentications/RegisterUserRequest'
+import { type User } from '@prisma/client'
 
 export default class AuthenticationControllerRest {
   router: Router
@@ -60,7 +60,7 @@ export default class AuthenticationControllerRest {
   register = (request: Request, response: Response): void => {
     const { method } = request.query
     if (method === 'username_and_password') {
-      const requestToRegisterByUsernameAndPassword: RegisterByUsernameAndPasswordRequest = request.body
+      const requestToRegisterByUsernameAndPassword: UserRegister = request.body
       this.registerAuthentication.registerByUsernameAndPassword(requestToRegisterByUsernameAndPassword)
         .then((result: Result<User | null>) => {
           response.status(result.status).json(result)

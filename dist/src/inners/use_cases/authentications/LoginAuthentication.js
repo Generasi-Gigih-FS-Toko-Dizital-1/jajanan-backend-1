@@ -13,16 +13,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Result_1 = __importDefault(require("../../models/value_objects/Result"));
-const mongoose_1 = require("mongoose");
 class LoginAuthentication {
     constructor(userManagement) {
         this.loginByUsernameAndPassword = (request) => __awaiter(this, void 0, void 0, function* () {
-            if (request.username === undefined) {
-                throw new mongoose_1.Error('Username is undefined.');
-            }
-            if (request.password === undefined) {
-                throw new mongoose_1.Error('Password is undefined.');
-            }
             try {
                 yield this.userManagement.readOneByUsername(request.username);
             }
@@ -32,6 +25,22 @@ class LoginAuthentication {
             let foundUserByUsernameAndPassword;
             try {
                 foundUserByUsernameAndPassword = yield this.userManagement.readOneByUsernameAndPassword(request.username, request.password);
+            }
+            catch (error) {
+                return new Result_1.default(404, `Login by username and password failed, unknown username or password: ${error.message}`, null);
+            }
+            return new Result_1.default(200, 'Login by username and password succeed.', foundUserByUsernameAndPassword.data);
+        });
+        this.loginByEmailAndPassword = (request) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield this.userManagement.readOneByUsername(request.email);
+            }
+            catch (error) {
+                return new Result_1.default(404, `Login by username failed, unknown username: ${error.message}`, null);
+            }
+            let foundUserByUsernameAndPassword;
+            try {
+                foundUserByUsernameAndPassword = yield this.userManagement.readOneByEmailAndPassword(request.email, request.password);
             }
             catch (error) {
                 return new Result_1.default(404, `Login by username and password failed, unknown username or password: ${error.message}`, null);
