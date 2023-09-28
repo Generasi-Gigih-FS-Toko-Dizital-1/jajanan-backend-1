@@ -3,10 +3,10 @@
 		"start": "node ./dist/src/App.js",
 		"build": "yarn prisma-generate && yarn prisma-db-push && tsc --build",
 		"dev": "nodemon --legacy-watch --watch ./src --ext ts --exec \"yarn build && yarn start\"",
-		"test-once": "nyc ts-mocha --parallel ./test/**/*.spec.ts",
+		"test": "nyc ts-mocha --parallel ./test/**/*.spec.ts",
 		"test-watch": "nyc ts-mocha --parallel --watch ./test/**/*.spec.ts",
-		"prisma-db-push": "prisma db push --schema=./src/outers/schemas/OneSchema.prisma",
-		"prisma-generate": "prisma generate --schema=./src/outers/schemas/OneSchema.prisma"
+		"prisma-generate": "npx prisma generate --schema=./src/outers/schemas/OneSchema.prisma",
+		"prisma-db-push": "npx prisma db push --schema=./src/outers/schemas/OneSchema.prisma"
 	},
 	"dependencies": {
 		"@prisma/client": "^5.3.1",
