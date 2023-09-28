@@ -1,0 +1,18 @@
+services:
+  app:
+    build: .
+    ports:
+      - "${APP_PORT}:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command:
+      - "yarn test && yarn build && yarn start"
+  ds-1:
+    image: mongo:latest
+    ports:
+      - "${DS_1_PORT}:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${DS_1_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${DS_1_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=${DS_1_DATABASE}
