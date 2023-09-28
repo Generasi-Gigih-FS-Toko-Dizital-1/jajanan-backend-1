@@ -1,0 +1,176 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+//   directUrl = env("DIRECT_URL")
+// }
+
+// generator client {
+//   provider = "prisma-client-js"
+// }
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum Status {
+  ON
+  OFF
+}
+
+enum Payment {
+  CASH
+  BALANCE
+}
+
+model User {
+  id String @id
+  fullname String @db.VarChar(50)
+  address String @db.VarChar(50)
+  email String @db.VarChar(50)
+  password String
+  username String @db.VarChar(50)
+  balance Float
+  gender Gender?
+  exp Int
+  lastLatitude Float
+  lastLongitude Float
+  updatedAt DateTime
+  createdAt DateTime
+  deletedAt DateTime?
+  notificationHistory NotificationHistory[]
+  topupHistory TopupHistory[]
+  transactionHistory TransactionHistory[]
+  userSubscriptions UserSubscription[]
+}
+
+model Vendor {
+  id String @id
+  fullname String @db.VarChar(50)
+  address String @db.VarChar(50)
+  email String @db.VarChar(50)
+  password String
+  username String @db.VarChar(50)
+  balance Float
+  gender Gender?
+  exp Int
+  lastLatitude Float
+  lastLongitude Float
+  jajanImage String @db.VarChar(50)
+  jajanName String @db.VarChar(50)
+  jajanDescription String
+  status Status
+  updatedAt DateTime
+  createdAt DateTime
+  deletedAt DateTime?
+  notificationHistory NotificationHistory[]
+  jajanItems jajanItem[]
+}
+
+model Admin {
+  id String @id
+  fullname String @db.VarChar(50)
+  email String @db.VarChar(50)
+  password String
+  gender Gender?
+  updatedAt DateTime
+  createdAt DateTime
+  deletedAt DateTime?
+}
+
+model jajanItem {
+  id String @id
+  vendorId String
+  jajanItemName String @db.VarChar(50)
+  price Int
+  categoryId String
+  image String @db.VarChar(50)
+  updatedAt DateTime
+  createdAt DateTime
+  deletedAt DateTime?
+  vendor Vendor @relation(fields: [vendorId], references: [id])
+  transactionHistory TransactionHistory[]
+  category Category @relation(fields: [categoryId], references: [id])
+}
+
+model Category {
+  id String @id
+  categoryName String @db.VarChar(50)
+  icon String @db.VarChar(50)
+  updatedAt DateTime
+  createdAt DateTime
+  deletedAt DateTime?
+  jajanItem jajanItem[]
+  userSubscriptions UserSubscription[]
+}
+
+model NotificationHistory {
+  id String @id
+  userId String
+  vendorId String
+  updatedAt DateTime
+  createdAt DateTime
+  deletedAt DateTime?
+  user User  @relation(fields: [userId], references: [id])
+  vendor Vendor @relation(fields: [vendorId], references: [id])
+}
+
+model TopupHistory {
+  id String @id
+  userId String
+  amount Float
+  media String @db.VarChar(50)
+  updatedAt DateTime
+  createdAt DateTime
+  deletedAt DateTime?
+  user User  @relation(fields: [userId], references: [id])
+}
+
+model UserLevel {
+  id String @id
+  levelName String @db.VarChar(50)
+  minimumExp Int
+  icon String @db.VarChar(50)
+  updatedAt DateTime
+  createdAt DateTime
+  deletedAt DateTime?
+}
+
+model VendorLevel {
+  id String @id
+  levelName String @db.VarChar(50)
+  minimumExp Int
+  icon String @db.VarChar(50)
+  updatedAt DateTime
+  createdAt DateTime
+  deletedAt DateTime?
+}
+
+model UserSubscription {
+  id String @id
+  userId String
+  categoryId String
+  updatedAt DateTime
+  createdAt DateTime
+  deletedAt DateTime?
+  user User @relation(fields: [userId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
+}
+
+model TransactionHistory {
+  id String @id
+  userId String
+  amount Int
+  jajanItemId String
+  paymentType Payment
+  lastLatitude Float
+  lastLongitude Float
+  updatedAt DateTime
+  createdAt DateTime
+  deletedAt DateTime?
+  user User @relation(fields: [userId], references: [id])
+  jajanItem jajanItem @relation(fields: [jajanItemId], references: [id])
+}
