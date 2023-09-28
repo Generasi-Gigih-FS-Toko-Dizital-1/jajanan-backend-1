@@ -1,71 +1,160 @@
-import type User from '../../inners/models/entities/User'
 import type OneDatastore from '../datastores/OneDatastore'
-import UserSchema from '../schemas/UserSchema'
-import {Types} from 'mongoose'
+import { type User } from '@prisma/client'
+import type UserAggregate from '../../inners/models/aggregates/UserAggregate'
 
 export default class UserRepository {
   oneDatastore: OneDatastore
+  aggregatedArgs: any
 
   constructor (datastoreOne: OneDatastore) {
     this.oneDatastore = datastoreOne
-  }
-
-  readAll = async (search?: any): Promise<User[]> => {
-    if (search !== undefined) {
-      if (search._id !== null) {
-        search._id = new Types.ObjectId(search._id)
+    this.aggregatedArgs = {
+      include: {
+        notificationHistories: true,
+        topUpHistories: true,
+        transactionHistories: true,
+        userSubscriptions: true
       }
     }
-    const foundUsers: User[] | null = await UserSchema.find(search)
-    if (foundUsers === null) {
-      throw new Error('Found users is null.')
-    }
-    return foundUsers
   }
 
-  readOneById = async (id: string): Promise<User> => {
-    const foundUser: User | null = await UserSchema.findOne({ _id: new Types.ObjectId(id) })
-    if (foundUser === null) {
-      throw new Error('Found user is null.')
+  readAll = async (isAggregated?: boolean): Promise<User[] | UserAggregate[]> => {
+    const args: any = {}
+    if (isAggregated === true) {
+      args.include = this.aggregatedArgs.include
     }
-    return foundUser
-  }
-
-  readOneByUsername = async (username: string): Promise<User> => {
-    const foundUser: User | null = await UserSchema.findOne({ username })
-    if (foundUser === null) {
-      throw new Error('Found user is null.')
+    const foundUser: User[] | UserAggregate[] | undefined = await this.oneDatastore.client?.user.findMany(args)
+    if (foundUser === undefined) {
+      throw new Error('Found user is undefined.')
     }
     return foundUser
   }
 
-  readOneByUsernameAndPassword = async (username: string, password: string): Promise<User> => {
-    const foundUser: User | null = await UserSchema.findOne({
-      username,
-      password
-    })
-    if (foundUser === null) {
-      throw new Error('Found user is null.')
+  readOneById = async (id: string, isAggregated?: boolean): Promise<User | UserAggregate | null > => {
+    const args: any = {
+      where: {
+        id
+      }
+    }
+    if (isAggregated === true) {
+      args.include = this.aggregatedArgs.include
+    }
+    const foundUser: User | UserAggregate | null | undefined = await this.oneDatastore.client?.user.findFirst(args)
+    if (foundUser === undefined) {
+      throw new Error('Found user is undefined.')
     }
     return foundUser
   }
 
-  createOne = async (user: User): Promise<User> => {
-    return await UserSchema.create(user)
+  readOneByUsername = async (username: string, isAggregated?: boolean): Promise<User | UserAggregate | null > => {
+    const args: any = {
+      where: {
+        username
+      }
+    }
+    if (isAggregated === true) {
+      args.include = this.aggregatedArgs.include
+    }
+    const foundUser: User | UserAggregate | null | undefined = await this.oneDatastore.client?.user.findFirst(args)
+    if (foundUser === undefined) {
+      throw new Error('Found user is undefined.')
+    }
+    return foundUser
   }
 
-  patchOneById = async (id: string, user: User): Promise<User> => {
-    const patchedUser: User | null = await UserSchema.findOneAndUpdate({ _id: new Types.ObjectId(id) }, { $set: user }, { new: true })
-    if (patchedUser === null) {
-      throw new Error('Patched user is null.')
+  readOneByEmail = async (email: string, isAggregated?: boolean): Promise<any | null > => {
+    const args: any = {
+      where: {
+        email
+      }
+    }
+    if (isAggregated === true) {
+      args.include = this.aggregatedArgs.include
+    }
+    const foundUser: User | UserAggregate | null | undefined = await this.oneDatastore.client?.user.findFirst(args)
+    if (foundUser === undefined) {
+      throw new Error('Found user is undefined.')
+    }
+    return foundUser
+  }
+
+  readOneByUsernameAndPassword = async (username: string, password: string, isAggregated?: boolean): Promise<User | UserAggregate | null> => {
+    const args: any = {
+      where: {
+        username,
+        password
+      }
+    }
+    if (isAggregated === true) {
+      args.include = this.aggregatedArgs.include
+    }
+    const foundUser: User | UserAggregate | null | undefined = await this.oneDatastore.client?.user.findFirst(args)
+    if (foundUser === undefined) {
+      throw new Error('Found user is undefined.')
+    }
+    return foundUser
+  }
+
+  readOneByEmailAndPassword = async (email: string, password: string, isAggregated?: boolean): Promise<User | UserAggregate | null> => {
+    const args: any = {
+      where: {
+        email,
+        password
+      }
+    }
+    if (isAggregated === true) {
+      args.include = this.aggregatedArgs.include
+    }
+    const foundUser: User | UserAggregate | null | undefined = await this.oneDatastore.client?.user.findFirst(args)
+    if (foundUser === undefined) {
+      throw new Error('Found user is undefined.')
+    }
+    return foundUser
+  }
+
+  createOne = async (user: User, isAggregated?: boolean): Promise<User | UserAggregate> => {
+    const args: any = {
+      data: user
+    }
+    if (isAggregated === true) {
+      args.include = this.aggregatedArgs.include
+    }
+    const createdUser: User | UserAggregate | undefined = await this.oneDatastore.client?.user.create(args)
+    if (createdUser === undefined) {
+      throw new Error('Created user is undefined.')
+    }
+    return createdUser
+  }
+
+  patchOneById = async (id: string, user: User, isAggregated?: boolean): Promise<User | UserAggregate> => {
+    const args: any = {
+      where: {
+        id
+      },
+      data: user
+    }
+    if (isAggregated === true) {
+      args.include = this.aggregatedArgs.include
+    }
+    const patchedUser: User | UserAggregate | undefined = await this.oneDatastore.client?.user.update(args)
+    if (patchedUser === undefined) {
+      throw new Error('Patched user is undefined.')
     }
     return patchedUser
   }
 
-  deleteOneById = async (id: string): Promise<User> => {
-    const deletedUser: User | null = await UserSchema.findOneAndDelete({ _id: new Types.ObjectId(id) })
-    if (deletedUser === null) {
-      throw new Error('Deleted user is null.')
+  deleteOneById = async (id: string, isAggregated?: boolean): Promise<User | UserAggregate> => {
+    const args: any = {
+      where: {
+        id
+      }
+    }
+    if (isAggregated === true) {
+      args.include = this.aggregatedArgs.include
+    }
+    const deletedUser: User | UserAggregate | undefined = await this.oneDatastore.client?.user.delete(args)
+    if (deletedUser === undefined) {
+      throw new Error('Deleted user is undefined.')
     }
     return deletedUser
   }

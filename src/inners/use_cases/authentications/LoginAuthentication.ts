@@ -1,10 +1,10 @@
 import type UserManagement from '../managements/UserManagement'
-import type LoginByUsernameAndPasswordRequest
-    from '../../models/value_objects/requests/authentications/LoginByUsernameAndPasswordRequest'
-
-import type User from '../../models/entities/User'
+import type { User } from '@prisma/client'
 import Result from '../../models/value_objects/Result'
-import {Error} from 'mongoose'
+import type LoginByUsernameAndPasswordRequest
+  from '../../models/value_objects/requests/authentications/LoginByUsernameAndPasswordRequest'
+import type LoginByEmailAndPasswordRequest
+  from '../../models/value_objects/requests/authentications/LoginByEmailAndPasswordRequest'
 
 export default class LoginAuthentication {
   userManagement: UserManagement
@@ -14,13 +14,6 @@ export default class LoginAuthentication {
   }
 
   loginByUsernameAndPassword = async (request: LoginByUsernameAndPasswordRequest): Promise<Result<User | null>> => {
-    if (request.username === undefined) {
-      throw new Error('Username is undefined.')
-    }
-    if (request.password === undefined) {
-      throw new Error('Password is undefined.')
-    }
-
     try {
       await this.userManagement.readOneByUsername(request.username)
     } catch (error) {
@@ -39,6 +32,35 @@ export default class LoginAuthentication {
         404,
                 `Login by username and password failed, unknown username or password: ${(error as Error).message}`,
                 null
+      )
+    }
+
+    return new Result<User>(
+      200,
+      'Login by username and password succeed.',
+      foundUserByUsernameAndPassword.data as User
+    )
+  }
+
+  loginByEmailAndPassword = async (request: LoginByEmailAndPasswordRequest): Promise<Result<User | null>> => {
+    try {
+      await this.userManagement.readOneByUsername(request.email)
+    } catch (error) {
+      return new Result<null>(
+        404,
+          `Login by username failed, unknown username: ${(error as Error).message}`,
+          null
+      )
+    }
+
+    let foundUserByUsernameAndPassword: Result<User | null>
+    try {
+      foundUserByUsernameAndPassword = await this.userManagement.readOneByEmailAndPassword(request.email, request.password)
+    } catch (error) {
+      return new Result<null>(
+        404,
+          `Login by username and password failed, unknown username or password: ${(error as Error).message}`,
+          null
       )
     }
 

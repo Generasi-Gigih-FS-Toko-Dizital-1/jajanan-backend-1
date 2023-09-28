@@ -1,8 +1,8 @@
-import {type Request, type Response, type Router} from 'express'
+import { type Request, type Response, type Router } from 'express'
 
-import type User from '../../../inners/models/entities/User'
 import type Result from '../../../inners/models/value_objects/Result'
 import type UserManagement from '../../../inners/use_cases/managements/UserManagement'
+import { type User } from '@prisma/client'
 
 export default class UserControllerRest {
   router: Router
@@ -22,10 +22,8 @@ export default class UserControllerRest {
   }
 
   readAll = (request: Request, response: Response): void => {
-    const { search } = request.query
-    const parsedSearch: any | undefined = search !== undefined ? JSON.parse(decodeURIComponent(String(search))) : undefined
     this.userManagement
-      .readAll(parsedSearch)
+      .readAll()
       .then((result: Result<User[]>) => {
         response.status(result.status).json(result)
       })

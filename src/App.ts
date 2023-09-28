@@ -1,13 +1,13 @@
-import express, {type Application} from 'express'
+import express, { type Application } from 'express'
 import './outers/configurations/DotenvConfiguration'
 import OneDatastore from './outers/datastores/OneDatastore'
 import RootRoute from './outers/routes/RootRoute'
 import socketIo from 'socket.io'
 import http from 'http'
 import caseExpressMiddleware from './outers/middlewares/CaseExpressMiddleware'
-import {type AddressInfo} from 'net'
+import { type AddressInfo } from 'net'
 import cors from 'cors'
-import OneMigration from './outers/migrations/OneMigration'
+import OneSeeder from './outers/seeders/OneSeeder'
 
 let app: Application | undefined
 let io: socketIo.Server | undefined
@@ -39,7 +39,7 @@ const main = async (): Promise<void> => {
   }
 
   if (process.env.NODE_ENV !== 'test') {
-    const oneMigration = new OneMigration(oneDatastore)
+    const oneMigration = new OneSeeder(oneDatastore)
     await oneMigration.down()
     await oneMigration.up()
   }

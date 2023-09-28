@@ -10,10 +10,8 @@ class UserControllerRest {
             this.router.delete('/:id', this.deleteOneById);
         };
         this.readAll = (request, response) => {
-            const { search } = request.query;
-            const parsedSearch = search !== undefined ? JSON.parse(decodeURIComponent(String(search))) : undefined;
             this.userManagement
-                .readAll(parsedSearch)
+                .readAll()
                 .then((result) => {
                 response.status(result.status).json(result);
             })

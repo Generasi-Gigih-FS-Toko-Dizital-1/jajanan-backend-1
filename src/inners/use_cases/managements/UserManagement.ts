@@ -1,6 +1,6 @@
 import type UserRepository from '../../../outers/repositories/UserRepository'
 import Result from '../../models/value_objects/Result'
-import type User from '../../models/entities/User'
+import { type User } from '@prisma/client'
 
 export default class UserManagement {
   userRepository: UserRepository
@@ -9,8 +9,8 @@ export default class UserManagement {
     this.userRepository = userRepository
   }
 
-  readAll = async (search?: any): Promise<Result<User[]>> => {
-    const foundUsers: User[] = await this.userRepository.readAll(search)
+  readAll = async (): Promise<Result<User[]>> => {
+    const foundUsers: any[] = await this.userRepository.readAll()
     return new Result<User[]>(
       200,
       'User read all succeed.',
@@ -19,7 +19,7 @@ export default class UserManagement {
   }
 
   readOneById = async (id: string): Promise<Result<User>> => {
-    const foundUser: User = await this.userRepository.readOneById(id)
+    const foundUser: any = await this.userRepository.readOneById(id)
     return new Result<User>(
       200,
       'User read one by id succeed.',
@@ -28,7 +28,7 @@ export default class UserManagement {
   }
 
   readOneByUsername = async (username: string): Promise<Result<User>> => {
-    const foundUser: User = await this.userRepository.readOneByUsername(username)
+    const foundUser: any = await this.userRepository.readOneByUsername(username)
     return new Result<User>(
       200,
       'User read one by username succeed.',
@@ -36,8 +36,17 @@ export default class UserManagement {
     )
   }
 
+  readOneByEmail = async (email: string): Promise<Result<User>> => {
+    const foundUser: any = await this.userRepository.readOneByEmail(email)
+    return new Result<User>(
+      200,
+      'User read one by email succeed.',
+      foundUser
+    )
+  }
+
   readOneByUsernameAndPassword = async (username: string, password: string): Promise<Result<User | null>> => {
-    const foundUser: User | null = await this.userRepository.readOneByUsernameAndPassword(username, password)
+    const foundUser: any | null = await this.userRepository.readOneByUsernameAndPassword(username, password)
     return new Result<User | null>(
       200,
       'User read one by username and password succeed.',
@@ -45,8 +54,17 @@ export default class UserManagement {
     )
   }
 
-  createOne = async (item: any): Promise<Result<User>> => {
-    const createdUser: User = await this.userRepository.createOne(item)
+  readOneByEmailAndPassword = async (email: string, password: string): Promise<Result<User | null>> => {
+    const foundUser: any | null = await this.userRepository.readOneByEmailAndPassword(email, password)
+    return new Result<User | null>(
+      200,
+      'User read one by email and password succeed.',
+      foundUser
+    )
+  }
+
+  createOne = async (user: User): Promise<Result<User>> => {
+    const createdUser: any = await this.userRepository.createOne(user)
     return new Result<User>(
       201,
       'User create one succeed.',
@@ -54,8 +72,8 @@ export default class UserManagement {
     )
   }
 
-  patchOneById = async (id: string, item: any): Promise<Result<User>> => {
-    const patchedUser: User = await this.userRepository.patchOneById(id, item)
+  patchOneById = async (id: string, user: User): Promise<Result<User>> => {
+    const patchedUser: any = await this.userRepository.patchOneById(id, user)
     return new Result<User>(
       200,
       'User patch one by id succeed.',
@@ -64,7 +82,7 @@ export default class UserManagement {
   }
 
   deleteOneById = async (id: string): Promise<Result<User>> => {
-    const deletedUser: User = await this.userRepository.deleteOneById(id)
+    const deletedUser: any = await this.userRepository.deleteOneById(id)
     return new Result<User>(
       200,
       'User delete one by id succeed.',

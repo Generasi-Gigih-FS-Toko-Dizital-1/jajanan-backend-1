@@ -1,10 +1,10 @@
 import type UserManagement from '../managements/UserManagement'
-import type RegisterByUsernameAndPasswordRequest
-    from '../../models/value_objects/requests/authentications/RegisterByUsernameAndPasswordRequest'
 
-import User from '../../models/entities/User'
 import Result from '../../models/value_objects/Result'
-import {Error} from 'mongoose'
+import { type User } from '@prisma/client'
+import type RegisterUserRequest from '../../models/value_objects/requests/authentications/RegisterUserRequest'
+import { randomUUID } from 'crypto'
+import { $Enums } from '.prisma/client'
 
 export default class RegisterAuthentication {
   userManagement: UserManagement
@@ -13,14 +13,7 @@ export default class RegisterAuthentication {
     this.userManagement = userManagement
   }
 
-  registerByUsernameAndPassword = async (request: RegisterByUsernameAndPasswordRequest): Promise<Result<User | null>> => {
-    if (request.username === undefined) {
-      throw new Error('Username is undefined.')
-    }
-    if (request.password === undefined) {
-      throw new Error('Password is undefined.')
-    }
-
+  registerByUsernameAndPassword = async (request: RegisterUserRequest): Promise<Result<User | null>> => {
     let isUserFound: boolean
     try {
       await this.userManagement.readOneByUsername(request.username)
@@ -37,11 +30,23 @@ export default class RegisterAuthentication {
       )
     }
 
-    const toCreateUser: User = new User(
-      request.username,
-      request.password,
-      ''
-    )
+    const toCreateUser: User = {
+      id: randomUUID(),
+      fullName: request.fullName,
+      address: request.address,
+      email: request.email,
+      password: request.password,
+      username: request.username,
+      balance: request.balance,
+      gender: request.gender,
+      experience: request.experience,
+      lastLatitude: request.lastLatitude,
+      lastLongitude: request.lastLongitude,
+      updatedAt: new Date(),
+      createdAt: new Date(),
+      deletedAt: null
+    }
+
     const createdUser: Result<User> = await this.userManagement.createOne(toCreateUser)
 
     return new Result<User>(
