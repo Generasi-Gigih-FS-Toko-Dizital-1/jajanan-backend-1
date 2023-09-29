@@ -14,11 +14,13 @@ export default class OneDatastore {
         datasourceUrl: url
       }
     )
+    await this.client.$connect()
   }
 
   disconnect = async (): Promise<void> => {
     if (this.client === undefined) {
       throw new Error('Client is undefined.')
     }
+    await this.client.$disconnect()
   }
 }
