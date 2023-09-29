@@ -11,10 +11,10 @@ services:
         yarn build && \
         export NODE_ENV=test && \
         yarn test && \
-        export NODE_ENV=production && \
+        export NODE_ENV=staging && \
         yarn start
     healthcheck:
-      test: "netstat -ltn | grep -c ${APP_PORT}"
+      test: "netstat -ltn | grep -c 3000"
   ds-1:
     image: postgres:latest
     ports:
