@@ -44,51 +44,39 @@ export default class OneSeeder {
     if (this.oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-
     await this.oneDatastore.client.user.createMany({
       data: this.userMock.data
     })
-
     await this.oneDatastore.client.admin.createMany({
       data: this.adminMock.data
     })
-
     await this.oneDatastore.client.vendor.createMany({
       data: this.vendorMock.data
     })
-
     await this.oneDatastore.client.category.createMany({
       data: this.categoryMock.data
     })
-
     await this.oneDatastore.client.jajanItem.createMany({
       data: this.jajanItemMock.data
     })
-
     await this.oneDatastore.client.topUpHistory.createMany({
       data: this.topUpHistoryMock.data
     })
-
     await this.oneDatastore.client.transactionHistory.createMany({
       data: this.transactionHistoryMock.data
     })
-
     await this.oneDatastore.client.notificationHistory.createMany({
       data: this.notificationHistoryMock.data
     })
-
     await this.oneDatastore.client.userSubscription.createMany({
       data: this.userSubscriptionMock.data
     })
-
     await this.oneDatastore.client.userLevel.createMany({
       data: this.userLevelMock.data
     })
-
     await this.oneDatastore.client.vendorLevel.createMany({
       data: this.vendorLevelMock.data
     })
-
     console.log('One seeder up.')
   }
 
@@ -96,6 +84,16 @@ export default class OneSeeder {
     if (this.oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
+    await this.oneDatastore.client.vendorLevel.deleteMany()
+    await this.oneDatastore.client.userLevel.deleteMany()
+    await this.oneDatastore.client.userSubscription.deleteMany()
+    await this.oneDatastore.client.notificationHistory.deleteMany()
+    await this.oneDatastore.client.transactionHistory.deleteMany()
+    await this.oneDatastore.client.topUpHistory.deleteMany()
+    await this.oneDatastore.client.jajanItem.deleteMany()
+    await this.oneDatastore.client.category.deleteMany()
+    await this.oneDatastore.client.vendor.deleteMany()
+    await this.oneDatastore.client.admin.deleteMany()
     await this.oneDatastore.client.user.deleteMany()
     console.log('One seeder down.')
   }

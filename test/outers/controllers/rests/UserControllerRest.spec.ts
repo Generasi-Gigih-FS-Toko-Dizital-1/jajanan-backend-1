@@ -30,7 +30,13 @@ describe('UserControllerRest', () => {
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-    await oneDatastore.client.user.deleteMany()
+    await oneDatastore.client.user.deleteMany({
+      where: {
+        id: {
+          in: userMock.data.map((userMock: any) => userMock.id)
+        }
+      }
+    })
     await oneDatastore.disconnect()
   })
 
