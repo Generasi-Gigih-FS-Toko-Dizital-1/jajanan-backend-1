@@ -13,8 +13,8 @@ services:
         yarn test && \
         export NODE_ENV=production && \
         yarn start
-    depends_on:
-      - ds-1
+    healthcheck:
+      test: "netstat -ltn | grep -c ${APP_PORT}"
   ds-1:
     image: postgres:latest
     ports:
@@ -22,4 +22,4 @@ services:
     environment:
       - POSTGRES_USER=${DS_1_USER}
       - POSTGRES_PASSWORD=${DS_1_PASSWORD}
-      - POSTGRES_DB=${DS_1_DATABASE}
+      - POSTGRES_DB=${DS_1_DATABASE}"
