@@ -1,53 +1,102 @@
 import type OneDatastore from '../datastores/OneDatastore'
-import { randomUUID } from 'crypto'
+import UserMock from '../../../test/mocks/UserMock'
+import AdminMock from '../../../test/mocks/AdminMock'
+import TransactionHistoryMock from '../../../test/mocks/TransactionHistoryMock'
+import NotificationHistoryMock from '../../../test/mocks/NotificationHistoryMock'
+import TopUpHistoryMock from '../../../test/mocks/TopUpHistoryMock'
+import JajanItemMock from '../../../test/mocks/JajanItemMock'
+import CategoryMock from '../../../test/mocks/CategoryMock'
+import VendorMock from '../../../test/mocks/VendorMock'
+import UserSubscriptionMock from '../../../test/mocks/UserSubscriptionMock'
+import UserLevelMock from '../../../test/mocks/UserLevelMock'
+import VendorLevelMock from '../../../test/mocks/VendorLevelMock'
 
 export default class OneSeeder {
   oneDatastore: OneDatastore
+  userMock: UserMock
+  adminMock: AdminMock
+  vendorMock: VendorMock
+  categoryMock: CategoryMock
+  jajanItemMock: JajanItemMock
+  topUpHistoryMock: TopUpHistoryMock
+  transactionHistoryMock: TransactionHistoryMock
+  notificationHistoryMock: NotificationHistoryMock
+  userSubscriptionMock: UserSubscriptionMock
+  userLevelMock: UserLevelMock
+  vendorLevelMock: VendorLevelMock
 
   constructor (oneDatastore: OneDatastore) {
     this.oneDatastore = oneDatastore
+    this.userMock = new UserMock()
+    this.adminMock = new AdminMock()
+    this.vendorMock = new VendorMock()
+    this.categoryMock = new CategoryMock()
+    this.jajanItemMock = new JajanItemMock(this.vendorMock, this.categoryMock)
+    this.topUpHistoryMock = new TopUpHistoryMock(this.userMock)
+    this.transactionHistoryMock = new TransactionHistoryMock(this.userMock, this.jajanItemMock)
+    this.notificationHistoryMock = new NotificationHistoryMock(this.userMock, this.vendorMock)
+    this.userSubscriptionMock = new UserSubscriptionMock(this.userMock, this.categoryMock)
+    this.userLevelMock = new UserLevelMock()
+    this.vendorLevelMock = new VendorLevelMock()
   }
 
   up = async (): Promise<void> => {
-    await this.oneDatastore.client?.user.createMany({
-      data: [
-        {
-          id: randomUUID(),
-          fullName: 'John Doe',
-          address: '456 Elm Street',
-          email: 'john.doe@example.com',
-          password: 'password',
-          username: 'johndoe',
-          balance: 50,
-          gender: 'MALE',
-          experience: 25,
-          lastLatitude: 37.7833,
-          lastLongitude: -122.4167,
-          updatedAt: new Date(),
-          createdAt: new Date()
-        },
-        {
-          id: randomUUID(),
-          fullName: 'Jane Doe',
-          address: '789 Oak Street',
-          email: 'jane.doe@example.com',
-          password: 'password',
-          username: 'janedoe',
-          balance: 100,
-          gender: 'FEMALE',
-          experience: 50,
-          lastLatitude: 37.7833,
-          lastLongitude: -122.4167,
-          updatedAt: new Date(),
-          createdAt: new Date()
-        }
-      ]
+    if (this.oneDatastore.client === undefined) {
+      throw new Error('Client is undefined.')
+    }
+
+    await this.oneDatastore.client.user.createMany({
+      data: this.userMock.data
     })
+
+    await this.oneDatastore.client.admin.createMany({
+      data: this.adminMock.data
+    })
+
+    await this.oneDatastore.client.vendor.createMany({
+      data: this.vendorMock.data
+    })
+
+    await this.oneDatastore.client.category.createMany({
+      data: this.categoryMock.data
+    })
+
+    await this.oneDatastore.client.jajanItem.createMany({
+      data: this.jajanItemMock.data
+    })
+
+    await this.oneDatastore.client.topUpHistory.createMany({
+      data: this.topUpHistoryMock.data
+    })
+
+    await this.oneDatastore.client.transactionHistory.createMany({
+      data: this.transactionHistoryMock.data
+    })
+
+    await this.oneDatastore.client.notificationHistory.createMany({
+      data: this.notificationHistoryMock.data
+    })
+
+    await this.oneDatastore.client.userSubscription.createMany({
+      data: this.userSubscriptionMock.data
+    })
+
+    await this.oneDatastore.client.userLevel.createMany({
+      data: this.userLevelMock.data
+    })
+
+    await this.oneDatastore.client.vendorLevel.createMany({
+      data: this.vendorLevelMock.data
+    })
+
     console.log('One seeder up.')
   }
 
   down = async (): Promise<void> => {
-    await this.oneDatastore.client?.user.deleteMany()
+    if (this.oneDatastore.client === undefined) {
+      throw new Error('Client is undefined.')
+    }
+    await this.oneDatastore.client.user.deleteMany()
     console.log('One seeder down.')
   }
 }

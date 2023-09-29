@@ -1,4 +1,4 @@
-import {type Application, Router} from 'express'
+import { type Application, Router } from 'express'
 import type OneDatastore from '../datastores/OneDatastore'
 import UserRepository from '../repositories/UserRepository'
 import UserManagement from '../../inners/use_cases/managements/UserManagement'
