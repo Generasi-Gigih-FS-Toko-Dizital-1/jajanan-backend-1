@@ -8,10 +8,6 @@ services:
       - /app/node_modules
     command:
       - | 
-        yarn build && \
-        export NODE_ENV=test && \
-        yarn test && \
-        export NODE_ENV=production && \
         yarn start
   ds-1:
     image: postgres:latest
