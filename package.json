@@ -5,8 +5,8 @@
 		"dev": "nodemon --legacy-watch --watch ./src --ext ts --exec \"yarn build && yarn start\"",
 		"test": "nyc ts-mocha --parallel ./test/**/*.spec.ts",
 		"test-watch": "nyc ts-mocha --parallel --watch ./test/**/*.spec.ts",
-		"prisma-generate": "npx prisma generate --schema=./src/outers/schemas/OneSchema.prisma",
-		"prisma-db-push": "npx prisma db push --schema=./src/outers/schemas/OneSchema.prisma"
+		"prisma-generate": "yarn prisma generate --schema=./src/outers/schemas/OneSchema.prisma",
+		"prisma-db-push": "yarn prisma db push --schema=./src/outers/schemas/OneSchema.prisma"
 	},
 	"dependencies": {
 		"@prisma/client": "^5.3.1",

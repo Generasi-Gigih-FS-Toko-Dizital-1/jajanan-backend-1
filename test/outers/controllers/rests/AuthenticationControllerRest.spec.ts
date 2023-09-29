@@ -3,6 +3,8 @@ import chaiHttp from 'chai-http'
 import { beforeEach, describe, it } from 'mocha'
 import OneDatastore from '../../../../src/outers/datastores/OneDatastore'
 import UserMock from '../../../mocks/UserMock'
+import { server } from '../../../../src/App'
+import waitUntil from 'async-wait-until'
 
 chai.use(chaiHttp)
 chai.should()
@@ -12,6 +14,8 @@ describe('AuthenticationControllerRest', () => {
   const oneDatastore = new OneDatastore()
 
   beforeEach(async () => {
+    await waitUntil(() => server !== undefined)
+
     await oneDatastore.connect()
   })
 
@@ -39,6 +43,7 @@ describe('AuthenticationControllerRest', () => {
     })
 
     it('should return 409 CONFLICT: Username already exists', async () => {
+
     })
   })
 })

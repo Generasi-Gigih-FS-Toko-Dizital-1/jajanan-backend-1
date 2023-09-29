@@ -5,6 +5,7 @@ import OneDatastore from '../../../../src/outers/datastores/OneDatastore'
 import UserMock from '../../../mocks/UserMock'
 import { server } from '../../../../src/App'
 import humps from 'humps'
+import waitUntil from 'async-wait-until'
 
 chai.use(chaiHttp)
 chai.should()
@@ -14,6 +15,8 @@ describe('UserControllerRest', () => {
   const oneDatastore = new OneDatastore()
 
   beforeEach(async () => {
+    await waitUntil(() => server !== undefined)
+
     await oneDatastore.connect()
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
@@ -50,26 +53,31 @@ describe('UserControllerRest', () => {
 
   describe('GET /api/v1/users?search=encoded', () => {
     it('should return 200 OK', async () => {
+
     })
   })
 
   describe('GET /api/v1/users/:id', () => {
     it('should return 200 OK', async () => {
+
     })
   })
 
   describe('POST /api/v1/users', () => {
     it('should return 201 CREATED', async () => {
+
     })
   })
 
   describe('PATCH /api/v1/users/:id', () => {
     it('should return 200 OK', async () => {
+
     })
   })
 
   describe('DELETE /api/v1/users/:id', () => {
     it('should return 200 OK', async () => {
+
     })
   })
 })
