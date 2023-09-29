@@ -1,8 +1,8 @@
-import { type User } from '@prisma/client'
+import { type Vendor } from '@prisma/client'
 import { randomUUID } from 'crypto'
 
-export default class UserMock {
-  data: User[]
+export default class VendorMock {
+  data: Vendor[]
 
   constructor () {
     this.data = [
@@ -18,6 +18,10 @@ export default class UserMock {
         experience: 0,
         lastLatitude: 0.0,
         lastLongitude: 0.0,
+        jajanImageUrl: 'https://placehold.co/400x400?text=jajanImageUrl0',
+        jajanName: 'jajanName0',
+        jajanDescription: 'jajanDescription0',
+        status: 'ON',
         updatedAt: new Date(),
         createdAt: new Date(),
         deletedAt: null
@@ -30,10 +34,14 @@ export default class UserMock {
         password: 'password1',
         username: 'username1',
         balance: 1.0,
-        gender: 'FEMALE',
+        gender: 'MALE',
         experience: 1,
         lastLatitude: 1.0,
         lastLongitude: 1.0,
+        jajanImageUrl: 'https://placehold.co/411x411?text=jajanImageUrl1',
+        jajanName: 'jajanName1',
+        jajanDescription: 'jajanDescription1',
+        status: 'OFF',
         updatedAt: new Date(),
         createdAt: new Date(),
         deletedAt: null
