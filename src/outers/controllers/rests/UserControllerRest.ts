@@ -29,7 +29,7 @@ export default class UserControllerRest {
   readMany = (request: Request, response: Response): void => {
     const { page, perPage } = request.query
     this.userManagement
-      .readMany(new Pagination(Number(page), Number(perPage)))
+      .readMany(new Pagination(page === undefined ? 1 : Number(page), perPage === undefined ? 10 : Number(perPage)))
       .then((result: Result<User[]>) => {
         const data: UserManagementReadManyResponse = new UserManagementReadManyResponse(
           result.data.length,
