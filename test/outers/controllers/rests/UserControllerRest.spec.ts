@@ -8,7 +8,6 @@ import humps from 'humps'
 import waitUntil from 'async-wait-until'
 import UserManagementCreateRequest from '../../../../src/inners/models/value_objects/requests/user_managements/UserManagementCreateRequest'
 import { type User } from '@prisma/client'
-import bcrypt from 'bcrypt'
 
 chai.use(chaiHttp)
 chai.should()
