@@ -8,6 +8,7 @@ services:
       - /app/node_modules
     command:
       - | 
+        export DS_1_HOST=ds-1
         yarn build && \
         export NODE_ENV=test && \
         yarn test && \
