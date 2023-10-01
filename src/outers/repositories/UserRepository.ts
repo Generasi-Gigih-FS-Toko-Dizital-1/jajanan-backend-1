@@ -1,6 +1,7 @@
 import type OneDatastore from '../datastores/OneDatastore'
 import { type User } from '@prisma/client'
 import type UserAggregate from '../../inners/models/aggregates/UserAggregate'
+import type Pagination from '../../inners/models/value_objects/Pagination'
 
 export default class UserRepository {
   oneDatastore: OneDatastore
@@ -18,19 +19,28 @@ export default class UserRepository {
     }
   }
 
-  readAll = async (isAggregated?: boolean): Promise<User[] | UserAggregate[]> => {
-    const args: any = {}
+  readMany = async (pagination: Pagination, isAggregated?: boolean): Promise<User[] | UserAggregate[]> => {
+    const offset: number = (pagination.pageNumber - 1) * pagination.itemPerPage
+    const args: any = {
+      take: pagination.itemPerPage,
+      skip: offset
+    }
     if (isAggregated === true) {
       args.include = this.aggregatedArgs.include
     }
-    const foundUser: User[] | UserAggregate[] | undefined = await this.oneDatastore.client?.user.findMany(args)
+
+    if (this.oneDatastore.client === undefined) {
+      throw new Error('oneDatastore client is undefined')
+    }
+
+    const foundUser: User[] | UserAggregate[] = await this.oneDatastore.client.user.findMany(args)
     if (foundUser === undefined) {
       throw new Error('Found user is undefined.')
     }
     return foundUser
   }
 
-  readOneById = async (id: string, isAggregated?: boolean): Promise<User | UserAggregate | null > => {
+  readOneById = async (id: string, isAggregated?: boolean): Promise<User | UserAggregate> => {
     const args: any = {
       where: {
         id
@@ -39,14 +49,19 @@ export default class UserRepository {
     if (isAggregated === true) {
       args.include = this.aggregatedArgs.include
     }
-    const foundUser: User | UserAggregate | null | undefined = await this.oneDatastore.client?.user.findFirst(args)
-    if (foundUser === undefined) {
-      throw new Error('Found user is undefined.')
+
+    if (this.oneDatastore.client === undefined) {
+      throw new Error('oneDatastore client is undefined')
+    }
+
+    const foundUser: User | UserAggregate | null = await this.oneDatastore.client.user.findFirst(args)
+    if (foundUser === null) {
+      throw new Error('Found user is null.')
     }
     return foundUser
   }
 
-  readOneByUsername = async (username: string, isAggregated?: boolean): Promise<User | UserAggregate | null > => {
+  readOneByUsername = async (username: string, isAggregated?: boolean): Promise<User | UserAggregate> => {
     const args: any = {
       where: {
         username
@@ -55,14 +70,19 @@ export default class UserRepository {
     if (isAggregated === true) {
       args.include = this.aggregatedArgs.include
     }
-    const foundUser: User | UserAggregate | null | undefined = await this.oneDatastore.client?.user.findFirst(args)
-    if (foundUser === undefined) {
-      throw new Error('Found user is undefined.')
+
+    if (this.oneDatastore.client === undefined) {
+      throw new Error('oneDatastore client is undefined')
+    }
+
+    const foundUser: User | UserAggregate | null = await this.oneDatastore.client.user.findFirst(args)
+    if (foundUser === null) {
+      throw new Error('Found user is null.')
     }
     return foundUser
   }
 
-  readOneByEmail = async (email: string, isAggregated?: boolean): Promise<any | null > => {
+  readOneByEmail = async (email: string, isAggregated?: boolean): Promise<any > => {
     const args: any = {
       where: {
         email
@@ -71,14 +91,19 @@ export default class UserRepository {
     if (isAggregated === true) {
       args.include = this.aggregatedArgs.include
     }
-    const foundUser: User | UserAggregate | null | undefined = await this.oneDatastore.client?.user.findFirst(args)
-    if (foundUser === undefined) {
-      throw new Error('Found user is undefined.')
+
+    if (this.oneDatastore.client === undefined) {
+      throw new Error('oneDatastore client is undefined')
+    }
+
+    const foundUser: User | UserAggregate | null = await this.oneDatastore.client.user.findFirst(args)
+    if (foundUser === null) {
+      throw new Error('Found user is null.')
     }
     return foundUser
   }
 
-  readOneByUsernameAndPassword = async (username: string, password: string, isAggregated?: boolean): Promise<User | UserAggregate | null> => {
+  readOneByUsernameAndPassword = async (username: string, password: string, isAggregated?: boolean): Promise<User | UserAggregate> => {
     const args: any = {
       where: {
         username,
@@ -88,14 +113,19 @@ export default class UserRepository {
     if (isAggregated === true) {
       args.include = this.aggregatedArgs.include
     }
-    const foundUser: User | UserAggregate | null | undefined = await this.oneDatastore.client?.user.findFirst(args)
-    if (foundUser === undefined) {
-      throw new Error('Found user is undefined.')
+
+    if (this.oneDatastore.client === undefined) {
+      throw new Error('oneDatastore client is undefined')
+    }
+
+    const foundUser: User | UserAggregate | null = await this.oneDatastore.client.user.findFirst(args)
+    if (foundUser === null) {
+      throw new Error('Found user is null.')
     }
     return foundUser
   }
 
-  readOneByEmailAndPassword = async (email: string, password: string, isAggregated?: boolean): Promise<User | UserAggregate | null> => {
+  readOneByEmailAndPassword = async (email: string, password: string, isAggregated?: boolean): Promise<User | UserAggregate> => {
     const args: any = {
       where: {
         email,
@@ -105,9 +135,14 @@ export default class UserRepository {
     if (isAggregated === true) {
       args.include = this.aggregatedArgs.include
     }
-    const foundUser: User | UserAggregate | null | undefined = await this.oneDatastore.client?.user.findFirst(args)
-    if (foundUser === undefined) {
-      throw new Error('Found user is undefined.')
+
+    if (this.oneDatastore.client === undefined) {
+      throw new Error('oneDatastore client is undefined')
+    }
+
+    const foundUser: User | UserAggregate | null = await this.oneDatastore.client.user.findFirst(args)
+    if (foundUser === null) {
+      throw new Error('Found user is null.')
     }
     return foundUser
   }
@@ -119,7 +154,12 @@ export default class UserRepository {
     if (isAggregated === true) {
       args.include = this.aggregatedArgs.include
     }
-    const createdUser: User | UserAggregate | undefined = await this.oneDatastore.client?.user.create(args)
+
+    if (this.oneDatastore.client === undefined) {
+      throw new Error('oneDatastore client is undefined')
+    }
+
+    const createdUser: User | UserAggregate = await this.oneDatastore.client.user.create(args)
     if (createdUser === undefined) {
       throw new Error('Created user is undefined.')
     }
@@ -136,7 +176,12 @@ export default class UserRepository {
     if (isAggregated === true) {
       args.include = this.aggregatedArgs.include
     }
-    const patchedUser: User | UserAggregate | undefined = await this.oneDatastore.client?.user.update(args)
+
+    if (this.oneDatastore.client === undefined) {
+      throw new Error('oneDatastore client is undefined')
+    }
+
+    const patchedUser: User | UserAggregate = await this.oneDatastore.client.user.update(args)
     if (patchedUser === undefined) {
       throw new Error('Patched user is undefined.')
     }
@@ -152,10 +197,13 @@ export default class UserRepository {
     if (isAggregated === true) {
       args.include = this.aggregatedArgs.include
     }
-    const deletedUser: User | UserAggregate | undefined = await this.oneDatastore.client?.user.delete(args)
-    if (deletedUser === undefined) {
-      throw new Error('Deleted user is undefined.')
+
+    if (this.oneDatastore.client === undefined) {
+      throw new Error('oneDatastore client is undefined')
     }
+
+    const deletedUser: User | UserAggregate = await this.oneDatastore.client.user.delete(args)
+
     return deletedUser
   }
 }
