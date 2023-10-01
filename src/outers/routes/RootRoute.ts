@@ -7,6 +7,7 @@ import type socketIo from 'socket.io'
 import LoginAuthentication from '../../inners/use_cases/authentications/LoginAuthentication'
 import RegisterAuthentication from '../../inners/use_cases/authentications/RegisterAuthentication'
 import AuthenticationControllerRest from '../controllers/rests/AuthenticationControllerRest'
+import ObjectUtility from '../utilities/ObjectUtility'
 
 export default class RootRoute {
   app: Application
@@ -22,8 +23,10 @@ export default class RootRoute {
   registerRoutes = async (): Promise<void> => {
     const routerVersionOne = Router()
 
+    const objectUtility: ObjectUtility = new ObjectUtility()
+
     const userRepository: UserRepository = new UserRepository(this.datastoreOne)
-    const userManagement: UserManagement = new UserManagement(userRepository)
+    const userManagement: UserManagement = new UserManagement(userRepository, objectUtility)
     const userControllerRest: UserControllerRest = new UserControllerRest(
       Router(),
       userManagement

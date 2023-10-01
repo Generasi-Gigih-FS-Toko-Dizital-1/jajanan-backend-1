@@ -30,7 +30,7 @@ model User {
   password              String
   username              String                @db.VarChar(50)
   balance               Float
-  gender                Gender?
+  gender                Gender
   experience            Int
   lastLatitude          Float
   lastLongitude         Float
