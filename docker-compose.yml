@@ -6,9 +6,9 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
-    entrypoint: ["/bin/sh", "-c"]
+    entrypoint: [ "/bin/sh", "-c" ]
     command:
-      - | 
+      - |
         export DS_1_HOST=ds-1
         yarn build && \
         export NODE_ENV=test && \

@@ -4,10 +4,13 @@ import { beforeEach, describe, it } from 'mocha'
 import OneDatastore from '../../../../src/outers/datastores/OneDatastore'
 import UserMock from '../../../mocks/UserMock'
 import { server } from '../../../../src/App'
-import humps from 'humps'
 import waitUntil from 'async-wait-until'
-import UserManagementCreateRequest from '../../../../src/inners/models/value_objects/requests/user_managements/UserManagementCreateRequest'
+import UserManagementCreateRequest
+  from '../../../../src/inners/models/value_objects/requests/user_managements/UserManagementCreateRequest'
 import { type User } from '@prisma/client'
+import UserManagementPatchRequest
+  from '../../../../src/inners/models/value_objects/requests/user_managements/UserManagementPatchRequest'
+import _ from 'underscore'
 
 chai.use(chaiHttp)
 chai.should()
@@ -32,23 +35,48 @@ describe('UserControllerRest', () => {
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-    await oneDatastore.client.user.deleteMany()
+    await oneDatastore.client.user.deleteMany(
+      {
+        where: {
+          id: {
+            in: userMock.data.map((user: User) => user.id)
+          }
+        }
+      }
+    )
     await oneDatastore.disconnect()
   })
 
-  describe('GET /api/v1/users', () => {
+  describe('GET /api/v1/users?page_number={}&page_size={}', () => {
     it('should return 200 OK', async () => {
-      const response = await chai.request(server).get(`/api/v1/users?page=1&per_page=${userMock.data.length}`)
-      response.should.have.status(200)
-      response.body.should.be.a('object')
-      response.body.should.have.property('total_users')
-      response.body.should.have.property('users')
-      response.body.users.should.be.a('array')
-      response.body.users.should.deep.include.members(
-        userMock.data.map((userMock: any) => {
-          return humps.decamelizeKeys(JSON.parse(JSON.stringify(userMock)))
-        })
-      )
+      const pageNumber: number = 1
+      const pageSize: number = userMock.data.length
+      const response = await chai
+        .request(server)
+        .get(`/api/v1/users?page_number=${pageNumber}&page_size=${pageSize}`)
+
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      response.body.data.should.be.an('object')
+      response.body.data.should.has.property('total_users')
+      response.body.data.should.has.property('users')
+      response.body.data.users.should.be.a('array')
+      response.body.data.users.length.should.be.equal(pageSize)
+      response.body.data.users.forEach((user: User) => {
+        user.should.has.property('id')
+        user.should.has.property('username')
+        user.should.has.property('full_name')
+        user.should.has.property('email')
+        user.should.has.property('gender')
+        user.should.has.property('balance')
+        user.should.has.property('experience')
+        user.should.has.property('last_latitude')
+        user.should.has.property('last_longitude')
+        user.should.has.property('created_at')
+        user.should.has.property('updated_at')
+      })
     })
   })
 
@@ -61,67 +89,107 @@ describe('UserControllerRest', () => {
   describe('GET /api/v1/users/:id', () => {
     it('should return 200 OK', async () => {
       const requestUser: User = userMock.data[0]
-      const response = await chai.request(server).get(`/api/v1/users/${requestUser.id}`)
-      response.should.have.status(200)
-      response.body.should.be.a('object')
-      response.body.should.have.property('id').equal(requestUser.id)
-      response.body.should.have.property('username').equal(requestUser.username)
-      response.body.should.have.property('full_name').equal(requestUser.fullName)
-      response.body.should.have.property('email').equal(requestUser.email)
-      response.body.should.have.property('gender').equal(requestUser.gender)
-      response.body.should.have.property('balance').equal(requestUser.balance)
-      response.body.should.have.property('experience').equal(requestUser.experience)
-      response.body.should.have.property('last_latitude').equal(requestUser.lastLatitude)
-      response.body.should.have.property('last_longitude').equal(requestUser.lastLongitude)
+      const response = await chai
+        .request(server)
+        .get(`/api/v1/users/${requestUser.id}`)
+
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      response.body.data.should.be.an('object')
+      response.body.data.should.has.property('id').equal(requestUser.id)
+      response.body.data.should.has.property('username').equal(requestUser.username)
+      response.body.data.should.has.property('full_name').equal(requestUser.fullName)
+      response.body.data.should.has.property('email').equal(requestUser.email)
+      response.body.data.should.has.property('gender').equal(requestUser.gender)
+      response.body.data.should.has.property('balance').equal(requestUser.balance)
+      response.body.data.should.has.property('experience').equal(requestUser.experience)
+      response.body.data.should.has.property('last_latitude').equal(requestUser.lastLatitude)
+      response.body.data.should.has.property('last_longitude').equal(requestUser.lastLongitude)
+      response.body.data.should.has.property('created_at')
+      response.body.data.should.has.property('updated_at')
     })
   })
 
   describe('POST /api/v1/users', () => {
     it('should return 201 CREATED', async () => {
       const requestBody: UserManagementCreateRequest = new UserManagementCreateRequest(
-        userMock.data[0].username,
         userMock.data[0].fullName,
+        userMock.data[0].gender,
+        userMock.data[0].username,
         userMock.data[0].email,
-        userMock.data[0].password,
-        userMock.data[0].gender
+        userMock.data[0].password
       )
-      const response = await chai.request(server).post('/api/v1/users').type('application/json').send(requestBody)
-      response.should.be.a('object')
-      response.body.should.have.property('id')
-      response.body.should.have.property('username').equal(requestBody.username)
-      response.body.should.have.property('full_name').equal(requestBody.fullName)
-      response.body.should.have.property('email').equal(requestBody.email)
-      response.body.should.have.property('gender').equal(requestBody.gender)
-      response.should.have.status(201)
+
+      const response = await chai
+        .request(server)
+        .post('/api/v1/users')
+        .send(requestBody)
+
+      response.should.has.status(201)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      response.body.data.should.be.an('object')
+      response.body.data.should.has.property('id')
+      response.body.data.should.has.property('username').equal(requestBody.username)
+      response.body.data.should.has.property('full_name').equal(requestBody.fullName)
+      response.body.data.should.has.property('email').equal(requestBody.email)
+      response.body.data.should.has.property('gender').equal(requestBody.gender)
+      response.body.data.should.has.property('balance')
+      response.body.data.should.has.property('experience')
+      response.body.data.should.has.property('last_latitude')
+      response.body.data.should.has.property('last_longitude')
+      response.body.data.should.has.property('created_at')
+      response.body.data.should.has.property('updated_at')
     })
   })
 
   describe('PATCH /api/v1/users/:id', () => {
     it('should return 200 OK', async () => {
       const requestUser: User = userMock.data[0]
-      const requestBody: any = {
-        fullName: 'new fullname',
-        username: 'new username',
-        password: 'newPassword',
-        email: 'newemail@gmail.com',
-        gender: 'FEMALE'
-      }
-      const response = await chai.request(server).patch(`/api/v1/users/${requestUser.id}`).send(requestBody)
-      response.should.have.status(200)
-      response.should.be.a('object')
-      response.body.should.have.property('id')
-      response.body.should.have.property('username').equal(requestBody.username)
-      response.body.should.have.property('full_name').equal(requestBody.fullName)
-      response.body.should.have.property('email').equal(requestBody.email)
-      response.body.should.have.property('gender').equal(requestBody.gender)
+      const requestBody: UserManagementPatchRequest = new UserManagementPatchRequest(
+        `patched${requestUser.fullName}`,
+        'FEMALE',
+        `patched${requestUser.username}`,
+        `patched${requestUser.email}`,
+        `patched${requestUser.password}`
+      )
+
+      const response = await chai
+        .request(server)
+        .patch(`/api/v1/users/${requestUser.id}`)
+        .send(requestBody)
+
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      response.body.data.should.be.an('object')
+      response.body.data.should.has.property('id')
+      response.body.data.should.has.property('username').equal(requestBody.username)
+      response.body.data.should.has.property('full_name').equal(requestBody.fullName)
+      response.body.data.should.has.property('email').equal(requestBody.email)
+      response.body.data.should.has.property('gender').equal(requestBody.gender)
+      response.body.data.should.has.property('balance')
+      response.body.data.should.has.property('experience')
+      response.body.data.should.has.property('last_latitude')
+      response.body.data.should.has.property('last_longitude')
+      response.body.data.should.has.property('created_at')
+      response.body.data.should.has.property('updated_at')
     })
   })
 
   describe('DELETE /api/v1/users/:id', () => {
     it('should return 200 OK', async () => {
       const requestUser: User = userMock.data[0]
-      const response = await chai.request(server).delete(`/api/v1/users/${requestUser.id}`)
-      response.should.have.status(200)
+
+      const response = await chai
+        .request(server)
+        .delete(`/api/v1/users/${requestUser.id}`)
+
+      response.should.has.status(200)
       if (oneDatastore.client === undefined) {
         throw new Error('oneDatastore client is undefined')
       }
@@ -130,7 +198,7 @@ describe('UserControllerRest', () => {
           id: requestUser.id
         }
       })
-      assert.equal(result, null)
+      assert.isNull(result)
     })
   })
 })

@@ -3,11 +3,16 @@ import { type Request, type Response, type Router } from 'express'
 import Result from '../../../inners/models/value_objects/Result'
 import type RegisterAuthentication from '../../../inners/use_cases/authentications/RegisterAuthentication'
 import type LoginAuthentication from '../../../inners/use_cases/authentications/LoginAuthentication'
-import type LoginByUsernameAndPasswordRequest
-  from '../../../inners/models/value_objects/requests/authentications/LoginByUsernameAndPasswordRequest'
-import type UserRegister
-  from '../../../inners/models/value_objects/requests/authentications/RegisterUserRequest'
+import type RegisterByEmailAndPasswordRequest
+  from '../../../inners/models/value_objects/requests/authentications/RegisterByEmailAndPasswordRequest'
 import { type User } from '@prisma/client'
+import ResponseBody from '../../../inners/models/value_objects/responses/ResponseBody'
+import LoginByEmailAndPasswordResponse
+  from '../../../inners/models/value_objects/responses/authentications/LoginByEmailAndPasswordResponse'
+import type LoginByEmailAndPasswordRequest
+  from '../../../inners/models/value_objects/requests/authentications/LoginByEmailAndPasswordRequest'
+import RegisterByEmailAndPasswordResponse
+  from '../../../inners/models/value_objects/responses/authentications/RegisterByEmailAndPasswordResponse'
 
 export default class AuthenticationControllerRest {
   router: Router
@@ -26,16 +31,23 @@ export default class AuthenticationControllerRest {
 
   registerRoutes = (): void => {
     this.router.post('/logins', this.login)
-    this.router.post('/registers', this.register)
+    this.router.post('/registers', this.registerByEmailAndPassword)
   }
 
   login = (request: Request, response: Response): void => {
     const { method } = request.query
-    if (method === 'username_and_password') {
-      const requestToLoginByUsernameAndPassword: LoginByUsernameAndPasswordRequest = request.body
-      this.loginAuthentication.loginByUsernameAndPassword(requestToLoginByUsernameAndPassword)
-        .then((result: Result<User | null>) => {
-          response.status(result.status).json(result)
+    if (method === 'email_and_password') {
+      const requestToLoginByUsernameAndPassword: LoginByEmailAndPasswordRequest = request.body
+      this.loginAuthentication.loginByEmailAndPassword(requestToLoginByUsernameAndPassword)
+        .then((result: Result<string | null>) => {
+          const data: LoginByEmailAndPasswordResponse = new LoginByEmailAndPasswordResponse(
+            result.data
+          )
+          const responseBody: ResponseBody<LoginByEmailAndPasswordResponse> = new ResponseBody<LoginByEmailAndPasswordResponse>(
+            result.message,
+            data
+          )
+          response.status(result.status).json(responseBody)
         })
         .catch((error: Error) => {
           response.status(500).json(
@@ -57,13 +69,33 @@ export default class AuthenticationControllerRest {
     }
   }
 
-  register = (request: Request, response: Response): void => {
+  registerByEmailAndPassword = (request: Request, response: Response): void => {
     const { method } = request.query
-    if (method === 'username_and_password') {
-      const requestToRegisterByUsernameAndPassword: UserRegister = request.body
-      this.registerAuthentication.registerByUsernameAndPassword(requestToRegisterByUsernameAndPassword)
+    if (method === 'email_and_password') {
+      const registerByEmailAndPasswordRequest: RegisterByEmailAndPasswordRequest = request.body
+      this.registerAuthentication.registerByEmailAndPassword(registerByEmailAndPasswordRequest)
         .then((result: Result<User | null>) => {
-          response.status(result.status).json(result)
+          let data: RegisterByEmailAndPasswordResponse | null
+          if (result.status === 200 && result.data !== null) {
+            data = new RegisterByEmailAndPasswordResponse(
+              result.data.id,
+              result.data.fullName,
+              result.data.gender,
+              result.data.username,
+              result.data.email,
+              result.data.balance,
+              result.data.experience,
+              result.data.lastLatitude,
+              result.data.lastLongitude
+            )
+          } else {
+            data = result.data
+          }
+          const responseBody: ResponseBody<RegisterByEmailAndPasswordResponse | null> = new ResponseBody<RegisterByEmailAndPasswordResponse | null>(
+            result.message,
+            data
+          )
+          response.status(result.status).send(responseBody)
         })
         .catch((error: Error) => {
           response.status(500).json(

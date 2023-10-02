@@ -1,10 +1,9 @@
 import type UserManagement from '../managements/UserManagement'
 import type { User } from '@prisma/client'
 import Result from '../../models/value_objects/Result'
-import type LoginByUsernameAndPasswordRequest
-  from '../../models/value_objects/requests/authentications/LoginByUsernameAndPasswordRequest'
 import type LoginByEmailAndPasswordRequest
   from '../../models/value_objects/requests/authentications/LoginByEmailAndPasswordRequest'
+import { randomUUID } from 'crypto'
 
 export default class LoginAuthentication {
   userManagement: UserManagement
@@ -13,61 +12,20 @@ export default class LoginAuthentication {
     this.userManagement = userManagement
   }
 
-  loginByUsernameAndPassword = async (request: LoginByUsernameAndPasswordRequest): Promise<Result<User | null>> => {
-    try {
-      await this.userManagement.readOneByUsername(request.username)
-    } catch (error) {
+  loginByEmailAndPassword = async (request: LoginByEmailAndPasswordRequest): Promise<Result<string | null>> => {
+    const foundUserByEmailAndPassword: Result<User | null> = await this.userManagement.readOneByEmailAndPassword(request.email, request.password)
+    if (foundUserByEmailAndPassword.data === null) {
       return new Result<null>(
         404,
-                `Login by username failed, unknown username: ${(error as Error).message}`,
-                null
+        'Login by username and password failed, unknown email or password.}',
+        null
       )
     }
 
-    let foundUserByUsernameAndPassword: Result<User | null>
-    try {
-      foundUserByUsernameAndPassword = await this.userManagement.readOneByUsernameAndPassword(request.username, request.password)
-    } catch (error) {
-      return new Result<null>(
-        404,
-                `Login by username and password failed, unknown username or password: ${(error as Error).message}`,
-                null
-      )
-    }
-
-    return new Result<User>(
+    return new Result<string>(
       200,
       'Login by username and password succeed.',
-      foundUserByUsernameAndPassword.data as User
-    )
-  }
-
-  loginByEmailAndPassword = async (request: LoginByEmailAndPasswordRequest): Promise<Result<User | null>> => {
-    try {
-      await this.userManagement.readOneByUsername(request.email)
-    } catch (error) {
-      return new Result<null>(
-        404,
-          `Login by username failed, unknown username: ${(error as Error).message}`,
-          null
-      )
-    }
-
-    let foundUserByUsernameAndPassword: Result<User | null>
-    try {
-      foundUserByUsernameAndPassword = await this.userManagement.readOneByEmailAndPassword(request.email, request.password)
-    } catch (error) {
-      return new Result<null>(
-        404,
-          `Login by username and password failed, unknown username or password: ${(error as Error).message}`,
-          null
-      )
-    }
-
-    return new Result<User>(
-      200,
-      'Login by username and password succeed.',
-      foundUserByUsernameAndPassword.data as User
+      randomUUID()
     )
   }
 }

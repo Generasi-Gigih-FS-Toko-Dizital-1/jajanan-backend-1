@@ -4,10 +4,10 @@
 		"build": "yarn prisma-generate && yarn prisma-db-push && tsc --build",
 		"dev": "nodemon --legacy-watch --watch ./src --ext ts --exec \"yarn build && yarn start\"",
 		"test": "nyc ts-mocha --parallel ./test/**/*.spec.ts",
-		"test-watch": "nyc ts-mocha --parallel --watch ./test/**/*.spec.ts",
 		"prisma-generate": "yarn prisma generate --schema=./src/outers/schemas/OneSchema.prisma",
 		"prisma-db-push": "yarn prisma db push --schema=./src/outers/schemas/OneSchema.prisma",
-		"prisma-studio": "yarn prisma studio --schema=./src/outers/schemas/OneSchema.prisma"
+		"prisma-studio": "yarn prisma studio --schema=./src/outers/schemas/OneSchema.prisma",
+		"swagger-generate": "node ./swagger.js"
 	},
 	"dependencies": {
 		"@prisma/client": "^5.3.1",
@@ -36,6 +36,7 @@
 		"@types/node": "^20.4.2",
 		"@types/nodemon": "^1.19.3",
 		"@types/source-map-support": "^0.5.8",
+		"@types/swagger-ui-express": "^4.1.4",
 		"@types/underscore": "^1.11.6",
 		"@typescript-eslint/eslint-plugin": "^5.50.0",
 		"chai": "^4.3.7",
@@ -50,6 +51,8 @@
 		"nyc": "^15.1.0",
 		"prisma": "^5.3.1",
 		"source-map-support": "^0.5.21",
+		"swagger-autogen": "^2.23.6",
+		"swagger-ui-express": "^5.0.0",
 		"ts-mocha": "^10.0.0",
 		"typescript": "^5.2.2",
 		"typesync": "^0.11.1"

@@ -1,23 +1,17 @@
 import { type Gender } from '@prisma/client'
 
 export default class UserManagementPatchRequest {
-  username: string
   fullName: string
+  gender: Gender
+  username: string
   email: string
   password: string
-  gender: Gender
 
-  constructor (
-    username: string,
-    fullName: string,
-    email: string,
-    password: string,
-    gender: Gender
-  ) {
-    this.username = username
+  constructor (fullName: string, gender: Gender, username: string, email: string, password: string) {
     this.fullName = fullName
+    this.gender = gender
+    this.username = username
     this.email = email
     this.password = password
-    this.gender = gender
   }
 }

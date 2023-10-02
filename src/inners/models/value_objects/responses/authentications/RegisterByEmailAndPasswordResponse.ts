@@ -1,6 +1,6 @@
 import { type Gender } from '@prisma/client'
 
-export default class UserManagementReadOneResponse {
+export default class RegisterByEmailAndPasswordResponse {
   id: string
   fullName: string
   gender: Gender

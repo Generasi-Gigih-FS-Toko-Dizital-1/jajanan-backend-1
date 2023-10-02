@@ -51,7 +51,7 @@ model Vendor {
   password              String
   username              String                @db.VarChar(50)
   balance               Float
-  gender                Gender?
+  gender                Gender
   experience            Int
   lastLatitude          Float
   lastLongitude         Float
@@ -71,7 +71,7 @@ model Admin {
   fullName  String    @db.VarChar(50)
   email     String    @db.VarChar(50)
   password  String
-  gender    Gender?
+  gender    Gender
   updatedAt DateTime
   createdAt DateTime
   deletedAt DateTime?

@@ -2,9 +2,8 @@ import type UserManagement from '../managements/UserManagement'
 
 import Result from '../../models/value_objects/Result'
 import { type User } from '@prisma/client'
-import type RegisterUserRequest from '../../models/value_objects/requests/authentications/RegisterUserRequest'
+import type RegisterByEmailAndPasswordRequest from '../../models/value_objects/requests/authentications/RegisterByEmailAndPasswordRequest'
 import { randomUUID } from 'crypto'
-import { $Enums } from '.prisma/client'
 
 export default class RegisterAuthentication {
   userManagement: UserManagement
@@ -13,45 +12,61 @@ export default class RegisterAuthentication {
     this.userManagement = userManagement
   }
 
-  registerByUsernameAndPassword = async (request: RegisterUserRequest): Promise<Result<User | null>> => {
-    let isUserFound: boolean
+  registerByEmailAndPassword = async (request: RegisterByEmailAndPasswordRequest): Promise<Result<User | null>> => {
+    let isUserEmailFound: boolean
     try {
-      await this.userManagement.readOneByUsername(request.username)
-      isUserFound = true
+      await this.userManagement.readOneByEmail(request.email)
+      isUserEmailFound = true
     } catch (error) {
-      isUserFound = false
+      isUserEmailFound = false
     }
 
-    if (isUserFound) {
+    if (isUserEmailFound) {
       return new Result<null>(
         409,
-        'Register by username and password failed, username already exists.',
+        'Register by email and password failed, email already exists.',
         null
       )
     }
 
-    const toCreateUser: User = {
+    let isUserUsernameFound: boolean
+    try {
+      await this.userManagement.readOneByUsername(request.username)
+      isUserUsernameFound = true
+    } catch (error) {
+      isUserUsernameFound = false
+    }
+
+    if (isUserUsernameFound) {
+      return new Result<null>(
+        409,
+        'Register by email and password failed, username already exists.',
+        null
+      )
+    }
+
+    const userToCreate: User = {
       id: randomUUID(),
       fullName: request.fullName,
+      gender: request.gender,
       address: request.address,
       email: request.email,
       password: request.password,
       username: request.username,
-      balance: request.balance,
-      gender: request.gender,
-      experience: request.experience,
-      lastLatitude: request.lastLatitude,
-      lastLongitude: request.lastLongitude,
+      balance: 0,
+      experience: 0,
+      lastLatitude: 0,
+      lastLongitude: 0,
       updatedAt: new Date(),
       createdAt: new Date(),
       deletedAt: null
     }
 
-    const createdUser: Result<User> = await this.userManagement.createOne(toCreateUser)
+    const createdUser: Result<User> = await this.userManagement.createOne(userToCreate)
 
     return new Result<User>(
       201,
-      'Register by username and password succeed.',
+      'Register by email and password succeed.',
       createdUser.data
     )
   }
