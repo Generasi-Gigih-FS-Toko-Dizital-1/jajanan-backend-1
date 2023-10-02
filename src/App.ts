@@ -38,12 +38,16 @@ const main = async (): Promise<void> => {
     console.log('Error connecting to one datastore: ', error)
   }
 
-  const oneMigration = new OneSeeder(oneDatastore)
-  if (process.env.NODE_ENV !== 'test') {
-    await oneMigration.down()
-    await oneMigration.up()
+  const oneSeeder = new OneSeeder(oneDatastore)
+  if (process.env.NODE_ENV === undefined) {
+    throw new Error('NODE_ENV is undefined.')
+  } else if (['test'].includes(process.env.NODE_ENV)) {
+    await oneSeeder.down()
+  } else if (['development', 'staging'].includes(process.env.NODE_ENV)) {
+    await oneSeeder.down()
+    await oneSeeder.up()
   } else {
-    await oneMigration.down()
+    throw new Error('Unknown NODE_ENV.')
   }
 
   const rootRoute = new RootRoute(app, io, oneDatastore)

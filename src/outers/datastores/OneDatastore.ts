@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client'
+import { Prisma, PrismaClient } from '@prisma/client'
+import waitUntil from 'async-wait-until'
 
 export default class OneDatastore {
   client: PrismaClient | undefined
@@ -14,6 +15,7 @@ export default class OneDatastore {
         datasourceUrl: url
       }
     )
+
     await this.client.$connect()
   }
 

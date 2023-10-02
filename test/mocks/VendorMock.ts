@@ -10,7 +10,7 @@ export default class VendorMock {
         id: randomUUID(),
         fullName: 'fulName0',
         address: 'address0',
-        email: 'email0',
+        email: 'email0@mail.com',
         password: 'password0',
         username: 'username0',
         balance: 0.0,

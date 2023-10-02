@@ -1,9 +1,9 @@
 export default class Pagination {
   pageNumber: number
-  itemPerPage: number
+  pageSize: number
 
-  constructor (pageNumber: number, itemPerPage: number) {
+  constructor (pageNumber: number, pageSize: number) {
     this.pageNumber = pageNumber
-    this.itemPerPage = itemPerPage
+    this.pageSize = pageSize
   }
 }

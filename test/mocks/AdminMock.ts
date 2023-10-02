@@ -9,7 +9,7 @@ export default class AdminMock {
       {
         id: randomUUID(),
         fullName: 'fullName0',
-        email: 'email0',
+        email: 'email0@mail.com',
         password: 'password0',
         gender: 'MALE',
         updatedAt: new Date(),
@@ -19,7 +19,7 @@ export default class AdminMock {
       {
         id: randomUUID(),
         fullName: 'fullName1',
-        email: 'email1',
+        email: 'email1@mail.com',
         password: 'password1',
         gender: 'FEMALE',
         updatedAt: new Date(),

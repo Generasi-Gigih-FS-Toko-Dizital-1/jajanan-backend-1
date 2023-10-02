@@ -6,8 +6,11 @@ import { type User } from '@prisma/client'
 import Pagination from '../../../inners/models/value_objects/Pagination'
 import UserManagementReadManyResponse from '../../../inners/models/value_objects/responses/user_managements/UserManagementReadManyResponse'
 import UserManagementCreateResponse from '../../../inners/models/value_objects/responses/user_managements/UserManagementCreateResponse'
-import UserManagementUpdateResponse from '../../../inners/models/value_objects/responses/user_managements/UserManagementUpdateResponse'
+import UserManagementPatchResponse from '../../../inners/models/value_objects/responses/user_managements/UserManagementPatchResponse'
 import UserManagementReadOneResponse from '../../../inners/models/value_objects/responses/user_managements/UserManagementReadOneResponse'
+import ResponseBody from '../../../inners/models/value_objects/responses/ResponseBody'
+import UserManagementPatchRequest
+  from '../../../inners/models/value_objects/requests/user_managements/UserManagementPatchRequest'
 
 export default class UserControllerRest {
   router: Router
@@ -27,15 +30,37 @@ export default class UserControllerRest {
   }
 
   readMany = (request: Request, response: Response): void => {
-    const { page, perPage } = request.query
+    const { pageNumber, pageSize } = request.query
+    const pagination: Pagination = new Pagination(
+      pageNumber === undefined ? 1 : Number(pageNumber),
+      pageSize === undefined ? 10 : Number(pageSize)
+    )
     this.userManagement
-      .readMany(new Pagination(page === undefined ? 1 : Number(page), perPage === undefined ? 10 : Number(perPage)))
+      .readMany(pagination)
       .then((result: Result<User[]>) => {
         const data: UserManagementReadManyResponse = new UserManagementReadManyResponse(
           result.data.length,
-          result.data
+          result.data.map((user: User) =>
+            new UserManagementReadOneResponse(
+              user.id,
+              user.fullName,
+              user.gender,
+              user.username,
+              user.email,
+              user.balance,
+              user.experience,
+              user.lastLatitude,
+              user.lastLongitude,
+              user.createdAt,
+              user.updatedAt
+            )
+          )
         )
-        response.status(result.status).send(data)
+        const responseBody: ResponseBody<UserManagementReadManyResponse> = new ResponseBody<UserManagementReadManyResponse>(
+          result.message,
+          data
+        )
+        response.status(result.status).send(responseBody)
       })
       .catch((error: Error) => {
         response.status(500).send(error.message)
@@ -50,16 +75,21 @@ export default class UserControllerRest {
         const data: UserManagementReadOneResponse = new UserManagementReadOneResponse(
           result.data.id,
           result.data.fullName,
+          result.data.gender,
           result.data.username,
           result.data.email,
-          result.data.gender,
           result.data.balance,
           result.data.experience,
           result.data.lastLatitude,
           result.data.lastLongitude,
-          result.message
+          result.data.createdAt,
+          result.data.updatedAt
         )
-        response.status(result.status).send(data)
+        const responseBody: ResponseBody<UserManagementReadOneResponse> = new ResponseBody<UserManagementReadOneResponse>(
+          result.message,
+          data
+        )
+        response.status(result.status).send(responseBody)
       })
       .catch((error: Error) => {
         response.status(500).send(error.message)
@@ -73,12 +103,21 @@ export default class UserControllerRest {
         const data: UserManagementCreateResponse = new UserManagementCreateResponse(
           result.data.id,
           result.data.fullName,
+          result.data.gender,
           result.data.username,
           result.data.email,
-          result.data.gender,
-          result.message
+          result.data.balance,
+          result.data.experience,
+          result.data.lastLatitude,
+          result.data.lastLongitude,
+          result.data.createdAt,
+          result.data.updatedAt
         )
-        response.status(result.status).send(data)
+        const responseBody: ResponseBody<UserManagementCreateResponse> = new ResponseBody<UserManagementCreateResponse>(
+          result.message,
+          data
+        )
+        response.status(result.status).send(responseBody)
       })
       .catch((error: Error) => {
         response.status(500).send(error.message)
@@ -90,15 +129,23 @@ export default class UserControllerRest {
     this.userManagement
       .patchOneById(id, request.body)
       .then((result: Result<User>) => {
-        const data: UserManagementUpdateResponse = new UserManagementUpdateResponse(
-          result.data.id,
-          result.data.fullName,
-          result.data.username,
-          result.data.email,
-          result.data.gender,
-          result.message
+        const responseBody: ResponseBody<UserManagementPatchResponse> = new ResponseBody<UserManagementPatchResponse>(
+          result.message,
+          new UserManagementPatchResponse(
+            result.data.id,
+            result.data.fullName,
+            result.data.gender,
+            result.data.username,
+            result.data.email,
+            result.data.balance,
+            result.data.experience,
+            result.data.lastLatitude,
+            result.data.lastLongitude,
+            result.data.createdAt,
+            result.data.updatedAt
+          )
         )
-        response.status(result.status).send(data)
+        response.status(result.status).send(responseBody)
       })
       .catch((error: Error) => {
         response.status(500).send(error.message)
