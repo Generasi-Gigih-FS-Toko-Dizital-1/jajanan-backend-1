@@ -3,9 +3,11 @@ pipeline {
     stages {
         stage('stage') {
             steps {
-                sh 'docker compose build'
-                sh 'docker compose down'
-                sh 'docker compose up -d'
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh 'docker compose build'
+                    sh 'docker compose down'
+                    sh 'docker compose up -d'
+                }
             }
         }
         stage('log') {
