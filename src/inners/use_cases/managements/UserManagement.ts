@@ -89,8 +89,8 @@ export default class UserManagement {
       balance: 0,
       gender: request.gender,
       experience: 0,
-      lastLatitude: 0,
-      lastLongitude: 0,
+      lastLatitude: request.lastLatitude,
+      lastLongitude: request.lastLongitude,
       updatedAt: new Date(),
       createdAt: new Date(),
       deletedAt: null

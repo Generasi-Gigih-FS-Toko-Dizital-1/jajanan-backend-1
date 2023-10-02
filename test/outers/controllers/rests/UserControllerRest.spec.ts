@@ -119,7 +119,9 @@ describe('UserControllerRest', () => {
         userMock.data[0].gender,
         userMock.data[0].username,
         userMock.data[0].email,
-        userMock.data[0].password
+        userMock.data[0].password,
+        userMock.data[0].lastLatitude,
+        userMock.data[0].lastLongitude
       )
 
       const response = await chai
@@ -154,7 +156,9 @@ describe('UserControllerRest', () => {
         'FEMALE',
         `patched${requestUser.username}`,
         `patched${requestUser.email}`,
-        `patched${requestUser.password}`
+        `patched${requestUser.password}`,
+        requestUser.lastLatitude + 1,
+        requestUser.lastLongitude + 1
       )
 
       const response = await chai

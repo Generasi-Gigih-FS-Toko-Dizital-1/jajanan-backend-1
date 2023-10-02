@@ -1,6 +1,6 @@
-import { type Gender } from '@prisma/client'
+import { type Gender, type Status } from '@prisma/client'
 
-export default class RegisterByEmailAndPasswordResponse {
+export default class VendorManagementCreateResponse {
   id: string
   fullName: string
   gender: Gender
@@ -8,6 +8,10 @@ export default class RegisterByEmailAndPasswordResponse {
   email: string
   balance: number
   experience: number
+  jajanImageUrl: string
+  jajanName: string
+  jajanDescription: string
+  status: Status
   lastLatitude: number
   lastLongitude: number
   createdAt: Date
@@ -21,6 +25,10 @@ export default class RegisterByEmailAndPasswordResponse {
     email: string,
     balance: number,
     experience: number,
+    jajanImageUrl: string,
+    jajanName: string,
+    jajanDescription: string,
+    status: Status,
     lastLatitude: number,
     lastLongitude: number,
     createdAt: Date,
@@ -33,6 +41,10 @@ export default class RegisterByEmailAndPasswordResponse {
     this.email = email
     this.balance = balance
     this.experience = experience
+    this.jajanImageUrl = jajanImageUrl
+    this.jajanName = jajanName
+    this.jajanDescription = jajanDescription
+    this.status = status
     this.lastLatitude = lastLatitude
     this.lastLongitude = lastLongitude
     this.createdAt = createdAt

@@ -1,4 +1,4 @@
-export default class LoginByEmailAndPasswordResponse {
+export default class VendorLoginByEmailAndPasswordResponse {
   token: string | null
 
   constructor (

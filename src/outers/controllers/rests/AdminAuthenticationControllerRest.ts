@@ -1,28 +1,31 @@
 import { type Request, type Response, type Router } from 'express'
 
 import Result from '../../../inners/models/value_objects/Result'
-import type RegisterAuthentication from '../../../inners/use_cases/authentications/RegisterAuthentication'
-import type LoginAuthentication from '../../../inners/use_cases/authentications/LoginAuthentication'
-import type RegisterByEmailAndPasswordRequest
-  from '../../../inners/models/value_objects/requests/authentications/RegisterByEmailAndPasswordRequest'
-import { type User } from '@prisma/client'
+import type VendorLoginAuthentication from '../../../inners/use_cases/authentications/vendors/VendorLoginAuthentication'
+import type VendorRegisterByEmailAndPasswordRequest
+  from '../../../inners/models/value_objects/requests/authentications/vendors/VendorRegisterByEmailAndPasswordRequest'
+import { type Admin } from '@prisma/client'
 import ResponseBody from '../../../inners/models/value_objects/responses/ResponseBody'
-import LoginByEmailAndPasswordResponse
-  from '../../../inners/models/value_objects/responses/authentications/LoginByEmailAndPasswordResponse'
-import type LoginByEmailAndPasswordRequest
-  from '../../../inners/models/value_objects/requests/authentications/LoginByEmailAndPasswordRequest'
-import RegisterByEmailAndPasswordResponse
-  from '../../../inners/models/value_objects/responses/authentications/RegisterByEmailAndPasswordResponse'
+import AdminLoginByEmailAndPasswordResponse
+  from '../../../inners/models/value_objects/responses/authentications/admins/AdminLoginByEmailAndPasswordResponse'
+import type VendorLoginByEmailAndPasswordRequest
+  from '../../../inners/models/value_objects/requests/authentications/vendors/VendorLoginByEmailAndPasswordRequest'
+import type RegisterByEmailAndPasswordResponse
+  from '../../../inners/models/value_objects/responses/authentications/admins/AdminRegisterByEmailAndPasswordResponse'
+import AdminRegisterByEmailAndPasswordResponse
+  from '../../../inners/models/value_objects/responses/authentications/admins/AdminRegisterByEmailAndPasswordResponse'
+import type AdminLoginAuthentication from '../../../inners/use_cases/authentications/admins/AdminLoginAuthentication'
+import type AdminRegisterAuthentication from '../../../inners/use_cases/authentications/admins/AdminRegisterAuthentication'
 
-export default class AuthenticationControllerRest {
+export default class AdminAuthenticationControllerRest {
   router: Router
-  loginAuthentication: LoginAuthentication
-  registerAuthentication: RegisterAuthentication
+  loginAuthentication: AdminLoginAuthentication
+  registerAuthentication: AdminRegisterAuthentication
 
   constructor (
     router: Router,
-    loginAuthentication: LoginAuthentication,
-    registerAuthentication: RegisterAuthentication
+    loginAuthentication: AdminLoginAuthentication,
+    registerAuthentication: AdminRegisterAuthentication
   ) {
     this.router = router
     this.loginAuthentication = loginAuthentication
@@ -37,13 +40,13 @@ export default class AuthenticationControllerRest {
   login = (request: Request, response: Response): void => {
     const { method } = request.query
     if (method === 'email_and_password') {
-      const requestToLoginByUsernameAndPassword: LoginByEmailAndPasswordRequest = request.body
-      this.loginAuthentication.loginByEmailAndPassword(requestToLoginByUsernameAndPassword)
+      const requestToLoginByAdminnameAndPassword: VendorLoginByEmailAndPasswordRequest = request.body
+      this.loginAuthentication.loginByEmailAndPassword(requestToLoginByAdminnameAndPassword)
         .then((result: Result<string | null>) => {
-          const data: LoginByEmailAndPasswordResponse = new LoginByEmailAndPasswordResponse(
+          const data: AdminLoginByEmailAndPasswordResponse = new AdminLoginByEmailAndPasswordResponse(
             result.data
           )
-          const responseBody: ResponseBody<LoginByEmailAndPasswordResponse> = new ResponseBody<LoginByEmailAndPasswordResponse>(
+          const responseBody: ResponseBody<AdminLoginByEmailAndPasswordResponse> = new ResponseBody<AdminLoginByEmailAndPasswordResponse>(
             result.message,
             data
           )
@@ -72,21 +75,19 @@ export default class AuthenticationControllerRest {
   registerByEmailAndPassword = (request: Request, response: Response): void => {
     const { method } = request.query
     if (method === 'email_and_password') {
-      const registerByEmailAndPasswordRequest: RegisterByEmailAndPasswordRequest = request.body
+      const registerByEmailAndPasswordRequest: VendorRegisterByEmailAndPasswordRequest = request.body
       this.registerAuthentication.registerByEmailAndPassword(registerByEmailAndPasswordRequest)
-        .then((result: Result<User | null>) => {
-          let data: RegisterByEmailAndPasswordResponse | null
+        .then((result: Result<Admin | null>) => {
+          let data: AdminRegisterByEmailAndPasswordResponse | null
           if (result.status === 200 && result.data !== null) {
-            data = new RegisterByEmailAndPasswordResponse(
+            data = new AdminRegisterByEmailAndPasswordResponse(
               result.data.id,
               result.data.fullName,
               result.data.gender,
-              result.data.username,
               result.data.email,
-              result.data.balance,
-              result.data.experience,
-              result.data.lastLatitude,
-              result.data.lastLongitude
+              result.data.password,
+              result.data.createdAt,
+              result.data.updatedAt
             )
           } else {
             data = result.data

@@ -1,17 +1,15 @@
 import { type Gender } from '@prisma/client'
 
-export default class RegisterByEmailAndPasswordRequest {
+export default class AdminRegisterByEmailAndPasswordRequest {
   fullName: string
   gender: Gender
-  username: string
   email: string
   password: string
   address: string
 
-  constructor (fullName: string, gender: Gender, username: string, email: string, password: string, address: string) {
+  constructor (fullName: string, gender: Gender, email: string, password: string, address: string) {
     this.fullName = fullName
     this.gender = gender
-    this.username = username
     this.email = email
     this.password = password
     this.address = address

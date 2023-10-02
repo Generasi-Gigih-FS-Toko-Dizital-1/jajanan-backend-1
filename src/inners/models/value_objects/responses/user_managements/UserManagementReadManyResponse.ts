@@ -1,4 +1,3 @@
-import { type User } from '@prisma/client'
 import type UserManagementReadOneResponse from './UserManagementReadOneResponse'
 
 export default class UserManagementReadManyResponse {

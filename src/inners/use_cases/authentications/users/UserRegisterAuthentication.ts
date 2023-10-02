@@ -1,18 +1,18 @@
-import type UserManagement from '../managements/UserManagement'
-
-import Result from '../../models/value_objects/Result'
 import { type User } from '@prisma/client'
-import type RegisterByEmailAndPasswordRequest from '../../models/value_objects/requests/authentications/RegisterByEmailAndPasswordRequest'
 import { randomUUID } from 'crypto'
+import type UserRegisterByEmailAndPasswordRequest
+  from '../../../models/value_objects/requests/authentications/users/UserRegisterByEmailAndPasswordRequest'
+import Result from '../../../models/value_objects/Result'
+import type UserManagement from '../../managements/UserManagement'
 
-export default class RegisterAuthentication {
+export default class UserRegisterAuthentication {
   userManagement: UserManagement
 
   constructor (userManagement: UserManagement) {
     this.userManagement = userManagement
   }
 
-  registerByEmailAndPassword = async (request: RegisterByEmailAndPasswordRequest): Promise<Result<User | null>> => {
+  registerByEmailAndPassword = async (request: UserRegisterByEmailAndPasswordRequest): Promise<Result<User | null>> => {
     let isUserEmailFound: boolean
     try {
       await this.userManagement.readOneByEmail(request.email)
@@ -55,8 +55,8 @@ export default class RegisterAuthentication {
       username: request.username,
       balance: 0,
       experience: 0,
-      lastLatitude: 0,
-      lastLongitude: 0,
+      lastLatitude: request.lastLatitude,
+      lastLongitude: request.lastLongitude,
       updatedAt: new Date(),
       createdAt: new Date(),
       deletedAt: null
