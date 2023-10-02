@@ -1,27 +1,38 @@
 import { type Gender } from '@prisma/client'
 
-export default class RegisterUserRequest {
+export default class UserManagementReadOneResponse {
+  id: string
   fullName: string
   username: string
   email: string
-  password: string
-  address: string
+  gender: Gender
   balance: number
   experience: number
-  gender: Gender
   lastLatitude: number
   lastLongitude: number
+  message: string
 
-  constructor (fullName: string, username: string, email: string, password: string, address: string, balance: number, experience: number, gender: Gender, lastLatitude: number, lastLongitude: number) {
+  constructor (
+    id: string,
+    fullName: string,
+    username: string,
+    email: string,
+    gender: Gender,
+    balance: number,
+    experience: number,
+    lastLatitude: number,
+    lastLongitude: number,
+    message: string
+  ) {
+    this.id = id
     this.fullName = fullName
     this.username = username
     this.email = email
-    this.password = password
-    this.address = address
+    this.gender = gender
     this.balance = balance
     this.experience = experience
-    this.gender = gender
     this.lastLatitude = lastLatitude
     this.lastLongitude = lastLongitude
+    this.message = message
   }
 }
