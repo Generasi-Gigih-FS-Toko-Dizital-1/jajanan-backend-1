@@ -1,4 +1,4 @@
-import dotenv, {type DotenvConfigOutput} from 'dotenv'
+import dotenv, { type DotenvConfigOutput } from 'dotenv'
 
 const dotenvOutput: DotenvConfigOutput = dotenv.config(
   {
