@@ -17,14 +17,14 @@ export default class AdminLoginAuthentication {
     if (foundAdminByEmailAndPassword.data === null) {
       return new Result<null>(
         404,
-        'Login by email and password failed, unknown email or password.}',
+        'Admin login by email and password failed, unknown email or password.}',
         null
       )
     }
 
     return new Result<string>(
       200,
-      'Login by email and password succeed.',
+      'Admin login by email and password succeed.',
       randomUUID()
     )
   }

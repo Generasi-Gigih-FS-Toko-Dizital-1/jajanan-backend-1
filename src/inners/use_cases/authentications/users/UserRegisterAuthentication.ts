@@ -24,7 +24,7 @@ export default class UserRegisterAuthentication {
     if (isUserEmailFound) {
       return new Result<null>(
         409,
-        'Register by email and password failed, email already exists.',
+        'User register by email and password failed, email already exists.',
         null
       )
     }
@@ -40,7 +40,7 @@ export default class UserRegisterAuthentication {
     if (isUserUsernameFound) {
       return new Result<null>(
         409,
-        'Register by email and password failed, username already exists.',
+        'User register by email and password failed, username already exists.',
         null
       )
     }
@@ -66,7 +66,7 @@ export default class UserRegisterAuthentication {
 
     return new Result<User>(
       201,
-      'Register by email and password succeed.',
+      'User register by email and password succeed.',
       createdUser.data
     )
   }

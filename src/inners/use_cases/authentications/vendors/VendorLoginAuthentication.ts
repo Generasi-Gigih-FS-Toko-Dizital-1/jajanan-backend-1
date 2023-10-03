@@ -17,14 +17,14 @@ export default class VendorLoginAuthentication {
     if (foundVendorByEmailAndPassword.data === null) {
       return new Result<null>(
         404,
-        'Login by username and password failed, unknown email or password.}',
+        'Vendor login by username and password failed, unknown email or password.}',
         null
       )
     }
 
     return new Result<string>(
       200,
-      'Login by username and password succeed.',
+      'Vendor login by username and password succeed.',
       randomUUID()
     )
   }
