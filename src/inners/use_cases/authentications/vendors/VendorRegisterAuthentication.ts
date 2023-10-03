@@ -71,7 +71,7 @@ export default class VendorRegisterAuthentication {
 
     return new Result<Vendor>(
       201,
-      'Register by email and password succeed.',
+      'Vendor register by email and password succeed.',
       createdVendor.data
     )
   }
