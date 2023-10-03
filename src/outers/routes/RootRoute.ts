@@ -12,7 +12,6 @@ import UserRegisterAuthentication from '../../inners/use_cases/authentications/u
 import UserLoginAuthentication from '../../inners/use_cases/authentications/users/UserLoginAuthentication'
 import VendorAuthenticationControllerRest from '../controllers/rests/VendorAuthenticationControllerRest'
 import AdminLoginAuthentication from '../../inners/use_cases/authentications/admins/AdminLoginAuthentication'
-import AdminRegisterAuthentication from '../../inners/use_cases/authentications/admins/AdminRegisterAuthentication'
 import AdminAuthenticationControllerRest from '../controllers/rests/AdminAuthenticationControllerRest'
 import VendorRepository from '../repositories/VendorRepository'
 import VendorManagement from '../../inners/use_cases/managements/VendorManagement'
@@ -85,11 +84,9 @@ export default class RootRoute {
     routerVersionOne.use('/authentications/vendors', vendorAuthenticationControllerRest.router)
 
     const adminLoginAuthentication: AdminLoginAuthentication = new AdminLoginAuthentication(adminManagement)
-    const adminRegisterAuthentication: AdminRegisterAuthentication = new AdminRegisterAuthentication(adminManagement)
     const adminAuthenticationControllerRest: AdminAuthenticationControllerRest = new AdminAuthenticationControllerRest(
       Router(),
-      adminLoginAuthentication,
-      adminRegisterAuthentication
+      adminLoginAuthentication
     )
     adminAuthenticationControllerRest.registerRoutes()
     routerVersionOne.use('/authentications/admins', adminAuthenticationControllerRest.router)

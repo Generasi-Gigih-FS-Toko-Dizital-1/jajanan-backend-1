@@ -6,7 +6,6 @@ export default class VendorRegisterByEmailAndPasswordResponse {
   gender: Gender
   username: string
   email: string
-  password: string
   balance: number
   experience: number
   jajanImageUrl: string
@@ -24,7 +23,6 @@ export default class VendorRegisterByEmailAndPasswordResponse {
     gender: Gender,
     username: string,
     email: string,
-    password: string,
     balance: number,
     experience: number,
     jajanImageUrl: string,
@@ -41,7 +39,6 @@ export default class VendorRegisterByEmailAndPasswordResponse {
     this.gender = gender
     this.username = username
     this.email = email
-    this.password = password
     this.balance = balance
     this.experience = experience
     this.jajanImageUrl = jajanImageUrl

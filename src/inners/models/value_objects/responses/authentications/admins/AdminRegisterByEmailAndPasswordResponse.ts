@@ -5,7 +5,6 @@ export default class AdminRegisterByEmailAndPasswordResponse {
   fullName: string
   gender: Gender
   email: string
-  password: string
   createdAt: Date
   updatedAt: Date
 
@@ -14,7 +13,6 @@ export default class AdminRegisterByEmailAndPasswordResponse {
     fullName: string,
     gender: Gender,
     email: string,
-    password: string,
     createdAt: Date,
     updatedAt: Date
   ) {
@@ -22,7 +20,6 @@ export default class AdminRegisterByEmailAndPasswordResponse {
     this.fullName = fullName
     this.gender = gender
     this.email = email
-    this.password = password
     this.createdAt = createdAt
     this.updatedAt = updatedAt
   }
