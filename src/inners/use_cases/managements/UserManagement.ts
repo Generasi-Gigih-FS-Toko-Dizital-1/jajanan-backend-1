@@ -4,8 +4,10 @@ import type UserRepository from '../../../outers/repositories/UserRepository'
 import type Pagination from '../../models/value_objects/Pagination'
 import Result from '../../models/value_objects/Result'
 import { type User } from '@prisma/client'
-import type UserManagementCreateRequest from '../../models/value_objects/requests/user_managements/UserManagementCreateRequest'
-import type UserManagementPatchRequest from '../../models/value_objects/requests/user_managements/UserManagementPatchRequest'
+import type UserManagementCreateRequest
+  from '../../models/value_objects/requests/user_managements/UserManagementCreateRequest'
+import type UserManagementPatchRequest
+  from '../../models/value_objects/requests/user_managements/UserManagementPatchRequest'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
 
 export default class UserManagement {
@@ -72,11 +74,6 @@ export default class UserManagement {
   }
 
   createOne = async (request: UserManagementCreateRequest): Promise<Result<User>> => {
-    const bcryptSize: number | undefined = Number(process.env.BCRYPT_SIZE)
-    if (bcryptSize === undefined) {
-      throw new Error('Bcrypt size is undefined')
-    }
-
     const salt: string | undefined = process.env.BCRYPT_SALT
     if (salt === undefined) {
       throw new Error('Salt is undefined.')
@@ -92,8 +89,8 @@ export default class UserManagement {
       balance: 0,
       gender: request.gender,
       experience: 0,
-      lastLatitude: 0,
-      lastLongitude: 0,
+      lastLatitude: request.lastLatitude,
+      lastLongitude: request.lastLongitude,
       updatedAt: new Date(),
       createdAt: new Date(),
       deletedAt: null
@@ -107,19 +104,13 @@ export default class UserManagement {
   }
 
   patchOneById = async (id: string, request: UserManagementPatchRequest): Promise<Result<User>> => {
-    const bcryptSize: number | undefined = Number(process.env.BCRYPT_SIZE)
-    if (bcryptSize === undefined) {
-      throw new Error('Bcrypt size is undefined')
-    }
-
     const salt: string | undefined = process.env.BCRYPT_SALT
     if (salt === undefined) {
       throw new Error('Salt is undefined.')
     }
 
     if (request.password !== undefined) {
-      const hashedPassword: string = bcrypt.hashSync(request.password, salt)
-      request.password = hashedPassword
+      request.password = bcrypt.hashSync(request.password, salt)
     }
 
     const foundUser: Result<User> = await this.readOneById(id)

@@ -1,4 +1,4 @@
-export default class LoginByEmailAndPasswordRequest {
+export default class VendorLoginByEmailAndPasswordRequest {
   email: string
   password: string
 

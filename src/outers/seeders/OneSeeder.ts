@@ -10,6 +10,7 @@ import VendorMock from '../../../test/mocks/VendorMock'
 import UserSubscriptionMock from '../../../test/mocks/UserSubscriptionMock'
 import UserLevelMock from '../../../test/mocks/UserLevelMock'
 import VendorLevelMock from '../../../test/mocks/VendorLevelMock'
+import waitUntil from 'async-wait-until'
 
 export default class OneSeeder {
   oneDatastore: OneDatastore
@@ -84,17 +85,84 @@ export default class OneSeeder {
     if (this.oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-    await this.oneDatastore.client.vendorLevel.deleteMany()
-    await this.oneDatastore.client.userLevel.deleteMany()
-    await this.oneDatastore.client.userSubscription.deleteMany()
-    await this.oneDatastore.client.notificationHistory.deleteMany()
-    await this.oneDatastore.client.transactionHistory.deleteMany()
-    await this.oneDatastore.client.topUpHistory.deleteMany()
-    await this.oneDatastore.client.jajanItem.deleteMany()
-    await this.oneDatastore.client.category.deleteMany()
-    await this.oneDatastore.client.vendor.deleteMany()
-    await this.oneDatastore.client.admin.deleteMany()
-    await this.oneDatastore.client.user.deleteMany()
+    await this.oneDatastore.client.vendorLevel.deleteMany({
+      where: {
+        id: {
+          in: this.vendorLevelMock.data.map((vendorLevel) => vendorLevel.id)
+        }
+      }
+    })
+    await this.oneDatastore.client.userLevel.deleteMany({
+      where: {
+        id: {
+          in: this.userLevelMock.data.map((userLevel) => userLevel.id)
+        }
+      }
+    })
+    await this.oneDatastore.client.userSubscription.deleteMany({
+      where: {
+        id: {
+          in: this.userSubscriptionMock.data.map((userSubscription) => userSubscription.id)
+        }
+      }
+    })
+    await this.oneDatastore.client.notificationHistory.deleteMany({
+      where: {
+        id: {
+          in: this.notificationHistoryMock.data.map((notificationHistory) => notificationHistory.id)
+        }
+      }
+    })
+    await this.oneDatastore.client.transactionHistory.deleteMany({
+      where: {
+        id: {
+          in: this.transactionHistoryMock.data.map((transactionHistory) => transactionHistory.id)
+        }
+      }
+    })
+    await this.oneDatastore.client.topUpHistory.deleteMany({
+      where: {
+        id: {
+          in: this.topUpHistoryMock.data.map((topUpHistory) => topUpHistory.id)
+        }
+      }
+    })
+    await this.oneDatastore.client.jajanItem.deleteMany({
+      where: {
+        id: {
+          in: this.jajanItemMock.data.map((jajanItem) => jajanItem.id)
+        }
+      }
+    })
+    await this.oneDatastore.client.category.deleteMany({
+      where: {
+        id: {
+          in: this.categoryMock.data.map((category) => category.id)
+        }
+      }
+    })
+    await this.oneDatastore.client.vendor.deleteMany({
+      where: {
+        id: {
+          in: this.vendorMock.data.map((vendor) => vendor.id)
+        }
+      }
+    })
+    await this.oneDatastore.client.admin.deleteMany({
+      where: {
+        id: {
+          in: this.adminMock.data.map((admin) => admin.id)
+        }
+      }
+    })
+    await this.oneDatastore.client.user.deleteMany({
+      where: {
+        id: {
+          in: this.userMock.data.map((user) => user.id)
+        }
+      }
+    })
+
     console.log('One seeder down.')
   }
 }

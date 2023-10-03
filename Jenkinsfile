@@ -6,7 +6,7 @@ pipeline {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     sh 'docker compose build'
                     sh 'docker compose down'
-                    sh 'docker compose up -d'
+                    sh 'docker compose up -d --wait'
                 }
             }
         }
