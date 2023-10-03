@@ -6,8 +6,8 @@ export default class AdminRepository {
   oneDatastore: OneDatastore
   aggregatedArgs: any
 
-  constructor (datastoreOne: OneDatastore) {
-    this.oneDatastore = datastoreOne
+  constructor (oneDatastore: OneDatastore) {
+    this.oneDatastore = oneDatastore
   }
 
   readMany = async (pagination: Pagination): Promise<Admin[] > => {

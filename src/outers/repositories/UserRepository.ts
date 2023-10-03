@@ -7,8 +7,8 @@ export default class UserRepository {
   oneDatastore: OneDatastore
   aggregatedArgs: any
 
-  constructor (datastoreOne: OneDatastore) {
-    this.oneDatastore = datastoreOne
+  constructor (oneDatastore: OneDatastore) {
+    this.oneDatastore = oneDatastore
     this.aggregatedArgs = {
       include: {
         notificationHistories: true,

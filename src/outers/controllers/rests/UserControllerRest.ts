@@ -4,13 +4,15 @@ import type Result from '../../../inners/models/value_objects/Result'
 import type UserManagement from '../../../inners/use_cases/managements/UserManagement'
 import { type User } from '@prisma/client'
 import Pagination from '../../../inners/models/value_objects/Pagination'
-import UserManagementReadManyResponse from '../../../inners/models/value_objects/responses/user_managements/UserManagementReadManyResponse'
-import UserManagementCreateResponse from '../../../inners/models/value_objects/responses/user_managements/UserManagementCreateResponse'
-import UserManagementPatchResponse from '../../../inners/models/value_objects/responses/user_managements/UserManagementPatchResponse'
-import UserManagementReadOneResponse from '../../../inners/models/value_objects/responses/user_managements/UserManagementReadOneResponse'
+import UserManagementReadManyResponse
+  from '../../../inners/models/value_objects/responses/user_managements/UserManagementReadManyResponse'
+import UserManagementCreateResponse
+  from '../../../inners/models/value_objects/responses/user_managements/UserManagementCreateResponse'
+import UserManagementPatchResponse
+  from '../../../inners/models/value_objects/responses/user_managements/UserManagementPatchResponse'
+import UserManagementReadOneResponse
+  from '../../../inners/models/value_objects/responses/user_managements/UserManagementReadOneResponse'
 import ResponseBody from '../../../inners/models/value_objects/responses/ResponseBody'
-import UserManagementPatchRequest
-  from '../../../inners/models/value_objects/requests/user_managements/UserManagementPatchRequest'
 
 export default class UserControllerRest {
   router: Router

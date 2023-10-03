@@ -14,6 +14,8 @@ import type UserRegisterAuthentication from '../../../inners/use_cases/authentic
 import type UserLoginByEmailAndPasswordRequest
   from '../../../inners/models/value_objects/requests/authentications/users/UserLoginByEmailAndPasswordRequest'
 
+import type Session from '../../../inners/models/value_objects/Session'
+
 export default class UserAuthenticationControllerRest {
   router: Router
   loginAuthentication: UserLoginAuthentication
@@ -30,8 +32,8 @@ export default class UserAuthenticationControllerRest {
   }
 
   registerRoutes = (): void => {
-    this.router.post('/logins', this.login)
-    this.router.post('/registers', this.registerByEmailAndPassword)
+    this.router.post('/login', this.login)
+    this.router.post('/register', this.registerByEmailAndPassword)
   }
 
   login = (request: Request, response: Response): void => {
@@ -39,22 +41,37 @@ export default class UserAuthenticationControllerRest {
     if (method === 'email_and_password') {
       const requestToLoginByEmailAndPassword: UserLoginByEmailAndPasswordRequest = request.body
       this.loginAuthentication.loginByEmailAndPassword(requestToLoginByEmailAndPassword)
-        .then((result: Result<string | null>) => {
-          const data: UserLoginByEmailAndPasswordResponse = new UserLoginByEmailAndPasswordResponse(
-            result.data
-          )
-          const responseBody: ResponseBody<UserLoginByEmailAndPasswordResponse> = new ResponseBody<UserLoginByEmailAndPasswordResponse>(
+        .then((result: Result<Session | null>) => {
+          let data: UserLoginByEmailAndPasswordResponse | null = null
+          if (result.data !== null) {
+            data = new UserLoginByEmailAndPasswordResponse(
+              result.data.accessToken,
+              result.data.refreshToken
+            )
+          }
+          const responseBody: ResponseBody<UserLoginByEmailAndPasswordResponse | null> = new ResponseBody<UserLoginByEmailAndPasswordResponse | null>(
             result.message,
             data
           )
-          response.status(result.status).json(responseBody)
+          const sessionString = JSON.stringify(result.data)
+          response
+            .cookie(
+              'session',
+              sessionString,
+              {
+                httpOnly: true,
+                expires: result.data?.expiredAt
+              }
+            )
+            .status(result.status)
+            .json(responseBody)
         })
         .catch((error: Error) => {
           response.status(500).json(
             new Result<null>(
               500,
-                            `Login by method ${method} failed: ${error.message}`,
-                            null
+                    `Login by method ${method} failed: ${error.message}`,
+                    null
             )
           )
         })
@@ -62,8 +79,8 @@ export default class UserAuthenticationControllerRest {
       response.status(400).json(
         new Result<null>(
           400,
-                    `Login by method ${method as string} failed, unknown method.`,
-                    null
+              `Login by method ${method as string} failed, unknown method.`,
+              null
         )
       )
     }

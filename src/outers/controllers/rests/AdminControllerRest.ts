@@ -13,17 +13,22 @@ import AdminManagementPatchResponse
 import AdminManagementReadOneResponse
   from '../../../inners/models/value_objects/responses/admin_managements/AdminManagementReadOneResponse'
 import ResponseBody from '../../../inners/models/value_objects/responses/ResponseBody'
+import type AuthenticationValidation from '../../../inners/use_cases/authentications/AuthenticationValidation'
+import validateAuthenticationMiddleware from '../../middlewares/ValidateAuthenticationMiddleware'
 
 export default class AdminControllerRest {
   router: Router
   adminManagement: AdminManagement
+  validateAuthentication: AuthenticationValidation
 
-  constructor (router: Router, adminManagement: AdminManagement) {
+  constructor (router: Router, adminManagement: AdminManagement, validateAuthentication: AuthenticationValidation) {
     this.router = router
     this.adminManagement = adminManagement
+    this.validateAuthentication = validateAuthentication
   }
 
   registerRoutes = (): void => {
+    this.router.use(validateAuthenticationMiddleware(this.validateAuthentication))
     this.router.get('', this.readMany)
     this.router.get('/:id', this.readOneById)
     this.router.post('', this.createOne)

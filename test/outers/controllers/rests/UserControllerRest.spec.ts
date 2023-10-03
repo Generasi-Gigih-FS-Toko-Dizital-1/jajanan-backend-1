@@ -19,10 +19,12 @@ describe('UserControllerRest', () => {
   const userMock: UserMock = new UserMock()
   const oneDatastore = new OneDatastore()
 
-  beforeEach(async () => {
+  before(async () => {
     await waitUntil(() => server !== undefined)
-
     await oneDatastore.connect()
+  })
+
+  beforeEach(async () => {
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
@@ -44,6 +46,9 @@ describe('UserControllerRest', () => {
         }
       }
     )
+  })
+
+  after(async () => {
     await oneDatastore.disconnect()
   })
 

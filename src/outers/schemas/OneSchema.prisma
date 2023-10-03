@@ -34,9 +34,9 @@ model User {
   experience            Int
   lastLatitude          Float
   lastLongitude         Float
-  updatedAt             DateTime
-  createdAt             DateTime
-  deletedAt             DateTime?
+  updatedAt             DateTime              @db.Timestamptz
+  createdAt             DateTime              @db.Timestamptz
+  deletedAt             DateTime?             @db.Timestamptz
   notificationHistories NotificationHistory[]
   topUpHistories        TopUpHistory[]
   transactionHistories  TransactionHistory[]
@@ -59,9 +59,9 @@ model Vendor {
   jajanName             String                @db.VarChar(255)
   jajanDescription      String
   status                Status
-  updatedAt             DateTime
-  createdAt             DateTime
-  deletedAt             DateTime?
+  updatedAt             DateTime              @db.Timestamptz
+  createdAt             DateTime              @db.Timestamptz
+  deletedAt             DateTime?             @db.Timestamptz
   notificationHistories NotificationHistory[]
   jajanItems            JajanItem[]
 }
@@ -72,9 +72,9 @@ model Admin {
   email     String    @db.VarChar(255)
   password  String
   gender    Gender
-  updatedAt DateTime
-  createdAt DateTime
-  deletedAt DateTime?
+  updatedAt DateTime  @db.Timestamptz
+  createdAt DateTime  @db.Timestamptz
+  deletedAt DateTime? @db.Timestamptz
 }
 
 model JajanItem {
@@ -86,9 +86,9 @@ model JajanItem {
   name                 String               @db.VarChar(255)
   price                Int
   imageUrl             String               @db.VarChar(255)
-  updatedAt            DateTime
-  createdAt            DateTime
-  deletedAt            DateTime?
+  updatedAt            DateTime             @db.Timestamptz
+  createdAt            DateTime             @db.Timestamptz
+  deletedAt            DateTime?            @db.Timestamptz
   transactionHistories TransactionHistory[]
 }
 
@@ -96,9 +96,9 @@ model Category {
   id                String             @id
   categoryName      String             @db.VarChar(255)
   iconUrl           String             @db.VarChar(255)
-  updatedAt         DateTime
-  createdAt         DateTime
-  deletedAt         DateTime?
+  updatedAt         DateTime           @db.Timestamptz
+  createdAt         DateTime           @db.Timestamptz
+  deletedAt         DateTime?          @db.Timestamptz
   jajanItems        JajanItem[]
   userSubscriptions UserSubscription[]
 }
@@ -109,9 +109,9 @@ model NotificationHistory {
   user      User      @relation(fields: [userId], references: [id])
   vendorId  String
   vendor    Vendor    @relation(fields: [vendorId], references: [id])
-  updatedAt DateTime
-  createdAt DateTime
-  deletedAt DateTime?
+  updatedAt DateTime  @db.Timestamptz
+  createdAt DateTime  @db.Timestamptz
+  deletedAt DateTime? @db.Timestamptz
 }
 
 model TopUpHistory {
@@ -120,9 +120,9 @@ model TopUpHistory {
   user      User      @relation(fields: [userId], references: [id])
   amount    Float
   media     String    @db.VarChar(255)
-  updatedAt DateTime
-  createdAt DateTime
-  deletedAt DateTime?
+  updatedAt DateTime  @db.Timestamptz
+  createdAt DateTime  @db.Timestamptz
+  deletedAt DateTime? @db.Timestamptz
 }
 
 model UserLevel {
@@ -130,9 +130,9 @@ model UserLevel {
   name              String    @db.VarChar(255)
   minimumExperience Int
   iconUrl           String    @db.VarChar(255)
-  updatedAt         DateTime
-  createdAt         DateTime
-  deletedAt         DateTime?
+  updatedAt         DateTime  @db.Timestamptz
+  createdAt         DateTime  @db.Timestamptz
+  deletedAt         DateTime? @db.Timestamptz
 }
 
 model VendorLevel {
@@ -140,18 +140,18 @@ model VendorLevel {
   name              String    @db.VarChar(255)
   minimumExperience Int
   iconUrl           String    @db.VarChar(255)
-  updatedAt         DateTime
-  createdAt         DateTime
-  deletedAt         DateTime?
+  updatedAt         DateTime  @db.Timestamptz
+  createdAt         DateTime  @db.Timestamptz
+  deletedAt         DateTime? @db.Timestamptz
 }
 
 model UserSubscription {
   id         String    @id
   userId     String
   categoryId String
-  updatedAt  DateTime
-  createdAt  DateTime
-  deletedAt  DateTime?
+  updatedAt  DateTime  @db.Timestamptz
+  createdAt  DateTime  @db.Timestamptz
+  deletedAt  DateTime? @db.Timestamptz
   user       User      @relation(fields: [userId], references: [id])
   category   Category  @relation(fields: [categoryId], references: [id])
 }
@@ -164,9 +164,9 @@ model TransactionHistory {
   paymentMethod PaymentMethod
   lastLatitude  Float
   lastLongitude Float
-  updatedAt     DateTime
-  createdAt     DateTime
-  deletedAt     DateTime?
+  updatedAt     DateTime      @db.Timestamptz
+  createdAt     DateTime      @db.Timestamptz
+  deletedAt     DateTime?     @db.Timestamptz
   user          User          @relation(fields: [userId], references: [id])
   jajanItem     JajanItem     @relation(fields: [jajanItemId], references: [id])
 }
