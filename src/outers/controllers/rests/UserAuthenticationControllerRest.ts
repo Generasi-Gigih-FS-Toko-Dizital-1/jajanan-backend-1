@@ -1,21 +1,18 @@
 import { type Request, type Response, type Router } from 'express'
 
 import Result from '../../../inners/models/value_objects/Result'
-import type VendorLoginAuthentication from '../../../inners/use_cases/authentications/vendors/VendorLoginAuthentication'
 import type VendorRegisterByEmailAndPasswordRequest
   from '../../../inners/models/value_objects/requests/authentications/vendors/VendorRegisterByEmailAndPasswordRequest'
 import { type User } from '@prisma/client'
 import ResponseBody from '../../../inners/models/value_objects/responses/ResponseBody'
 import UserLoginByEmailAndPasswordResponse
   from '../../../inners/models/value_objects/responses/authentications/users/UserLoginByEmailAndPasswordResponse'
-import type VendorLoginByEmailAndPasswordRequest
-  from '../../../inners/models/value_objects/requests/authentications/vendors/VendorLoginByEmailAndPasswordRequest'
-import type RegisterByEmailAndPasswordResponse
-  from '../../../inners/models/value_objects/responses/authentications/users/UserRegisterByEmailAndPasswordResponse'
 import UserRegisterByEmailAndPasswordResponse
   from '../../../inners/models/value_objects/responses/authentications/users/UserRegisterByEmailAndPasswordResponse'
 import type UserLoginAuthentication from '../../../inners/use_cases/authentications/users/UserLoginAuthentication'
 import type UserRegisterAuthentication from '../../../inners/use_cases/authentications/users/UserRegisterAuthentication'
+import type UserLoginByEmailAndPasswordRequest
+  from '../../../inners/models/value_objects/requests/authentications/users/UserLoginByEmailAndPasswordRequest'
 
 export default class UserAuthenticationControllerRest {
   router: Router
@@ -40,8 +37,8 @@ export default class UserAuthenticationControllerRest {
   login = (request: Request, response: Response): void => {
     const { method } = request.query
     if (method === 'email_and_password') {
-      const requestToLoginByUsernameAndPassword: VendorLoginByEmailAndPasswordRequest = request.body
-      this.loginAuthentication.loginByEmailAndPassword(requestToLoginByUsernameAndPassword)
+      const requestToLoginByEmailAndPassword: UserLoginByEmailAndPasswordRequest = request.body
+      this.loginAuthentication.loginByEmailAndPassword(requestToLoginByEmailAndPassword)
         .then((result: Result<string | null>) => {
           const data: UserLoginByEmailAndPasswordResponse = new UserLoginByEmailAndPasswordResponse(
             result.data
@@ -86,7 +83,6 @@ export default class UserAuthenticationControllerRest {
               result.data.gender,
               result.data.username,
               result.data.email,
-              result.data.password,
               result.data.balance,
               result.data.experience,
               result.data.lastLatitude,
@@ -97,7 +93,7 @@ export default class UserAuthenticationControllerRest {
           } else {
             data = result.data
           }
-          const responseBody: ResponseBody<RegisterByEmailAndPasswordResponse | null> = new ResponseBody<RegisterByEmailAndPasswordResponse | null>(
+          const responseBody: ResponseBody<UserRegisterByEmailAndPasswordResponse | null> = new ResponseBody<UserRegisterByEmailAndPasswordResponse | null>(
             result.message,
             data
           )

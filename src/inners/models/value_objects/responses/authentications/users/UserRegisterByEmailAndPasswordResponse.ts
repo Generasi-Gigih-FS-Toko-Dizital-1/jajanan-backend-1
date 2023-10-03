@@ -5,7 +5,6 @@ export default class UserRegisterByEmailAndPasswordResponse {
   fullName: string
   gender: Gender
   username: string
-  password: string
   email: string
   balance: number
   experience: number
@@ -20,7 +19,6 @@ export default class UserRegisterByEmailAndPasswordResponse {
     gender: Gender,
     username: string,
     email: string,
-    password: string,
     balance: number,
     experience: number,
     lastLatitude: number,
@@ -33,7 +31,6 @@ export default class UserRegisterByEmailAndPasswordResponse {
     this.gender = gender
     this.username = username
     this.email = email
-    this.password = password
     this.balance = balance
     this.experience = experience
     this.lastLatitude = lastLatitude

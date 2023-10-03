@@ -10,8 +10,6 @@ import VendorLoginByEmailAndPasswordResponse
   from '../../../inners/models/value_objects/responses/authentications/vendors/VendorLoginByEmailAndPasswordResponse'
 import type VendorLoginByEmailAndPasswordRequest
   from '../../../inners/models/value_objects/requests/authentications/vendors/VendorLoginByEmailAndPasswordRequest'
-import type RegisterByEmailAndPasswordResponse
-  from '../../../inners/models/value_objects/responses/authentications/vendors/VendorRegisterByEmailAndPasswordResponse'
 import VendorRegisterByEmailAndPasswordResponse
   from '../../../inners/models/value_objects/responses/authentications/vendors/VendorRegisterByEmailAndPasswordResponse'
 import type VendorRegisterAuthentication
@@ -86,7 +84,6 @@ export default class VendorAuthenticationControllerRest {
               result.data.gender,
               result.data.username,
               result.data.email,
-              result.data.password,
               result.data.balance,
               result.data.experience,
               result.data.jajanImageUrl,
@@ -101,7 +98,7 @@ export default class VendorAuthenticationControllerRest {
           } else {
             data = result.data
           }
-          const responseBody: ResponseBody<RegisterByEmailAndPasswordResponse | null> = new ResponseBody<RegisterByEmailAndPasswordResponse | null>(
+          const responseBody: ResponseBody<VendorRegisterByEmailAndPasswordResponse | null> = new ResponseBody<VendorRegisterByEmailAndPasswordResponse | null>(
             result.message,
             data
           )
