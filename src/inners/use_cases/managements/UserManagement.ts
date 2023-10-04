@@ -82,7 +82,7 @@ export default class UserManagement {
     const userToCreate: User = {
       id: randomUUID(),
       fullName: request.fullName,
-      address: '',
+      address: request.address,
       email: request.email,
       password: bcrypt.hashSync(request.password, salt),
       username: request.username,

@@ -1,7 +1,7 @@
-import {type NextFunction, type Request, type Response} from 'express'
-import humps, {type OptionOrProcessor} from 'humps'
-import {type ParamsDictionary} from 'express-serve-static-core'
-import {type ParsedQs} from 'qs'
+import { type NextFunction, type Request, type Response } from 'express'
+import humps, { type OptionOrProcessor } from 'humps'
+import { type ParamsDictionary } from 'express-serve-static-core'
+import { type ParsedQs } from 'qs'
 
 const caseExpressMiddleware = (options?: OptionOrProcessor): any => {
   const snakeCaseResHandler = (_req: Request, res: Response, next: NextFunction): void => {
@@ -27,7 +27,10 @@ const caseExpressMiddleware = (options?: OptionOrProcessor): any => {
     next()
   }
 
-  return [snakeCaseResHandler, snakeCaseReqHandler]
+  return [
+    snakeCaseResHandler,
+    snakeCaseReqHandler
+  ]
 }
 
 export default caseExpressMiddleware

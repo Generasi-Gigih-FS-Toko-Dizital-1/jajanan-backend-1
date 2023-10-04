@@ -1,9 +1,8 @@
-export default class AdminLoginByEmailAndPasswordResponse {
-  token: string | null
+import type Session from '../../../Session'
 
-  constructor (
-    token: string | null
-  ) {
-    this.token = token
+export default class AdminLoginByEmailAndPasswordResponse {
+  session: Session
+  constructor (session: Session) {
+    this.session = session
   }
 }

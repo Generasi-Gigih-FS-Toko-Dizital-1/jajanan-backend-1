@@ -10,19 +10,57 @@ import UserManagementCreateRequest
 import { type User } from '@prisma/client'
 import UserManagementPatchRequest
   from '../../../../src/inners/models/value_objects/requests/user_managements/UserManagementPatchRequest'
-import _ from 'underscore'
+import Authorization from '../../../../src/inners/models/value_objects/Authorization'
 
 chai.use(chaiHttp)
 chai.should()
 
 describe('UserControllerRest', () => {
   const userMock: UserMock = new UserMock()
+  const authUserMock: UserMock = new UserMock()
   const oneDatastore = new OneDatastore()
+  let agent: ChaiHttp.Agent
+  let authorization: Authorization
+
+  before(async () => {
+    await waitUntil(() => server !== undefined)
+    await oneDatastore.connect()
+
+    if (oneDatastore.client === undefined) {
+      throw new Error('Client is undefined.')
+    }
+    await oneDatastore.client.user.createMany({
+      data: authUserMock.data
+    })
+
+    agent = chai.request.agent(server)
+    const requestUser = authUserMock.data[0]
+    const response = await agent
+      .post('/api/v1/authentications/users/login?method=email_and_password')
+      .send({
+        email: requestUser.email,
+        password: requestUser.password
+      })
+
+    response.should.has.status(200)
+    response.body.should.be.an('object')
+    response.body.should.has.property('message')
+    response.body.should.has.property('data')
+    response.body.data.should.has.property('session')
+    response.body.data.session.should.be.an('object')
+    response.body.data.session.should.has.property('account_id').equal(requestUser.id)
+    response.body.data.session.should.has.property('account_type').equal('USER')
+    response.body.data.session.should.has.property('access_token')
+    response.body.data.session.should.has.property('refresh_token')
+    response.body.data.session.should.has.property('expired_at')
+
+    authorization = new Authorization(
+      response.body.data.session.access_token,
+      'Bearer'
+    )
+  })
 
   beforeEach(async () => {
-    await waitUntil(() => server !== undefined)
-
-    await oneDatastore.connect()
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
@@ -44,6 +82,21 @@ describe('UserControllerRest', () => {
         }
       }
     )
+  })
+
+  after(async () => {
+    if (oneDatastore.client === undefined) {
+      throw new Error('Client is undefined.')
+    }
+    await oneDatastore.client.user.deleteMany(
+      {
+        where: {
+          id: {
+            in: authUserMock.data.map((user: User) => user.id)
+          }
+        }
+      }
+    )
     await oneDatastore.disconnect()
   })
 
@@ -51,9 +104,10 @@ describe('UserControllerRest', () => {
     it('should return 200 OK', async () => {
       const pageNumber: number = 1
       const pageSize: number = userMock.data.length
-      const response = await chai
-        .request(server)
+      const response = await agent
         .get(`/api/v1/users?page_number=${pageNumber}&page_size=${pageSize}`)
+        .set('Authorization', authorization.convertToString())
+        .send()
 
       response.should.has.status(200)
       response.body.should.be.an('object')
@@ -70,6 +124,7 @@ describe('UserControllerRest', () => {
         user.should.has.property('full_name')
         user.should.has.property('email')
         user.should.has.property('gender')
+        user.should.has.property('address')
         user.should.has.property('balance')
         user.should.has.property('experience')
         user.should.has.property('last_latitude')
@@ -89,9 +144,10 @@ describe('UserControllerRest', () => {
   describe('GET /api/v1/users/:id', () => {
     it('should return 200 OK', async () => {
       const requestUser: User = userMock.data[0]
-      const response = await chai
-        .request(server)
+      const response = await agent
         .get(`/api/v1/users/${requestUser.id}`)
+        .set('Authorization', authorization.convertToString())
+        .send()
 
       response.should.has.status(200)
       response.body.should.be.an('object')
@@ -103,6 +159,7 @@ describe('UserControllerRest', () => {
       response.body.data.should.has.property('full_name').equal(requestUser.fullName)
       response.body.data.should.has.property('email').equal(requestUser.email)
       response.body.data.should.has.property('gender').equal(requestUser.gender)
+      response.body.data.should.has.property('address').equal(requestUser.address)
       response.body.data.should.has.property('balance').equal(requestUser.balance)
       response.body.data.should.has.property('experience').equal(requestUser.experience)
       response.body.data.should.has.property('last_latitude').equal(requestUser.lastLatitude)
@@ -117,6 +174,7 @@ describe('UserControllerRest', () => {
       const requestBody: UserManagementCreateRequest = new UserManagementCreateRequest(
         userMock.data[0].fullName,
         userMock.data[0].gender,
+        userMock.data[0].address,
         userMock.data[0].username,
         userMock.data[0].email,
         userMock.data[0].password,
@@ -124,9 +182,9 @@ describe('UserControllerRest', () => {
         userMock.data[0].lastLongitude
       )
 
-      const response = await chai
-        .request(server)
+      const response = await agent
         .post('/api/v1/users')
+        .set('Authorization', authorization.convertToString())
         .send(requestBody)
 
       response.should.has.status(201)
@@ -139,6 +197,7 @@ describe('UserControllerRest', () => {
       response.body.data.should.has.property('full_name').equal(requestBody.fullName)
       response.body.data.should.has.property('email').equal(requestBody.email)
       response.body.data.should.has.property('gender').equal(requestBody.gender)
+      response.body.data.should.has.property('address').equal(requestBody.address)
       response.body.data.should.has.property('balance')
       response.body.data.should.has.property('experience')
       response.body.data.should.has.property('last_latitude')
@@ -161,9 +220,9 @@ describe('UserControllerRest', () => {
         requestUser.lastLongitude + 1
       )
 
-      const response = await chai
-        .request(server)
+      const response = await agent
         .patch(`/api/v1/users/${requestUser.id}`)
+        .set('Authorization', authorization.convertToString())
         .send(requestBody)
 
       response.should.has.status(200)
@@ -176,6 +235,7 @@ describe('UserControllerRest', () => {
       response.body.data.should.has.property('full_name').equal(requestBody.fullName)
       response.body.data.should.has.property('email').equal(requestBody.email)
       response.body.data.should.has.property('gender').equal(requestBody.gender)
+      response.body.data.should.has.property('address').equal(requestUser.address)
       response.body.data.should.has.property('balance')
       response.body.data.should.has.property('experience')
       response.body.data.should.has.property('last_latitude')
@@ -189,9 +249,10 @@ describe('UserControllerRest', () => {
     it('should return 200 OK', async () => {
       const requestUser: User = userMock.data[0]
 
-      const response = await chai
-        .request(server)
+      const response = await agent
         .delete(`/api/v1/users/${requestUser.id}`)
+        .set('Authorization', authorization.convertToString())
+        .send()
 
       response.should.has.status(200)
       if (oneDatastore.client === undefined) {

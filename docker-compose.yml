@@ -9,7 +9,8 @@ services:
     entrypoint: [ "/bin/sh", "-c" ]
     command:
       - |
-        export DS_1_HOST=ds-1
+        export DS_1_HOST=ds-1 && \
+        export DS_2_HOST=ds-2 && \
         yarn build && \
         export NODE_ENV=test && \
         yarn test && \
@@ -25,3 +26,11 @@ services:
       - POSTGRES_USER=${DS_1_USER}
       - POSTGRES_PASSWORD=${DS_1_PASSWORD}
       - POSTGRES_DB=${DS_1_DATABASE}"
+  ds-2:
+    image: redis:latest
+    ports:
+      - "${DS_2_PORT}:6379"
+    entrypoint: [ "/bin/sh", "-c" ]
+    command:
+      - redis-server --requirepass ${DS_2_PASSWORD}
+

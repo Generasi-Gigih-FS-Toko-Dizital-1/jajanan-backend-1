@@ -4,24 +4,31 @@ import type Result from '../../../inners/models/value_objects/Result'
 import type UserManagement from '../../../inners/use_cases/managements/UserManagement'
 import { type User } from '@prisma/client'
 import Pagination from '../../../inners/models/value_objects/Pagination'
-import UserManagementReadManyResponse from '../../../inners/models/value_objects/responses/user_managements/UserManagementReadManyResponse'
-import UserManagementCreateResponse from '../../../inners/models/value_objects/responses/user_managements/UserManagementCreateResponse'
-import UserManagementPatchResponse from '../../../inners/models/value_objects/responses/user_managements/UserManagementPatchResponse'
-import UserManagementReadOneResponse from '../../../inners/models/value_objects/responses/user_managements/UserManagementReadOneResponse'
+import UserManagementReadManyResponse
+  from '../../../inners/models/value_objects/responses/user_managements/UserManagementReadManyResponse'
+import UserManagementCreateResponse
+  from '../../../inners/models/value_objects/responses/user_managements/UserManagementCreateResponse'
+import UserManagementPatchResponse
+  from '../../../inners/models/value_objects/responses/user_managements/UserManagementPatchResponse'
+import UserManagementReadOneResponse
+  from '../../../inners/models/value_objects/responses/user_managements/UserManagementReadOneResponse'
 import ResponseBody from '../../../inners/models/value_objects/responses/ResponseBody'
-import UserManagementPatchRequest
-  from '../../../inners/models/value_objects/requests/user_managements/UserManagementPatchRequest'
+import type AuthenticationValidation from '../../../inners/use_cases/authentications/AuthenticationValidation'
+import validateAuthenticationMiddleware from '../../middlewares/ValidateAuthenticationMiddleware'
 
 export default class UserControllerRest {
   router: Router
   userManagement: UserManagement
+  authenticationValidation: AuthenticationValidation
 
-  constructor (router: Router, userManagement: UserManagement) {
+  constructor (router: Router, userManagement: UserManagement, authenticationValidation: AuthenticationValidation) {
     this.router = router
     this.userManagement = userManagement
+    this.authenticationValidation = authenticationValidation
   }
 
   registerRoutes = (): void => {
+    this.router.use(validateAuthenticationMiddleware(this.authenticationValidation))
     this.router.get('', this.readMany)
     this.router.get('/:id', this.readOneById)
     this.router.post('', this.createOne)
@@ -45,6 +52,7 @@ export default class UserControllerRest {
               user.id,
               user.fullName,
               user.gender,
+              user.address,
               user.username,
               user.email,
               user.balance,
@@ -60,7 +68,9 @@ export default class UserControllerRest {
           result.message,
           data
         )
-        response.status(result.status).send(responseBody)
+        response
+          .status(result.status)
+          .send(responseBody)
       })
       .catch((error: Error) => {
         response.status(500).send(error.message)
@@ -76,6 +86,7 @@ export default class UserControllerRest {
           result.data.id,
           result.data.fullName,
           result.data.gender,
+          result.data.address,
           result.data.username,
           result.data.email,
           result.data.balance,
@@ -89,7 +100,9 @@ export default class UserControllerRest {
           result.message,
           data
         )
-        response.status(result.status).send(responseBody)
+        response
+          .status(result.status)
+          .send(responseBody)
       })
       .catch((error: Error) => {
         response.status(500).send(error.message)
@@ -104,6 +117,7 @@ export default class UserControllerRest {
           result.data.id,
           result.data.fullName,
           result.data.gender,
+          result.data.address,
           result.data.username,
           result.data.email,
           result.data.balance,
@@ -117,7 +131,9 @@ export default class UserControllerRest {
           result.message,
           data
         )
-        response.status(result.status).send(responseBody)
+        response
+          .status(result.status)
+          .send(responseBody)
       })
       .catch((error: Error) => {
         response.status(500).send(error.message)
@@ -135,6 +151,7 @@ export default class UserControllerRest {
             result.data.id,
             result.data.fullName,
             result.data.gender,
+            result.data.address,
             result.data.username,
             result.data.email,
             result.data.balance,
@@ -145,7 +162,9 @@ export default class UserControllerRest {
             result.data.updatedAt
           )
         )
-        response.status(result.status).send(responseBody)
+        response
+          .status(result.status)
+          .send(responseBody)
       })
       .catch((error: Error) => {
         response.status(500).send(error.message)
