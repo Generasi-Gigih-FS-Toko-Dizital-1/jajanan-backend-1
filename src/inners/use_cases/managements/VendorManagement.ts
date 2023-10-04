@@ -82,7 +82,7 @@ export default class VendorManagement {
     const vendorToCreate: Vendor = {
       id: randomUUID(),
       fullName: request.fullName,
-      address: '',
+      address: request.address,
       email: request.email,
       password: bcrypt.hashSync(request.password, salt),
       username: request.username,
@@ -93,8 +93,8 @@ export default class VendorManagement {
       jajanName: request.jajanName,
       jajanDescription: request.jajanDescription,
       status: request.status,
-      lastLatitude: 0,
-      lastLongitude: 0,
+      lastLatitude: request.lastLatitude,
+      lastLongitude: request.lastLongitude,
       updatedAt: new Date(),
       createdAt: new Date(),
       deletedAt: null
@@ -103,6 +103,20 @@ export default class VendorManagement {
     return new Result<Vendor>(
       201,
       'Vendor create one succeed.',
+      createdVendor
+    )
+  }
+
+  createOneRaw = async (vendor: Vendor): Promise<Result<Vendor>> => {
+    const salt: string | undefined = process.env.BCRYPT_SALT
+    if (salt === undefined) {
+      throw new Error('Salt is undefined.')
+    }
+
+    const createdVendor: any = await this.vendorRepository.createOne(vendor)
+    return new Result<Vendor>(
+      201,
+      'Vendor create one raw succeed.',
       createdVendor
     )
   }

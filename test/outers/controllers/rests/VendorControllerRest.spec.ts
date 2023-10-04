@@ -122,6 +122,7 @@ describe('VendorControllerRest', () => {
         vendor.should.has.property('id')
         vendor.should.has.property('username')
         vendor.should.has.property('full_name')
+        vendor.should.has.property('address')
         vendor.should.has.property('email')
         vendor.should.has.property('gender')
         vendor.should.has.property('balance')
@@ -162,6 +163,7 @@ describe('VendorControllerRest', () => {
       response.body.data.should.has.property('full_name').equal(requestVendor.fullName)
       response.body.data.should.has.property('email').equal(requestVendor.email)
       response.body.data.should.has.property('gender').equal(requestVendor.gender)
+      response.body.data.should.has.property('address').equal(requestVendor.address)
       response.body.data.should.has.property('balance').equal(requestVendor.balance)
       response.body.data.should.has.property('experience').equal(requestVendor.experience)
       response.body.data.should.has.property('jajan_image_url').equal(requestVendor.jajanImageUrl)
@@ -180,6 +182,7 @@ describe('VendorControllerRest', () => {
       const requestBody: VendorManagementCreateRequest = new VendorManagementCreateRequest(
         vendorMock.data[0].fullName,
         vendorMock.data[0].gender,
+        vendorMock.data[0].address,
         vendorMock.data[0].username,
         vendorMock.data[0].email,
         vendorMock.data[0].password,
@@ -206,6 +209,7 @@ describe('VendorControllerRest', () => {
       response.body.data.should.has.property('full_name').equal(requestBody.fullName)
       response.body.data.should.has.property('email').equal(requestBody.email)
       response.body.data.should.has.property('gender').equal(requestBody.gender)
+      response.body.data.should.has.property('address').equal(requestBody.address)
       response.body.data.should.has.property('balance')
       response.body.data.should.has.property('experience')
       response.body.data.should.has.property('jajan_image_url').equal(requestBody.jajanImageUrl)
@@ -251,6 +255,7 @@ describe('VendorControllerRest', () => {
       response.body.data.should.has.property('full_name').equal(requestBody.fullName)
       response.body.data.should.has.property('email').equal(requestBody.email)
       response.body.data.should.has.property('gender').equal(requestBody.gender)
+      response.body.data.should.has.property('address').equal(requestVendor.address)
       response.body.data.should.has.property('balance')
       response.body.data.should.has.property('experience')
       response.body.data.should.has.property('jajan_image_url').equal(requestBody.jajanImageUrl)

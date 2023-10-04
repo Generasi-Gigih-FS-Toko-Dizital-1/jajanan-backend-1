@@ -50,15 +50,61 @@ describe('VendorAuthenticationControllerRest', () => {
 
   describe('POST /api/v1/authentications/vendors/login?method=email_and_password', () => {
     it('should return 200 OK', async () => {
+      const requestVendor = vendorMock.data[0]
+      const requestBodyLogin: VendorLoginByEmailAndPasswordRequest = new VendorLoginByEmailAndPasswordRequest(
+        requestVendor.email,
+        requestVendor.password
+      )
+      const response = await chai
+        .request(server)
+        .post('/api/v1/authentications/vendors/login?method=email_and_password')
+        .send(requestBodyLogin)
 
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      response.body.data.should.has.property('session')
+      response.body.data.session.should.be.an('object')
+      response.body.data.session.should.has.property('account_id').equal(requestVendor.id)
+      response.body.data.session.should.has.property('account_type').equal('VENDOR')
+      response.body.data.session.should.has.property('access_token')
+      response.body.data.session.should.has.property('refresh_token')
+      response.body.data.session.should.has.property('expired_at')
     })
 
     it('should return 404 NOT FOUND: Unknown email', async () => {
+      const requestVendor = vendorMock.data[0]
+      const requestBodyLogin: VendorLoginByEmailAndPasswordRequest = new VendorLoginByEmailAndPasswordRequest(
+        'unknown_email',
+        requestVendor.password
+      )
+      const response = await chai
+        .request(server)
+        .post('/api/v1/authentications/vendors/login?method=email_and_password')
+        .send(requestBodyLogin)
 
+      response.should.has.status(404)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data').equal(null)
     })
 
     it('should return 404 NOT FOUND: Unknown email or password', async () => {
+      const requestVendor = vendorMock.data[0]
+      const requestBodyLogin: VendorLoginByEmailAndPasswordRequest = new VendorLoginByEmailAndPasswordRequest(
+        requestVendor.email,
+        'unknown_password'
+      )
+      const response = await chai
+        .request(server)
+        .post('/api/v1/authentications/vendors/login?method=email_and_password')
+        .send(requestBodyLogin)
 
+      response.should.has.status(404)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data').equal(null)
     })
   })
 
@@ -79,6 +125,16 @@ describe('VendorAuthenticationControllerRest', () => {
         2
       )
 
+      if (oneDatastore.client === undefined) {
+        throw new Error('Client is undefined.')
+      }
+      await oneDatastore.client.vendor.deleteMany({
+        where: {
+          email: requestBody.email,
+          username: requestBody.username
+        }
+      })
+
       const response = await chai
         .request(server)
         .post('/api/v1/authentications/vendors/register?method=email_and_password')
@@ -94,6 +150,7 @@ describe('VendorAuthenticationControllerRest', () => {
       response.body.data.should.has.property('full_name').equal(requestBody.fullName)
       response.body.data.should.has.property('email').equal(requestBody.email)
       response.body.data.should.has.property('gender').equal(requestBody.gender)
+      response.body.data.should.has.property('address').equal(requestBody.address)
       response.body.data.should.has.property('balance')
       response.body.data.should.has.property('experience')
       response.body.data.should.has.property('jajan_image_url').equal(requestBody.jajanImageUrl)
@@ -105,9 +162,6 @@ describe('VendorAuthenticationControllerRest', () => {
       response.body.data.should.has.property('created_at')
       response.body.data.should.has.property('updated_at')
 
-      if (oneDatastore.client === undefined) {
-        throw new Error('Client is undefined.')
-      }
       await oneDatastore.client.vendor.deleteMany({
         where: {
           email: requestBody.email,
