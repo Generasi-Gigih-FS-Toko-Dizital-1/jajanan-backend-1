@@ -12,14 +12,14 @@ import type Session from '../../../inners/models/value_objects/Session'
 
 export default class AdminAuthenticationControllerRest {
   router: Router
-  loginAuthentication: AdminLoginAuthentication
+  adminLoginAuthentication: AdminLoginAuthentication
 
   constructor (
     router: Router,
     loginAuthentication: AdminLoginAuthentication
   ) {
     this.router = router
-    this.loginAuthentication = loginAuthentication
+    this.adminLoginAuthentication = loginAuthentication
   }
 
   registerRoutes = (): void => {
@@ -30,7 +30,7 @@ export default class AdminAuthenticationControllerRest {
     const { method } = request.query
     if (method === 'email_and_password') {
       const requestToLoginByEmailAndPassword: AdminLoginByEmailAndPasswordRequest = request.body
-      this.loginAuthentication.loginByEmailAndPassword(requestToLoginByEmailAndPassword)
+      this.adminLoginAuthentication.loginByEmailAndPassword(requestToLoginByEmailAndPassword)
         .then((result: Result<Session | null>) => {
           let data: AdminLoginByEmailAndPasswordResponse | null = null
           if (result.data !== null) {
@@ -49,7 +49,6 @@ export default class AdminAuthenticationControllerRest {
               'session',
               sessionString,
               {
-                httpOnly: true,
                 expires: result.data?.expiredAt
               }
             )

@@ -1,5 +1,5 @@
 import type TwoDatastore from '../datastores/TwoDatastore'
-import type Session from '../../inners/models/value_objects/Session'
+import Session from '../../inners/models/value_objects/Session'
 import bcrypt from 'bcrypt'
 
 export default class SessionRepository {
@@ -32,7 +32,7 @@ export default class SessionRepository {
     if (session === null) {
       throw new Error('Session is not saved.')
     }
-    return JSON.parse(session)
+    return Session.parseFromJsonString(session)
   }
 
   deleteOneById = async (id: string): Promise<void> => {

@@ -12,4 +12,15 @@ export default class Session {
     this.refreshToken = refreshToken
     this.expiredAt = expiredAt
   }
+
+  static parseFromJsonString = (jsonString: any): Session => {
+    const jsonObject = JSON.parse(jsonString)
+    return new Session(
+      jsonObject.accountId,
+      jsonObject.accountType,
+      jsonObject.accessToken,
+      jsonObject.refreshToken,
+      new Date(jsonObject.expiredAt)
+    )
+  }
 }

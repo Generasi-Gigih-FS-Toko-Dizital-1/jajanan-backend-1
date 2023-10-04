@@ -62,14 +62,16 @@ export default class RootRoute {
 
     const userControllerRest: UserControllerRest = new UserControllerRest(
       Router(),
-      userManagement
+      userManagement,
+      authenticationValidation
     )
     userControllerRest.registerRoutes()
     routerVersionOne.use('/users', userControllerRest.router)
 
     const vendorControllerRest: VendorControllerRest = new VendorControllerRest(
       Router(),
-      vendorManagement
+      vendorManagement,
+      authenticationValidation
     )
     vendorControllerRest.registerRoutes()
     routerVersionOne.use('/vendors', vendorControllerRest.router)

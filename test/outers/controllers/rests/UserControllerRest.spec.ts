@@ -10,18 +10,43 @@ import UserManagementCreateRequest
 import { type User } from '@prisma/client'
 import UserManagementPatchRequest
   from '../../../../src/inners/models/value_objects/requests/user_managements/UserManagementPatchRequest'
-import _ from 'underscore'
 
 chai.use(chaiHttp)
 chai.should()
 
 describe('UserControllerRest', () => {
   const userMock: UserMock = new UserMock()
+  const authUserMock: UserMock = new UserMock()
   const oneDatastore = new OneDatastore()
+  let agent: ChaiHttp.Agent
 
   before(async () => {
     await waitUntil(() => server !== undefined)
     await oneDatastore.connect()
+
+    if (oneDatastore.client === undefined) {
+      throw new Error('Client is undefined.')
+    }
+    await oneDatastore.client.user.createMany({
+      data: authUserMock.data
+    })
+
+    agent = chai.request.agent(server)
+    const requestUser = authUserMock.data[0]
+    const response = await agent
+      .post('/api/v1/authentications/users/login?method=email_and_password')
+      .send({
+        email: requestUser.email,
+        password: requestUser.password
+      })
+
+    response.should.has.status(200)
+    response.body.should.be.an('object')
+    response.body.should.has.property('message')
+    response.body.should.has.property('data')
+    response.body.data.should.has.property('access_token')
+    response.body.data.should.has.property('refresh_token')
+    response.should.have.cookie('session')
   })
 
   beforeEach(async () => {
@@ -49,6 +74,18 @@ describe('UserControllerRest', () => {
   })
 
   after(async () => {
+    if (oneDatastore.client === undefined) {
+      throw new Error('Client is undefined.')
+    }
+    await oneDatastore.client.user.deleteMany(
+      {
+        where: {
+          id: {
+            in: authUserMock.data.map((user: User) => user.id)
+          }
+        }
+      }
+    )
     await oneDatastore.disconnect()
   })
 
@@ -56,8 +93,7 @@ describe('UserControllerRest', () => {
     it('should return 200 OK', async () => {
       const pageNumber: number = 1
       const pageSize: number = userMock.data.length
-      const response = await chai
-        .request(server)
+      const response = await agent
         .get(`/api/v1/users?page_number=${pageNumber}&page_size=${pageSize}`)
 
       response.should.has.status(200)
@@ -94,8 +130,7 @@ describe('UserControllerRest', () => {
   describe('GET /api/v1/users/:id', () => {
     it('should return 200 OK', async () => {
       const requestUser: User = userMock.data[0]
-      const response = await chai
-        .request(server)
+      const response = await agent
         .get(`/api/v1/users/${requestUser.id}`)
 
       response.should.has.status(200)
@@ -129,8 +164,7 @@ describe('UserControllerRest', () => {
         userMock.data[0].lastLongitude
       )
 
-      const response = await chai
-        .request(server)
+      const response = await agent
         .post('/api/v1/users')
         .send(requestBody)
 
@@ -166,8 +200,7 @@ describe('UserControllerRest', () => {
         requestUser.lastLongitude + 1
       )
 
-      const response = await chai
-        .request(server)
+      const response = await agent
         .patch(`/api/v1/users/${requestUser.id}`)
         .send(requestBody)
 
@@ -194,8 +227,7 @@ describe('UserControllerRest', () => {
     it('should return 200 OK', async () => {
       const requestUser: User = userMock.data[0]
 
-      const response = await chai
-        .request(server)
+      const response = await agent
         .delete(`/api/v1/users/${requestUser.id}`)
 
       response.should.has.status(200)

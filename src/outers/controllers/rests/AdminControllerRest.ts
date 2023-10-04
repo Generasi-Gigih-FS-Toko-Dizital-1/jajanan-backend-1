@@ -19,16 +19,16 @@ import validateAuthenticationMiddleware from '../../middlewares/ValidateAuthenti
 export default class AdminControllerRest {
   router: Router
   adminManagement: AdminManagement
-  validateAuthentication: AuthenticationValidation
+  authenticationValidation: AuthenticationValidation
 
-  constructor (router: Router, adminManagement: AdminManagement, validateAuthentication: AuthenticationValidation) {
+  constructor (router: Router, adminManagement: AdminManagement, authenticationValidation: AuthenticationValidation) {
     this.router = router
     this.adminManagement = adminManagement
-    this.validateAuthentication = validateAuthentication
+    this.authenticationValidation = authenticationValidation
   }
 
   registerRoutes = (): void => {
-    this.router.use(validateAuthenticationMiddleware(this.validateAuthentication))
+    this.router.use(validateAuthenticationMiddleware(this.authenticationValidation))
     this.router.get('', this.readMany)
     this.router.get('/:id', this.readOneById)
     this.router.post('', this.createOne)
@@ -62,7 +62,18 @@ export default class AdminControllerRest {
           result.message,
           data
         )
-        response.status(result.status).send(responseBody)
+
+        const sessionString = JSON.stringify(response.locals.session)
+        response
+          .cookie(
+            'session',
+            sessionString,
+            {
+              expires: response.locals.session.expiredAt
+            }
+          )
+          .status(result.status)
+          .send(responseBody)
       })
       .catch((error: Error) => {
         response.status(500).send(error.message)
@@ -86,7 +97,17 @@ export default class AdminControllerRest {
           result.message,
           data
         )
-        response.status(result.status).send(responseBody)
+        const sessionString = JSON.stringify(response.locals.session)
+        response
+          .cookie(
+            'session',
+            sessionString,
+            {
+              expires: response.locals.session.expiredAt
+            }
+          )
+          .status(result.status)
+          .send(responseBody)
       })
       .catch((error: Error) => {
         response.status(500).send(error.message)
@@ -109,7 +130,17 @@ export default class AdminControllerRest {
           result.message,
           data
         )
-        response.status(result.status).send(responseBody)
+        const sessionString = JSON.stringify(response.locals.session)
+        response
+          .cookie(
+            'session',
+            sessionString,
+            {
+              expires: response.locals.session.expiredAt
+            }
+          )
+          .status(result.status)
+          .send(responseBody)
       })
       .catch((error: Error) => {
         response.status(500).send(error.message)
@@ -132,7 +163,17 @@ export default class AdminControllerRest {
             result.data.updatedAt
           )
         )
-        response.status(result.status).send(responseBody)
+        const sessionString = JSON.stringify(response.locals.session)
+        response
+          .cookie(
+            'session',
+            sessionString,
+            {
+              expires: response.locals.session.expiredAt
+            }
+          )
+          .status(result.status)
+          .send(responseBody)
       })
       .catch((error: Error) => {
         response.status(500).send(error.message)
@@ -144,7 +185,17 @@ export default class AdminControllerRest {
     this.adminManagement
       .deleteOneById(id)
       .then((result: Result<Admin>) => {
-        response.status(result.status).send()
+        const sessionString = JSON.stringify(response.locals.session)
+        response
+          .cookie(
+            'session',
+            sessionString,
+            {
+              expires: response.locals.session.expiredAt
+            }
+          )
+          .status(result.status)
+          .send()
       })
       .catch((error: Error) => {
         response.status(500).send(error.message)

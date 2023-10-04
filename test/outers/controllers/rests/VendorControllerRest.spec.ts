@@ -15,12 +15,38 @@ chai.use(chaiHttp)
 chai.should()
 
 describe('VendorControllerRest', () => {
+  const authVendorMock: VendorMock = new VendorMock()
   const vendorMock: VendorMock = new VendorMock()
-  const oneDatastore = new OneDatastore()
+  const oneDatastore: OneDatastore = new OneDatastore()
+  let agent: ChaiHttp.Agent
 
   before(async () => {
     await waitUntil(() => server !== undefined)
     await oneDatastore.connect()
+
+    if (oneDatastore.client === undefined) {
+      throw new Error('Client is undefined.')
+    }
+    await oneDatastore.client.vendor.createMany({
+      data: authVendorMock.data
+    })
+
+    agent = chai.request.agent(server)
+    const requestVendor = authVendorMock.data[0]
+    const response = await agent
+      .post('/api/v1/authentications/vendors/login?method=email_and_password')
+      .send({
+        email: requestVendor.email,
+        password: requestVendor.password
+      })
+
+    response.should.has.status(200)
+    response.body.should.be.an('object')
+    response.body.should.has.property('message')
+    response.body.should.has.property('data')
+    response.body.data.should.has.property('access_token')
+    response.body.data.should.has.property('refresh_token')
+    response.should.have.cookie('session')
   })
 
   beforeEach(async () => {
@@ -48,6 +74,18 @@ describe('VendorControllerRest', () => {
   })
 
   after(async () => {
+    if (oneDatastore.client === undefined) {
+      throw new Error('Client is undefined.')
+    }
+    await oneDatastore.client.vendor.deleteMany(
+      {
+        where: {
+          id: {
+            in: authVendorMock.data.map((vendor: Vendor) => vendor.id)
+          }
+        }
+      }
+    )
     await oneDatastore.disconnect()
   })
 
@@ -55,8 +93,7 @@ describe('VendorControllerRest', () => {
     it('should return 200 OK', async () => {
       const pageNumber: number = 1
       const pageSize: number = vendorMock.data.length
-      const response = await chai
-        .request(server)
+      const response = await agent
         .get(`/api/v1/vendors?page_number=${pageNumber}&page_size=${pageSize}`)
 
       response.should.has.status(200)
@@ -97,8 +134,7 @@ describe('VendorControllerRest', () => {
   describe('GET /api/v1/vendors/:id', () => {
     it('should return 200 OK', async () => {
       const requestVendor: Vendor = vendorMock.data[0]
-      const response = await chai
-        .request(server)
+      const response = await agent
         .get(`/api/v1/vendors/${requestVendor.id}`)
 
       response.should.has.status(200)
@@ -140,8 +176,7 @@ describe('VendorControllerRest', () => {
         vendorMock.data[0].lastLongitude
       )
 
-      const response = await chai
-        .request(server)
+      const response = await agent
         .post('/api/v1/vendors')
         .send(requestBody)
 
@@ -185,8 +220,7 @@ describe('VendorControllerRest', () => {
         requestVendor.lastLongitude + 1
       )
 
-      const response = await chai
-        .request(server)
+      const response = await agent
         .patch(`/api/v1/vendors/${requestVendor.id}`)
         .send(requestBody)
 
@@ -217,8 +251,7 @@ describe('VendorControllerRest', () => {
     it('should return 200 OK', async () => {
       const requestVendor: Vendor = vendorMock.data[0]
 
-      const response = await chai
-        .request(server)
+      const response = await agent
         .delete(`/api/v1/vendors/${requestVendor.id}`)
 
       response.should.has.status(200)

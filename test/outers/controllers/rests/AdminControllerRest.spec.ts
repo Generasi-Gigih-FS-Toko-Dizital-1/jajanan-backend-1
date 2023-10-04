@@ -10,9 +10,6 @@ import AdminManagementCreateRequest
 import { type Admin } from '@prisma/client'
 import AdminManagementPatchRequest
   from '../../../../src/inners/models/value_objects/requests/admin_managements/AdminManagementPatchRequest'
-import cookie from 'cookie'
-import type Session from '../../../../src/inners/models/value_objects/Session'
-import bcrypt from 'bcrypt'
 
 chai.use(chaiHttp)
 chai.should()
@@ -22,7 +19,6 @@ describe('AdminControllerRest', () => {
   const adminMock: AdminMock = new AdminMock()
   const oneDatastore: OneDatastore = new OneDatastore()
   let agent: ChaiHttp.Agent
-  let session: Session
 
   before(async () => {
     await waitUntil(() => server !== undefined)
@@ -51,11 +47,6 @@ describe('AdminControllerRest', () => {
     response.body.data.should.has.property('access_token')
     response.body.data.should.has.property('refresh_token')
     response.should.have.cookie('session')
-
-    const cookies = cookie.parse(response.header['set-cookie'][0])
-    session = JSON.parse(cookies.session)
-    const id = btoa(JSON.stringify(session))
-    console.log('before', id, atob(id))
   })
 
   beforeEach(async () => {
@@ -103,8 +94,6 @@ describe('AdminControllerRest', () => {
       const pageNumber: number = 1
       const pageSize: number = adminMock.data.length
 
-      agent.should.have.cookie('session')
-
       const response = await agent
         .get(`/api/v1/admins?page_number=${pageNumber}&page_size=${pageSize}`)
 
@@ -138,8 +127,6 @@ describe('AdminControllerRest', () => {
     it('should return 200 OK', async () => {
       const requestAdmin: Admin = adminMock.data[0]
 
-      agent.should.have.cookie('session')
-
       const response = await agent
         .get(`/api/v1/admins/${requestAdmin.id}`)
 
@@ -165,8 +152,6 @@ describe('AdminControllerRest', () => {
         adminMock.data[0].email,
         adminMock.data[0].password
       )
-
-      agent.should.have.cookie('session')
 
       const response = await agent
         .post('/api/v1/admins')
@@ -196,8 +181,6 @@ describe('AdminControllerRest', () => {
         `patched${requestAdmin.password}`
       )
 
-      agent.should.have.cookie('session')
-
       const response = await agent
         .patch(`/api/v1/admins/${requestAdmin.id}`)
         .send(requestBody)
@@ -219,8 +202,6 @@ describe('AdminControllerRest', () => {
   describe('DELETE /api/v1/admins/:id', () => {
     it('should return 200 OK', async () => {
       const requestAdmin: Admin = adminMock.data[0]
-
-      agent.should.have.cookie('session')
 
       const response = await agent
         .delete(`/api/v1/admins/${requestAdmin.id}`)

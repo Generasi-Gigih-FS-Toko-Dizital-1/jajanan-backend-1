@@ -14,13 +14,9 @@ export default class AuthenticationValidation {
   }
 
   jwtVerifyAsync = async (accessToken: string, secret: string): Promise<any> => {
-    console.log(2)
     return await new Promise((resolve, reject) => {
-      console.log(3)
       jwt.verify(accessToken, secret, (err, decoded) => {
-        console.log(4)
         if (err != null) {
-          console.log(5)
           reject(err); return
         }
         resolve(decoded)
@@ -37,10 +33,12 @@ export default class AuthenticationValidation {
         null
       )
     }
+
     const sessionString: string = JSON.stringify(session)
     const id: string = bcrypt.hashSync(sessionString, salt)
 
     const foundSession: Result<Session | null> = await this.sessionManagement.readOneById(id)
+
     if (foundSession.status !== 200) {
       return new Result<null>(
         401,
@@ -61,17 +59,26 @@ export default class AuthenticationValidation {
     if (foundSession.data === null) {
       return new Result<null>(500, 'Session is null.', null)
     }
-
     try {
-      console.log(1)
       await this.jwtVerifyAsync(foundSession.data.accessToken, jwtSecret)
-      console.log(6)
       return new Result<Session>(200, 'Validate authentication succeed.', foundSession.data)
     } catch (error) {
       if (error instanceof TokenExpiredError) {
         const jwtAccessTokenExpirationTime: string | undefined = process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME
         if (jwtAccessTokenExpirationTime === undefined) {
-          return new Result<null>(500, 'JWT access token expiration time is undefined.', null)
+          return new Result<null>(
+            500,
+            'JWT access token expiration time is undefined.',
+            null
+          )
+        }
+
+        if (moment().isAfter(foundSession.data.expiredAt)) {
+          return new Result<null>(
+            401,
+            'Validate authentication failed, session refresh token is expired.',
+            null
+          )
         }
 
         const newAccessToken = jwt.sign(

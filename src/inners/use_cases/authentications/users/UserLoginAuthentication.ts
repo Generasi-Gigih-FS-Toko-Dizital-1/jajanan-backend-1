@@ -53,7 +53,7 @@ export default class UserLoginAuthentication {
     const accessToken = jwt.sign(
       {
         accountId: foundUserByEmailAndPassword.data.id,
-        accountType: 'ADMIN'
+        accountType: 'USER'
       },
       jwtSecret,
       {
@@ -65,14 +65,14 @@ export default class UserLoginAuthentication {
     if (jwtRefreshTokenExpirationTime === undefined) {
       return new Result<null>(
         500,
-        'User login by email and password failedw, JWT refresh token expiration time is undefined.',
+        'User login by email and password failed, JWT refresh token expiration time is undefined.',
         null
       )
     }
 
     const session: Session = new Session(
       foundUserByEmailAndPassword.data.id,
-      'ADMIN',
+      'USER',
       accessToken,
       randomUUID(),
       moment().add(jwtRefreshTokenExpirationTime, 'seconds').toDate()
