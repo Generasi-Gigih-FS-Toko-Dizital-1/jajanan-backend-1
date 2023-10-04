@@ -14,66 +14,81 @@ import type UserRegisterAuthentication from '../../../inners/use_cases/authentic
 import type UserLoginByEmailAndPasswordRequest
   from '../../../inners/models/value_objects/requests/authentications/users/UserLoginByEmailAndPasswordRequest'
 
+import type Session from '../../../inners/models/value_objects/Session'
+import type UserRefreshAccessTokenRequest
+  from '../../../inners/models/value_objects/requests/authentications/users/UserRefreshAccessTokenRequest'
+
+import type UserRefreshAuthentication from '../../../inners/use_cases/authentications/users/UserRefreshAuthentication'
+
 export default class UserAuthenticationControllerRest {
   router: Router
-  loginAuthentication: UserLoginAuthentication
-  registerAuthentication: UserRegisterAuthentication
+  userLoginAuthentication: UserLoginAuthentication
+  userRegisterAuthentication: UserRegisterAuthentication
+  userRefreshAuthentication: UserRefreshAuthentication
 
   constructor (
     router: Router,
     loginAuthentication: UserLoginAuthentication,
-    registerAuthentication: UserRegisterAuthentication
+    registerAuthentication: UserRegisterAuthentication,
+    userAuthenticationRefresh: UserRefreshAuthentication
   ) {
     this.router = router
-    this.loginAuthentication = loginAuthentication
-    this.registerAuthentication = registerAuthentication
+    this.userLoginAuthentication = loginAuthentication
+    this.userRegisterAuthentication = registerAuthentication
+    this.userRefreshAuthentication = userAuthenticationRefresh
   }
 
   registerRoutes = (): void => {
-    this.router.post('/logins', this.login)
-    this.router.post('/registers', this.registerByEmailAndPassword)
+    this.router.post('/login', this.login)
+    this.router.post('/register', this.register)
+    this.router.post('/refreshes/access-token', this.refreshAccessToken)
   }
 
   login = (request: Request, response: Response): void => {
     const { method } = request.query
     if (method === 'email_and_password') {
       const requestToLoginByEmailAndPassword: UserLoginByEmailAndPasswordRequest = request.body
-      this.loginAuthentication.loginByEmailAndPassword(requestToLoginByEmailAndPassword)
-        .then((result: Result<string | null>) => {
-          const data: UserLoginByEmailAndPasswordResponse = new UserLoginByEmailAndPasswordResponse(
-            result.data
-          )
-          const responseBody: ResponseBody<UserLoginByEmailAndPasswordResponse> = new ResponseBody<UserLoginByEmailAndPasswordResponse>(
+      this.userLoginAuthentication.loginByEmailAndPassword(requestToLoginByEmailAndPassword)
+        .then((result: Result<Session | null>) => {
+          let data: UserLoginByEmailAndPasswordResponse | null = null
+          if (result.data !== null) {
+            data = new UserLoginByEmailAndPasswordResponse(
+              result.data
+            )
+          }
+          const responseBody: ResponseBody<UserLoginByEmailAndPasswordResponse | null> = new ResponseBody<UserLoginByEmailAndPasswordResponse | null>(
             result.message,
             data
           )
-          response.status(result.status).json(responseBody)
+          response
+            .status(result.status)
+            .send(responseBody)
         })
         .catch((error: Error) => {
-          response.status(500).json(
+          response.status(500).send(
             new Result<null>(
               500,
-                            `Login by method ${method} failed: ${error.message}`,
-                            null
+                    `Login by method ${method} failed: ${error.message}`,
+                    null
             )
           )
         })
     } else {
-      response.status(400).json(
+      response.status(400).send(
         new Result<null>(
           400,
-                    `Login by method ${method as string} failed, unknown method.`,
-                    null
+              `Login by method ${method as string} failed, unknown method.`,
+              null
         )
       )
     }
   }
 
-  registerByEmailAndPassword = (request: Request, response: Response): void => {
+  register = (request: Request, response: Response): void => {
     const { method } = request.query
     if (method === 'email_and_password') {
       const registerByEmailAndPasswordRequest: VendorRegisterByEmailAndPasswordRequest = request.body
-      this.registerAuthentication.registerByEmailAndPassword(registerByEmailAndPasswordRequest)
+      this.userRegisterAuthentication.registerByEmailAndPassword(registerByEmailAndPasswordRequest)
         .then((result: Result<User | null>) => {
           let data: UserRegisterByEmailAndPasswordResponse | null
           if (result.status === 200 && result.data !== null) {
@@ -100,7 +115,7 @@ export default class UserAuthenticationControllerRest {
           response.status(result.status).send(responseBody)
         })
         .catch((error: Error) => {
-          response.status(500).json(
+          response.status(500).send(
             new Result<null>(
               500,
                             `Register by method ${method} failed: ${error.message}`,
@@ -109,7 +124,7 @@ export default class UserAuthenticationControllerRest {
           )
         })
     } else {
-      response.status(400).json(
+      response.status(400).send(
         new Result<null>(
           400,
                     `Register by method ${method as string} failed, unknown method.`,
@@ -117,5 +132,34 @@ export default class UserAuthenticationControllerRest {
         )
       )
     }
+  }
+
+  refreshAccessToken = (request: Request, response: Response): void => {
+    const requestToRefreshAccessToken: UserRefreshAccessTokenRequest = request.body
+    this.userRefreshAuthentication.refreshAccessToken(requestToRefreshAccessToken)
+      .then((result: Result<Session | null>) => {
+        let data: UserLoginByEmailAndPasswordResponse | null = null
+        if (result.data !== null) {
+          data = new UserLoginByEmailAndPasswordResponse(
+            result.data
+          )
+        }
+        const responseBody: ResponseBody<UserLoginByEmailAndPasswordResponse | null> = new ResponseBody<UserLoginByEmailAndPasswordResponse | null>(
+          result.message,
+          data
+        )
+        response
+          .status(result.status)
+          .send(responseBody)
+      })
+      .catch((error: Error) => {
+        response.status(500).send(
+          new Result<null>(
+            500,
+                  `Refresh access token failed: ${error.message}`,
+                  null
+          )
+        )
+      })
   }
 }

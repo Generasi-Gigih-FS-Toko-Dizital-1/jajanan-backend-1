@@ -10,18 +10,57 @@ import VendorManagementCreateRequest
 import { type Vendor } from '@prisma/client'
 import VendorManagementPatchRequest
   from '../../../../src/inners/models/value_objects/requests/vendor_managements/VendorManagementPatchRequest'
+import Authorization from '../../../../src/inners/models/value_objects/Authorization'
 
 chai.use(chaiHttp)
 chai.should()
 
 describe('VendorControllerRest', () => {
+  const authVendorMock: VendorMock = new VendorMock()
   const vendorMock: VendorMock = new VendorMock()
-  const oneDatastore = new OneDatastore()
+  const oneDatastore: OneDatastore = new OneDatastore()
+  let agent: ChaiHttp.Agent
+  let authorization: Authorization
+
+  before(async () => {
+    await waitUntil(() => server !== undefined)
+    await oneDatastore.connect()
+
+    if (oneDatastore.client === undefined) {
+      throw new Error('Client is undefined.')
+    }
+    await oneDatastore.client.vendor.createMany({
+      data: authVendorMock.data
+    })
+
+    agent = chai.request.agent(server)
+    const requestVendor = authVendorMock.data[0]
+    const response = await agent
+      .post('/api/v1/authentications/vendors/login?method=email_and_password')
+      .send({
+        email: requestVendor.email,
+        password: requestVendor.password
+      })
+
+    response.should.has.status(200)
+    response.body.should.be.an('object')
+    response.body.should.has.property('message')
+    response.body.should.has.property('data')
+    response.body.data.should.has.property('session')
+    response.body.data.session.should.be.an('object')
+    response.body.data.session.should.has.property('account_id').equal(requestVendor.id)
+    response.body.data.session.should.has.property('account_type').equal('VENDOR')
+    response.body.data.session.should.has.property('access_token')
+    response.body.data.session.should.has.property('refresh_token')
+    response.body.data.session.should.has.property('expired_at')
+
+    authorization = new Authorization(
+      response.body.data.session.access_token,
+      'Bearer'
+    )
+  })
 
   beforeEach(async () => {
-    await waitUntil(() => server !== undefined)
-
-    await oneDatastore.connect()
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
@@ -43,6 +82,21 @@ describe('VendorControllerRest', () => {
         }
       }
     )
+  })
+
+  after(async () => {
+    if (oneDatastore.client === undefined) {
+      throw new Error('Client is undefined.')
+    }
+    await oneDatastore.client.vendor.deleteMany(
+      {
+        where: {
+          id: {
+            in: authVendorMock.data.map((vendor: Vendor) => vendor.id)
+          }
+        }
+      }
+    )
     await oneDatastore.disconnect()
   })
 
@@ -50,9 +104,10 @@ describe('VendorControllerRest', () => {
     it('should return 200 OK', async () => {
       const pageNumber: number = 1
       const pageSize: number = vendorMock.data.length
-      const response = await chai
-        .request(server)
+      const response = await agent
         .get(`/api/v1/vendors?page_number=${pageNumber}&page_size=${pageSize}`)
+        .set('Authorization', authorization.convertToString())
+        .send()
 
       response.should.has.status(200)
       response.body.should.be.an('object')
@@ -92,9 +147,10 @@ describe('VendorControllerRest', () => {
   describe('GET /api/v1/vendors/:id', () => {
     it('should return 200 OK', async () => {
       const requestVendor: Vendor = vendorMock.data[0]
-      const response = await chai
-        .request(server)
+      const response = await agent
         .get(`/api/v1/vendors/${requestVendor.id}`)
+        .set('Authorization', authorization.convertToString())
+        .send()
 
       response.should.has.status(200)
       response.body.should.be.an('object')
@@ -135,9 +191,9 @@ describe('VendorControllerRest', () => {
         vendorMock.data[0].lastLongitude
       )
 
-      const response = await chai
-        .request(server)
+      const response = await agent
         .post('/api/v1/vendors')
+        .set('Authorization', authorization.convertToString())
         .send(requestBody)
 
       response.should.has.status(201)
@@ -180,9 +236,9 @@ describe('VendorControllerRest', () => {
         requestVendor.lastLongitude + 1
       )
 
-      const response = await chai
-        .request(server)
+      const response = await agent
         .patch(`/api/v1/vendors/${requestVendor.id}`)
+        .set('Authorization', authorization.convertToString())
         .send(requestBody)
 
       response.should.has.status(200)
@@ -212,9 +268,10 @@ describe('VendorControllerRest', () => {
     it('should return 200 OK', async () => {
       const requestVendor: Vendor = vendorMock.data[0]
 
-      const response = await chai
-        .request(server)
+      const response = await agent
         .delete(`/api/v1/vendors/${requestVendor.id}`)
+        .set('Authorization', authorization.convertToString())
+        .send()
 
       response.should.has.status(200)
       if (oneDatastore.client === undefined) {

@@ -10,7 +10,6 @@ import VendorMock from '../../../test/mocks/VendorMock'
 import UserSubscriptionMock from '../../../test/mocks/UserSubscriptionMock'
 import UserLevelMock from '../../../test/mocks/UserLevelMock'
 import VendorLevelMock from '../../../test/mocks/VendorLevelMock'
-import waitUntil from 'async-wait-until'
 
 export default class OneSeeder {
   oneDatastore: OneDatastore

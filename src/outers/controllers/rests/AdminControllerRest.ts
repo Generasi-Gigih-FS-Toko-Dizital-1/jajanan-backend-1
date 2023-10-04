@@ -13,17 +13,22 @@ import AdminManagementPatchResponse
 import AdminManagementReadOneResponse
   from '../../../inners/models/value_objects/responses/admin_managements/AdminManagementReadOneResponse'
 import ResponseBody from '../../../inners/models/value_objects/responses/ResponseBody'
+import type AuthenticationValidation from '../../../inners/use_cases/authentications/AuthenticationValidation'
+import validateAuthenticationMiddleware from '../../middlewares/ValidateAuthenticationMiddleware'
 
 export default class AdminControllerRest {
   router: Router
   adminManagement: AdminManagement
+  authenticationValidation: AuthenticationValidation
 
-  constructor (router: Router, adminManagement: AdminManagement) {
+  constructor (router: Router, adminManagement: AdminManagement, authenticationValidation: AuthenticationValidation) {
     this.router = router
     this.adminManagement = adminManagement
+    this.authenticationValidation = authenticationValidation
   }
 
   registerRoutes = (): void => {
+    this.router.use(validateAuthenticationMiddleware(this.authenticationValidation))
     this.router.get('', this.readMany)
     this.router.get('/:id', this.readOneById)
     this.router.post('', this.createOne)
@@ -57,7 +62,9 @@ export default class AdminControllerRest {
           result.message,
           data
         )
-        response.status(result.status).send(responseBody)
+        response
+          .status(result.status)
+          .send(responseBody)
       })
       .catch((error: Error) => {
         response.status(500).send(error.message)
@@ -81,7 +88,9 @@ export default class AdminControllerRest {
           result.message,
           data
         )
-        response.status(result.status).send(responseBody)
+        response
+          .status(result.status)
+          .send(responseBody)
       })
       .catch((error: Error) => {
         response.status(500).send(error.message)
@@ -104,7 +113,9 @@ export default class AdminControllerRest {
           result.message,
           data
         )
-        response.status(result.status).send(responseBody)
+        response
+          .status(result.status)
+          .send(responseBody)
       })
       .catch((error: Error) => {
         response.status(500).send(error.message)
@@ -127,7 +138,9 @@ export default class AdminControllerRest {
             result.data.updatedAt
           )
         )
-        response.status(result.status).send(responseBody)
+        response
+          .status(result.status)
+          .send(responseBody)
       })
       .catch((error: Error) => {
         response.status(500).send(error.message)
@@ -139,7 +152,9 @@ export default class AdminControllerRest {
     this.adminManagement
       .deleteOneById(id)
       .then((result: Result<Admin>) => {
-        response.status(result.status).send()
+        response
+          .status(result.status)
+          .send()
       })
       .catch((error: Error) => {
         response.status(500).send(error.message)

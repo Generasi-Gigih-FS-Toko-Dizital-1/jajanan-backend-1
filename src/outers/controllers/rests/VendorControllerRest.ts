@@ -13,17 +13,22 @@ import VendorManagementPatchResponse
 import VendorManagementReadOneResponse
   from '../../../inners/models/value_objects/responses/vendor_managements/VendorManagementReadOneResponse'
 import ResponseBody from '../../../inners/models/value_objects/responses/ResponseBody'
+import type AuthenticationValidation from '../../../inners/use_cases/authentications/AuthenticationValidation'
+import validateAuthenticationMiddleware from '../../middlewares/ValidateAuthenticationMiddleware'
 
 export default class VendorControllerRest {
   router: Router
   vendorManagement: VendorManagement
+  authenticationValidation: AuthenticationValidation
 
-  constructor (router: Router, vendorManagement: VendorManagement) {
+  constructor (router: Router, vendorManagement: VendorManagement, authenticationValidation: AuthenticationValidation) {
     this.router = router
     this.vendorManagement = vendorManagement
+    this.authenticationValidation = authenticationValidation
   }
 
   registerRoutes = (): void => {
+    this.router.use(validateAuthenticationMiddleware(this.authenticationValidation))
     this.router.get('', this.readMany)
     this.router.get('/:id', this.readOneById)
     this.router.post('', this.createOne)
@@ -66,7 +71,9 @@ export default class VendorControllerRest {
           result.message,
           data
         )
-        response.status(result.status).send(responseBody)
+        response
+          .status(result.status)
+          .send(responseBody)
       })
       .catch((error: Error) => {
         response.status(500).send(error.message)
@@ -99,7 +106,9 @@ export default class VendorControllerRest {
           result.message,
           data
         )
-        response.status(result.status).send(responseBody)
+        response
+          .status(result.status)
+          .send(responseBody)
       })
       .catch((error: Error) => {
         response.status(500).send(error.message)
@@ -131,7 +140,9 @@ export default class VendorControllerRest {
           result.message,
           data
         )
-        response.status(result.status).send(responseBody)
+        response
+          .status(result.status)
+          .send(responseBody)
       })
       .catch((error: Error) => {
         response.status(500).send(error.message)
@@ -163,7 +174,9 @@ export default class VendorControllerRest {
             result.data.updatedAt
           )
         )
-        response.status(result.status).send(responseBody)
+        response
+          .status(result.status)
+          .send(responseBody)
       })
       .catch((error: Error) => {
         response.status(500).send(error.message)
