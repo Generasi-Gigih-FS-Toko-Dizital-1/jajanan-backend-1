@@ -15,6 +15,8 @@ import VendorRegisterByEmailAndPasswordResponse
 import type VendorRegisterAuthentication
   from '../../../inners/use_cases/authentications/vendors/VendorRegisterAuthentication'
 
+import type Session from '../../../inners/models/value_objects/Session'
+
 export default class VendorAuthenticationControllerRest {
   router: Router
   loginAuthentication: VendorLoginAuthentication
@@ -31,24 +33,39 @@ export default class VendorAuthenticationControllerRest {
   }
 
   registerRoutes = (): void => {
-    this.router.post('/logins', this.login)
-    this.router.post('/registers', this.registerByEmailAndPassword)
+    this.router.post('/login', this.login)
+    this.router.post('/register', this.registerByEmailAndPassword)
   }
 
   login = (request: Request, response: Response): void => {
     const { method } = request.query
     if (method === 'email_and_password') {
-      const requestToLoginByVendornameAndPassword: VendorLoginByEmailAndPasswordRequest = request.body
-      this.loginAuthentication.loginByEmailAndPassword(requestToLoginByVendornameAndPassword)
-        .then((result: Result<string | null>) => {
-          const data: VendorLoginByEmailAndPasswordResponse = new VendorLoginByEmailAndPasswordResponse(
-            result.data
-          )
-          const responseBody: ResponseBody<VendorLoginByEmailAndPasswordResponse> = new ResponseBody<VendorLoginByEmailAndPasswordResponse>(
+      const requestToLoginByEmailAndPassword: VendorLoginByEmailAndPasswordRequest = request.body
+      this.loginAuthentication.loginByEmailAndPassword(requestToLoginByEmailAndPassword)
+        .then((result: Result<Session | null>) => {
+          let data: VendorLoginByEmailAndPasswordResponse | null = null
+          if (result.data !== null) {
+            data = new VendorLoginByEmailAndPasswordResponse(
+              result.data.accessToken,
+              result.data.refreshToken
+            )
+          }
+          const responseBody: ResponseBody<VendorLoginByEmailAndPasswordResponse | null> = new ResponseBody<VendorLoginByEmailAndPasswordResponse | null>(
             result.message,
             data
           )
-          response.status(result.status).json(responseBody)
+          const sessionString = JSON.stringify(result.data)
+          response
+            .cookie(
+              'session',
+              sessionString,
+              {
+                httpOnly: true,
+                expires: result.data?.expiredAt
+              }
+            )
+            .status(result.status)
+            .json(responseBody)
         })
         .catch((error: Error) => {
           response.status(500).json(

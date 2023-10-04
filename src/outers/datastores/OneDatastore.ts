@@ -5,7 +5,7 @@ export default class OneDatastore {
   client: PrismaClient | undefined
 
   connect = async (): Promise<void> => {
-    const url = process.env.DS_1_URL
+    const url: string | undefined = process.env.DS_1_URL
     if (url === undefined) {
       throw new Error('URL is undefined.')
     }
