@@ -115,7 +115,7 @@ export default class AdminRefreshAuthentication {
 
     const newSession: Session = new Session(
       foundAdminById.data.id,
-      'ADMIN',
+      oldSession.data.accountType,
       newAccessToken,
       oldSession.data.refreshToken,
       oldSession.data.expiredAt

@@ -115,7 +115,7 @@ export default class VendorRefreshAuthentication {
 
     const newSession: Session = new Session(
       foundVendorById.data.id,
-      'ADMIN',
+      oldSession.data.accountType,
       newAccessToken,
       oldSession.data.refreshToken,
       oldSession.data.expiredAt
