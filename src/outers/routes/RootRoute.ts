@@ -3,7 +3,7 @@ import type OneDatastore from '../datastores/OneDatastore'
 import UserRepository from '../repositories/UserRepository'
 import UserManagement from '../../inners/use_cases/managements/UserManagement'
 import UserControllerRest from '../controllers/rests/UserControllerRest'
-import type socketIo from 'socket.io'
+import { type Server } from 'socket.io'
 import VendorLoginAuthentication from '../../inners/use_cases/authentications/vendors/VendorLoginAuthentication'
 import VendorRegisterAuthentication from '../../inners/use_cases/authentications/vendors/VendorRegisterAuthentication'
 import UserAuthenticationControllerRest from '../controllers/rests/UserAuthenticationControllerRest'
@@ -22,16 +22,22 @@ import AdminControllerRest from '../controllers/rests/AdminControllerRest'
 import JajanItemRepository from '../repositories/JajanItemRepository'
 import JajanItemManagement from '../../inners/use_cases/managements/JajanItemManagement'
 import JajanItemControllerRest from '../controllers/rests/JajanItemControllerRest'
+import type TwoDatastore from '../datastores/TwoDatastore'
+import SessionRepository from '../repositories/SessionRepository'
+import SessionManagement from '../../inners/use_cases/managements/SessionManagement'
+import AuthenticationValidation from '../../inners/use_cases/authentications/AuthenticationValidation'
 
 export default class RootRoute {
   app: Application
-  io: socketIo.Server
+  io: Server
   datastoreOne: OneDatastore
+  twoDatastore: TwoDatastore
 
-  constructor (app: Application, io: socketIo.Server, datastoreOne: OneDatastore) {
+  constructor (app: Application, io: Server, datastoreOne: OneDatastore, twoDatastore: TwoDatastore) {
     this.app = app
     this.io = io
     this.datastoreOne = datastoreOne
+    this.twoDatastore = twoDatastore
   }
 
   registerRoutes = async (): Promise<void> => {
@@ -39,45 +45,56 @@ export default class RootRoute {
 
     const objectUtility: ObjectUtility = new ObjectUtility()
 
+    const sessionRepository: SessionRepository = new SessionRepository(this.twoDatastore)
     const userRepository: UserRepository = new UserRepository(this.datastoreOne)
+    const vendorRepository: VendorRepository = new VendorRepository(this.datastoreOne)
+    const adminRepository: AdminRepository = new AdminRepository(this.datastoreOne)
+    const jajanItemRepository: JajanItemRepository = new JajanItemRepository(this.datastoreOne)
+
+    const sessionManagement: SessionManagement = new SessionManagement(sessionRepository, objectUtility)
+    const authenticationValidation: AuthenticationValidation = new AuthenticationValidation(sessionManagement)
     const userManagement: UserManagement = new UserManagement(userRepository, objectUtility)
+    const vendorManagement: VendorManagement = new VendorManagement(vendorRepository, objectUtility)
+    const adminManagement: AdminManagement = new AdminManagement(adminRepository, objectUtility)
+    const jajanItemManagement: JajanItemManagement = new JajanItemManagement(jajanItemRepository, objectUtility)
+
+    const userLoginAuthentication: UserLoginAuthentication = new UserLoginAuthentication(userManagement, sessionManagement)
+    const userRegisterAuthentication: UserRegisterAuthentication = new UserRegisterAuthentication(userManagement)
+    const vendorLoginAuthentication: VendorLoginAuthentication = new VendorLoginAuthentication(vendorManagement, sessionManagement)
+    const vendorRegisterAuthentication: VendorRegisterAuthentication = new VendorRegisterAuthentication(vendorManagement)
+    const adminLoginAuthentication: AdminLoginAuthentication = new AdminLoginAuthentication(adminManagement, sessionManagement)
+
     const userControllerRest: UserControllerRest = new UserControllerRest(
       Router(),
-      userManagement
+      userManagement,
+      authenticationValidation
     )
     userControllerRest.registerRoutes()
     routerVersionOne.use('/users', userControllerRest.router)
 
-    const vendorRepository: VendorRepository = new VendorRepository(this.datastoreOne)
-    const vendorManagement: VendorManagement = new VendorManagement(vendorRepository, objectUtility)
     const vendorControllerRest: VendorControllerRest = new VendorControllerRest(
       Router(),
-      vendorManagement
+      vendorManagement,
+      authenticationValidation
     )
     vendorControllerRest.registerRoutes()
     routerVersionOne.use('/vendors', vendorControllerRest.router)
 
-    const jajanItemRepository: JajanItemRepository = new JajanItemRepository(this.datastoreOne)
-    const jajanItemManagement: JajanItemManagement = new JajanItemManagement(jajanItemRepository, objectUtility)
     const jajanItemControllerRest: JajanItemControllerRest = new JajanItemControllerRest(
       Router(),
       jajanItemManagement
     )
-
     jajanItemControllerRest.registerRoutes()
     routerVersionOne.use('/jajan-items', jajanItemControllerRest.router)
 
-    const adminRepository: AdminRepository = new AdminRepository(this.datastoreOne)
-    const adminManagement: AdminManagement = new AdminManagement(adminRepository, objectUtility)
     const adminControllerRest: AdminControllerRest = new AdminControllerRest(
       Router(),
-      adminManagement
+      adminManagement,
+      authenticationValidation
     )
     adminControllerRest.registerRoutes()
     routerVersionOne.use('/admins', adminControllerRest.router)
 
-    const userLoginAuthentication: UserLoginAuthentication = new UserLoginAuthentication(userManagement)
-    const userRegisterAuthentication: UserRegisterAuthentication = new UserRegisterAuthentication(userManagement)
     const userAuthenticationControllerRest: UserAuthenticationControllerRest = new UserAuthenticationControllerRest(
       Router(),
       userLoginAuthentication,
@@ -86,8 +103,6 @@ export default class RootRoute {
     userAuthenticationControllerRest.registerRoutes()
     routerVersionOne.use('/authentications/users', userAuthenticationControllerRest.router)
 
-    const vendorLoginAuthentication: VendorLoginAuthentication = new VendorLoginAuthentication(vendorManagement)
-    const vendorRegisterAuthentication: VendorRegisterAuthentication = new VendorRegisterAuthentication(vendorManagement)
     const vendorAuthenticationControllerRest: VendorAuthenticationControllerRest = new VendorAuthenticationControllerRest(
       Router(),
       vendorLoginAuthentication,
@@ -96,7 +111,6 @@ export default class RootRoute {
     vendorAuthenticationControllerRest.registerRoutes()
     routerVersionOne.use('/authentications/vendors', vendorAuthenticationControllerRest.router)
 
-    const adminLoginAuthentication: AdminLoginAuthentication = new AdminLoginAuthentication(adminManagement)
     const adminAuthenticationControllerRest: AdminAuthenticationControllerRest = new AdminAuthenticationControllerRest(
       Router(),
       adminLoginAuthentication

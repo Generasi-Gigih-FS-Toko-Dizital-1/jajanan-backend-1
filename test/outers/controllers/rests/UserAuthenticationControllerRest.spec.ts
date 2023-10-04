@@ -12,7 +12,7 @@ import { type User } from '@prisma/client'
 chai.use(chaiHttp)
 chai.should()
 
-describe('AuthenticationControllerRest', () => {
+describe('UserAuthenticationControllerRest', () => {
   const userMock: UserMock = new UserMock()
   const oneDatastore = new OneDatastore()
 
@@ -44,7 +44,7 @@ describe('AuthenticationControllerRest', () => {
     await oneDatastore.disconnect()
   })
 
-  describe('POST /api/v1/authentications/users/logins?method=email_and_password', () => {
+  describe('POST /api/v1/authentications/users/login?method=email_and_password', () => {
     it('should return 200 OK', async () => {
 
     })
@@ -58,7 +58,7 @@ describe('AuthenticationControllerRest', () => {
     })
   })
 
-  describe('POST /api/v1/authentications/users/registers?method=email_and_password', () => {
+  describe('POST /api/v1/authentications/users/register?method=email_and_password', () => {
     it('should return 201 CREATED', async () => {
       const requestBody: UserRegisterByEmailAndPasswordRequest = new UserRegisterByEmailAndPasswordRequest(
         'fullName2',
@@ -73,7 +73,7 @@ describe('AuthenticationControllerRest', () => {
 
       const response = await chai
         .request(server)
-        .post('/api/v1/authentications/users/registers?method=email_and_password')
+        .post('/api/v1/authentications/users/register?method=email_and_password')
         .send(requestBody)
 
       response.should.have.status(201)
@@ -118,7 +118,7 @@ describe('AuthenticationControllerRest', () => {
 
       const response = await chai
         .request(server)
-        .post('/api/v1/authentications/users/registers?method=email_and_password')
+        .post('/api/v1/authentications/users/register?method=email_and_password')
         .send(requestBody)
 
       response.should.have.status(409)
@@ -142,7 +142,7 @@ describe('AuthenticationControllerRest', () => {
 
       const response = await chai
         .request(server)
-        .post('/api/v1/authentications/users/registers?method=email_and_password')
+        .post('/api/v1/authentications/users/register?method=email_and_password')
         .send(requestBody)
 
       response.should.have.status(409)

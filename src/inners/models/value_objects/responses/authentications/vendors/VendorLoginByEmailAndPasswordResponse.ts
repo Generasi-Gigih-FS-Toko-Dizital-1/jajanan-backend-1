@@ -1,9 +1,9 @@
 export default class VendorLoginByEmailAndPasswordResponse {
-  token: string | null
+  accessToken: string
+  refreshToken: string
 
-  constructor (
-    token: string | null
-  ) {
-    this.token = token
+  constructor (accessToken: string, refreshToken: string) {
+    this.accessToken = accessToken
+    this.refreshToken = refreshToken
   }
 }

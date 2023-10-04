@@ -15,13 +15,41 @@ chai.use(chaiHttp)
 chai.should()
 
 describe('AdminControllerRest', () => {
+  const authAdminMock: AdminMock = new AdminMock()
   const adminMock: AdminMock = new AdminMock()
-  const oneDatastore = new OneDatastore()
+  const oneDatastore: OneDatastore = new OneDatastore()
+  let agent: ChaiHttp.Agent
+
+  before(async () => {
+    await waitUntil(() => server !== undefined)
+    await oneDatastore.connect()
+
+    if (oneDatastore.client === undefined) {
+      throw new Error('Client is undefined.')
+    }
+    await oneDatastore.client.admin.createMany({
+      data: authAdminMock.data
+    })
+
+    agent = chai.request.agent(server)
+    const requestAdmin = authAdminMock.data[0]
+    const response = await agent
+      .post('/api/v1/authentications/admins/login?method=email_and_password')
+      .send({
+        email: requestAdmin.email,
+        password: requestAdmin.password
+      })
+
+    response.should.has.status(200)
+    response.body.should.be.an('object')
+    response.body.should.has.property('message')
+    response.body.should.has.property('data')
+    response.body.data.should.has.property('access_token')
+    response.body.data.should.has.property('refresh_token')
+    response.should.have.cookie('session')
+  })
 
   beforeEach(async () => {
-    await waitUntil(() => server !== undefined)
-
-    await oneDatastore.connect()
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
@@ -43,6 +71,21 @@ describe('AdminControllerRest', () => {
         }
       }
     )
+  })
+
+  after(async () => {
+    if (oneDatastore.client === undefined) {
+      throw new Error('Client is undefined.')
+    }
+    await oneDatastore.client.admin.deleteMany(
+      {
+        where: {
+          id: {
+            in: authAdminMock.data.map((admin: Admin) => admin.id)
+          }
+        }
+      }
+    )
     await oneDatastore.disconnect()
   })
 
@@ -50,8 +93,8 @@ describe('AdminControllerRest', () => {
     it('should return 200 OK', async () => {
       const pageNumber: number = 1
       const pageSize: number = adminMock.data.length
-      const response = await chai
-        .request(server)
+
+      const response = await agent
         .get(`/api/v1/admins?page_number=${pageNumber}&page_size=${pageSize}`)
 
       response.should.has.status(200)
@@ -83,8 +126,8 @@ describe('AdminControllerRest', () => {
   describe('GET /api/v1/admins/:id', () => {
     it('should return 200 OK', async () => {
       const requestAdmin: Admin = adminMock.data[0]
-      const response = await chai
-        .request(server)
+
+      const response = await agent
         .get(`/api/v1/admins/${requestAdmin.id}`)
 
       response.should.has.status(200)
@@ -110,8 +153,7 @@ describe('AdminControllerRest', () => {
         adminMock.data[0].password
       )
 
-      const response = await chai
-        .request(server)
+      const response = await agent
         .post('/api/v1/admins')
         .send(requestBody)
 
@@ -139,8 +181,7 @@ describe('AdminControllerRest', () => {
         `patched${requestAdmin.password}`
       )
 
-      const response = await chai
-        .request(server)
+      const response = await agent
         .patch(`/api/v1/admins/${requestAdmin.id}`)
         .send(requestBody)
 
@@ -162,8 +203,7 @@ describe('AdminControllerRest', () => {
     it('should return 200 OK', async () => {
       const requestAdmin: Admin = adminMock.data[0]
 
-      const response = await chai
-        .request(server)
+      const response = await agent
         .delete(`/api/v1/admins/${requestAdmin.id}`)
 
       response.should.has.status(200)

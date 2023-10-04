@@ -14,10 +14,12 @@ import type UserRegisterAuthentication from '../../../inners/use_cases/authentic
 import type UserLoginByEmailAndPasswordRequest
   from '../../../inners/models/value_objects/requests/authentications/users/UserLoginByEmailAndPasswordRequest'
 
+import type Session from '../../../inners/models/value_objects/Session'
+
 export default class UserAuthenticationControllerRest {
   router: Router
-  loginAuthentication: UserLoginAuthentication
-  registerAuthentication: UserRegisterAuthentication
+  userLoginAuthentication: UserLoginAuthentication
+  userRegisterAuthentication: UserRegisterAuthentication
 
   constructor (
     router: Router,
@@ -25,36 +27,51 @@ export default class UserAuthenticationControllerRest {
     registerAuthentication: UserRegisterAuthentication
   ) {
     this.router = router
-    this.loginAuthentication = loginAuthentication
-    this.registerAuthentication = registerAuthentication
+    this.userLoginAuthentication = loginAuthentication
+    this.userRegisterAuthentication = registerAuthentication
   }
 
   registerRoutes = (): void => {
-    this.router.post('/logins', this.login)
-    this.router.post('/registers', this.registerByEmailAndPassword)
+    this.router.post('/login', this.login)
+    this.router.post('/register', this.register)
   }
 
   login = (request: Request, response: Response): void => {
     const { method } = request.query
     if (method === 'email_and_password') {
       const requestToLoginByEmailAndPassword: UserLoginByEmailAndPasswordRequest = request.body
-      this.loginAuthentication.loginByEmailAndPassword(requestToLoginByEmailAndPassword)
-        .then((result: Result<string | null>) => {
-          const data: UserLoginByEmailAndPasswordResponse = new UserLoginByEmailAndPasswordResponse(
-            result.data
-          )
-          const responseBody: ResponseBody<UserLoginByEmailAndPasswordResponse> = new ResponseBody<UserLoginByEmailAndPasswordResponse>(
+      this.userLoginAuthentication.loginByEmailAndPassword(requestToLoginByEmailAndPassword)
+        .then((result: Result<Session | null>) => {
+          let data: UserLoginByEmailAndPasswordResponse | null = null
+          if (result.data !== null) {
+            data = new UserLoginByEmailAndPasswordResponse(
+              result.data.accessToken,
+              result.data.refreshToken
+            )
+          }
+          const responseBody: ResponseBody<UserLoginByEmailAndPasswordResponse | null> = new ResponseBody<UserLoginByEmailAndPasswordResponse | null>(
             result.message,
             data
           )
-          response.status(result.status).json(responseBody)
+          const sessionString = JSON.stringify(result.data)
+          response
+            .cookie(
+              'session',
+              sessionString,
+              {
+                httpOnly: true,
+                expires: result.data?.expiredAt
+              }
+            )
+            .status(result.status)
+            .json(responseBody)
         })
         .catch((error: Error) => {
           response.status(500).json(
             new Result<null>(
               500,
-                            `Login by method ${method} failed: ${error.message}`,
-                            null
+                    `Login by method ${method} failed: ${error.message}`,
+                    null
             )
           )
         })
@@ -62,18 +79,18 @@ export default class UserAuthenticationControllerRest {
       response.status(400).json(
         new Result<null>(
           400,
-                    `Login by method ${method as string} failed, unknown method.`,
-                    null
+              `Login by method ${method as string} failed, unknown method.`,
+              null
         )
       )
     }
   }
 
-  registerByEmailAndPassword = (request: Request, response: Response): void => {
+  register = (request: Request, response: Response): void => {
     const { method } = request.query
     if (method === 'email_and_password') {
       const registerByEmailAndPasswordRequest: VendorRegisterByEmailAndPasswordRequest = request.body
-      this.registerAuthentication.registerByEmailAndPassword(registerByEmailAndPasswordRequest)
+      this.userRegisterAuthentication.registerByEmailAndPassword(registerByEmailAndPasswordRequest)
         .then((result: Result<User | null>) => {
           let data: UserRegisterByEmailAndPasswordResponse | null
           if (result.status === 200 && result.data !== null) {
