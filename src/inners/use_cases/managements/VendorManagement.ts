@@ -107,6 +107,20 @@ export default class VendorManagement {
     )
   }
 
+  createOneRaw = async (vendor: Vendor): Promise<Result<Vendor>> => {
+    const salt: string | undefined = process.env.BCRYPT_SALT
+    if (salt === undefined) {
+      throw new Error('Salt is undefined.')
+    }
+
+    const createdVendor: any = await this.vendorRepository.createOne(vendor)
+    return new Result<Vendor>(
+      201,
+      'Vendor create one raw succeed.',
+      createdVendor
+    )
+  }
+
   patchOneById = async (id: string, request: VendorManagementPatchRequest): Promise<Result<Vendor>> => {
     const salt: string | undefined = process.env.BCRYPT_SALT
     if (salt === undefined) {

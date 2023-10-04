@@ -103,6 +103,20 @@ export default class UserManagement {
     )
   }
 
+  createOneRaw = async (user: User): Promise<Result<User>> => {
+    const salt: string | undefined = process.env.BCRYPT_SALT
+    if (salt === undefined) {
+      throw new Error('Salt is undefined.')
+    }
+
+    const createdUser: any = await this.userRepository.createOne(user)
+    return new Result<User>(
+      201,
+      'User create one raw succeed.',
+      createdUser
+    )
+  }
+
   patchOneById = async (id: string, request: UserManagementPatchRequest): Promise<Result<User>> => {
     const salt: string | undefined = process.env.BCRYPT_SALT
     if (salt === undefined) {
