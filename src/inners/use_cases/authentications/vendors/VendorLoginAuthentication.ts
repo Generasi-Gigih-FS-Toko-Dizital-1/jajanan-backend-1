@@ -8,6 +8,8 @@ import type SessionManagement from '../../managements/SessionManagement'
 import Session from '../../../models/value_objects/Session'
 import jwt from 'jsonwebtoken'
 import moment from 'moment'
+import Authorization from '../../../models/value_objects/Authorization'
+import bcrypt from 'bcrypt'
 
 export default class VendorLoginAuthentication {
   vendorManagement: VendorManagement
@@ -65,22 +67,37 @@ export default class VendorLoginAuthentication {
     if (jwtRefreshTokenExpirationTime === undefined) {
       return new Result<null>(
         500,
-        'Vendor login by email and password failedw, JWT refresh token expiration time is undefined.',
+        'Vendor login by email and password failed, JWT refresh token expiration time is undefined.',
         null
       )
     }
 
     const session: Session = new Session(
       foundVendorByEmailAndPassword.data.id,
-      'ADMIN',
+      'VENDOR',
       accessToken,
       randomUUID(),
       moment().add(jwtRefreshTokenExpirationTime, 'seconds').toDate()
     )
 
+    const authorization: Authorization = new Authorization(
+      session.accessToken,
+      'Bearer'
+    )
+    const salt: string | undefined = process.env.BCRYPT_SALT
+    if (salt === undefined) {
+      return new Result<null>(
+        500,
+        'Vendor login by email and password failed, bcrypt salt is undefined.',
+        null
+      )
+    }
+    const authorizationString: string = JSON.stringify(authorization)
+    const id: string = bcrypt.hashSync(authorizationString, salt)
+
     let setSession: Result<null>
     try {
-      setSession = await this.sessionManagement.setOne(session)
+      setSession = await this.sessionManagement.setOneById(id, session)
     } catch (error) {
       return new Result<null>(
         500,

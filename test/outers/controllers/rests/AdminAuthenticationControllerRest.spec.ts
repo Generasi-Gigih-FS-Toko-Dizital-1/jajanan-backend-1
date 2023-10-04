@@ -8,6 +8,10 @@ import waitUntil from 'async-wait-until'
 import { type Admin } from '@prisma/client'
 import type Session from '../../../../src/inners/models/value_objects/Session'
 import cookie from 'cookie'
+import AdminRefreshAccessTokenRequest
+  from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminRefreshAccessTokenRequest'
+import AdminLoginByEmailAndPasswordRequest
+  from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
 
 chai.use(chaiHttp)
 chai.should()
@@ -47,40 +51,38 @@ describe('AdminAuthenticationControllerRest', () => {
   describe('POST /api/v1/authentications/admins/login?method=email_and_password', () => {
     it('should return 200 OK', async () => {
       const requestAdmin = adminMock.data[0]
+      const requestBodyLogin: AdminLoginByEmailAndPasswordRequest = new AdminLoginByEmailAndPasswordRequest(
+        requestAdmin.email,
+        requestAdmin.password
+      )
       const response = await chai
         .request(server)
         .post('/api/v1/authentications/admins/login?method=email_and_password')
-        .send({
-          email: requestAdmin.email,
-          password: requestAdmin.password
-        })
+        .send(requestBodyLogin)
 
       response.should.has.status(200)
       response.body.should.be.an('object')
       response.body.should.has.property('message')
       response.body.should.has.property('data')
-      response.body.data.should.has.property('access_token')
-      response.body.data.should.has.property('refresh_token')
-
-      const cookies = cookie.parse(response.headers['set-cookie'][0])
-      const session: Session = JSON.parse(cookies.session)
-      session.should.be.an('object')
-      session.should.has.property('accessToken').equal(response.body.data.access_token)
-      session.should.has.property('refreshToken').equal(response.body.data.refresh_token)
-      session.should.has.property('accountId').equal(requestAdmin.id)
-      session.should.has.property('accountType').equal('ADMIN')
-      session.should.has.property('expiredAt')
+      response.body.data.should.has.property('session')
+      response.body.data.session.should.be.an('object')
+      response.body.data.session.should.has.property('account_id').equal(requestAdmin.id)
+      response.body.data.session.should.has.property('account_type').equal('ADMIN')
+      response.body.data.session.should.has.property('access_token')
+      response.body.data.session.should.has.property('refresh_token')
+      response.body.data.session.should.has.property('expired_at')
     })
 
     it('should return 404 NOT FOUND: Unknown email', async () => {
       const requestAdmin = adminMock.data[0]
+      const requestBodyLogin: AdminLoginByEmailAndPasswordRequest = new AdminLoginByEmailAndPasswordRequest(
+        'unknown_email',
+        requestAdmin.password
+      )
       const response = await chai
         .request(server)
         .post('/api/v1/authentications/admins/login?method=email_and_password')
-        .send({
-          email: 'unknown_email',
-          password: requestAdmin.password
-        })
+        .send(requestBodyLogin)
 
       response.should.has.status(404)
       response.body.should.be.an('object')
@@ -90,18 +92,65 @@ describe('AdminAuthenticationControllerRest', () => {
 
     it('should return 404 NOT FOUND: Unknown email or password', async () => {
       const requestAdmin = adminMock.data[0]
+      const requestBodyLogin: AdminLoginByEmailAndPasswordRequest = new AdminLoginByEmailAndPasswordRequest(
+        requestAdmin.email,
+        'unknown_password'
+      )
       const response = await chai
         .request(server)
         .post('/api/v1/authentications/admins/login?method=email_and_password')
-        .send({
-          email: requestAdmin.email,
-          password: 'unknown_password'
-        })
+        .send(requestBodyLogin)
 
       response.should.has.status(404)
       response.body.should.be.an('object')
       response.body.should.has.property('message')
       response.body.should.has.property('data').equal(null)
+    })
+  })
+
+  describe('POST /api/v1/authentications/admins/refreshes/access-token', () => {
+    it('should return 200 OK', async () => {
+      const requestAdmin = adminMock.data[0]
+      const requestBodyLogin: AdminLoginByEmailAndPasswordRequest = new AdminLoginByEmailAndPasswordRequest(
+        requestAdmin.email,
+        requestAdmin.password
+      )
+      const responseLogin = await chai
+        .request(server)
+        .post('/api/v1/authentications/admins/login?method=email_and_password')
+        .send(requestBodyLogin)
+
+      responseLogin.should.has.status(200)
+      responseLogin.body.should.be.an('object')
+      responseLogin.body.should.has.property('message')
+      responseLogin.body.should.has.property('data')
+      responseLogin.body.data.should.has.property('session')
+      responseLogin.body.data.session.should.be.an('object')
+      responseLogin.body.data.session.should.has.property('account_id').equal(requestAdmin.id)
+      responseLogin.body.data.session.should.has.property('account_type').equal('ADMIN')
+      responseLogin.body.data.session.should.has.property('access_token')
+      responseLogin.body.data.session.should.has.property('refresh_token')
+      responseLogin.body.data.session.should.has.property('expired_at')
+
+      const requestBodyRefreshAccessToken: AdminRefreshAccessTokenRequest = new AdminRefreshAccessTokenRequest(
+        responseLogin.body.data.session
+      )
+      const response = await chai
+        .request(server)
+        .post('/api/v1/authentications/admins/refreshes/access-token')
+        .send(requestBodyRefreshAccessToken)
+
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      response.body.data.should.has.property('session')
+      response.body.data.session.should.be.an('object')
+      response.body.data.session.should.has.property('account_id').equal(responseLogin.body.data.session.account_id)
+      response.body.data.session.should.has.property('account_type').equal(responseLogin.body.data.session.account_type)
+      response.body.data.session.should.has.property('access_token')
+      response.body.data.session.should.has.property('refresh_token').equal(responseLogin.body.data.session.refresh_token)
+      response.body.data.session.should.has.property('expired_at')
     })
   })
 })

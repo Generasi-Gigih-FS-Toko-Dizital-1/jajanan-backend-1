@@ -62,16 +62,7 @@ export default class AdminControllerRest {
           result.message,
           data
         )
-
-        const sessionString = JSON.stringify(response.locals.session)
         response
-          .cookie(
-            'session',
-            sessionString,
-            {
-              expires: response.locals.session.expiredAt
-            }
-          )
           .status(result.status)
           .send(responseBody)
       })
@@ -97,15 +88,7 @@ export default class AdminControllerRest {
           result.message,
           data
         )
-        const sessionString = JSON.stringify(response.locals.session)
         response
-          .cookie(
-            'session',
-            sessionString,
-            {
-              expires: response.locals.session.expiredAt
-            }
-          )
           .status(result.status)
           .send(responseBody)
       })
@@ -130,15 +113,7 @@ export default class AdminControllerRest {
           result.message,
           data
         )
-        const sessionString = JSON.stringify(response.locals.session)
         response
-          .cookie(
-            'session',
-            sessionString,
-            {
-              expires: response.locals.session.expiredAt
-            }
-          )
           .status(result.status)
           .send(responseBody)
       })
@@ -163,15 +138,7 @@ export default class AdminControllerRest {
             result.data.updatedAt
           )
         )
-        const sessionString = JSON.stringify(response.locals.session)
         response
-          .cookie(
-            'session',
-            sessionString,
-            {
-              expires: response.locals.session.expiredAt
-            }
-          )
           .status(result.status)
           .send(responseBody)
       })
@@ -185,15 +152,7 @@ export default class AdminControllerRest {
     this.adminManagement
       .deleteOneById(id)
       .then((result: Result<Admin>) => {
-        const sessionString = JSON.stringify(response.locals.session)
         response
-          .cookie(
-            'session',
-            sessionString,
-            {
-              expires: response.locals.session.expiredAt
-            }
-          )
           .status(result.status)
           .send()
       })

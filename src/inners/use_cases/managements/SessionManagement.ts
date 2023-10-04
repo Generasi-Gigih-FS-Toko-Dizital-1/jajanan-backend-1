@@ -30,8 +30,8 @@ export default class SessionManagement {
     )
   }
 
-  setOne = async (session: Session): Promise<Result<null>> => {
-    await this.sessionRepository.setOne(session)
+  setOneById = async (id: string, session: Session): Promise<Result<null>> => {
+    await this.sessionRepository.setOneById(id, session)
     return new Result<null>(
       200,
       'Session set one succeed.',

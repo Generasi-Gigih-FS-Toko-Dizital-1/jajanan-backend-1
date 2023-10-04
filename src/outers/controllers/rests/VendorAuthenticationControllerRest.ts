@@ -16,59 +16,58 @@ import type VendorRegisterAuthentication
   from '../../../inners/use_cases/authentications/vendors/VendorRegisterAuthentication'
 
 import type Session from '../../../inners/models/value_objects/Session'
+import type VendorRefreshAccessTokenRequest
+  from '../../../inners/models/value_objects/requests/authentications/vendors/VendorRefreshAccessTokenRequest'
+
+import type VendorRefreshAuthentication
+  from '../../../inners/use_cases/authentications/vendors/VendorRefreshAuthentication'
 
 export default class VendorAuthenticationControllerRest {
   router: Router
-  loginAuthentication: VendorLoginAuthentication
-  registerAuthentication: VendorRegisterAuthentication
+  vendorLoginAuthentication: VendorLoginAuthentication
+  vendorRegisterAuthentication: VendorRegisterAuthentication
+  vendorRefreshAuthentication: VendorRefreshAuthentication
 
   constructor (
     router: Router,
     loginAuthentication: VendorLoginAuthentication,
-    registerAuthentication: VendorRegisterAuthentication
+    registerAuthentication: VendorRegisterAuthentication,
+    vendorAuthenticationRefresh: VendorRefreshAuthentication
   ) {
     this.router = router
-    this.loginAuthentication = loginAuthentication
-    this.registerAuthentication = registerAuthentication
+    this.vendorLoginAuthentication = loginAuthentication
+    this.vendorRegisterAuthentication = registerAuthentication
+    this.vendorRefreshAuthentication = vendorAuthenticationRefresh
   }
 
   registerRoutes = (): void => {
     this.router.post('/login', this.login)
-    this.router.post('/register', this.registerByEmailAndPassword)
+    this.router.post('/register', this.register)
+    this.router.post('/refreshes/access-token', this.refreshAccessToken)
   }
 
   login = (request: Request, response: Response): void => {
     const { method } = request.query
     if (method === 'email_and_password') {
       const requestToLoginByEmailAndPassword: VendorLoginByEmailAndPasswordRequest = request.body
-      this.loginAuthentication.loginByEmailAndPassword(requestToLoginByEmailAndPassword)
+      this.vendorLoginAuthentication.loginByEmailAndPassword(requestToLoginByEmailAndPassword)
         .then((result: Result<Session | null>) => {
           let data: VendorLoginByEmailAndPasswordResponse | null = null
           if (result.data !== null) {
             data = new VendorLoginByEmailAndPasswordResponse(
-              result.data.accessToken,
-              result.data.refreshToken
+              result.data
             )
           }
           const responseBody: ResponseBody<VendorLoginByEmailAndPasswordResponse | null> = new ResponseBody<VendorLoginByEmailAndPasswordResponse | null>(
             result.message,
             data
           )
-          const sessionString = JSON.stringify(result.data)
           response
-            .cookie(
-              'session',
-              sessionString,
-              {
-                httpOnly: true,
-                expires: result.data?.expiredAt
-              }
-            )
             .status(result.status)
-            .json(responseBody)
+            .send(responseBody)
         })
         .catch((error: Error) => {
-          response.status(500).json(
+          response.status(500).send(
             new Result<null>(
               500,
                     `Login by method ${method} failed: ${error.message}`,
@@ -77,7 +76,7 @@ export default class VendorAuthenticationControllerRest {
           )
         })
     } else {
-      response.status(400).json(
+      response.status(400).send(
         new Result<null>(
           400,
               `Login by method ${method as string} failed, unknown method.`,
@@ -87,11 +86,11 @@ export default class VendorAuthenticationControllerRest {
     }
   }
 
-  registerByEmailAndPassword = (request: Request, response: Response): void => {
+  register = (request: Request, response: Response): void => {
     const { method } = request.query
     if (method === 'email_and_password') {
       const registerByEmailAndPasswordRequest: VendorRegisterByEmailAndPasswordRequest = request.body
-      this.registerAuthentication.registerByEmailAndPassword(registerByEmailAndPasswordRequest)
+      this.vendorRegisterAuthentication.registerByEmailAndPassword(registerByEmailAndPasswordRequest)
         .then((result: Result<Vendor | null>) => {
           let data: VendorRegisterByEmailAndPasswordResponse | null
           if (result.status === 200 && result.data !== null) {
@@ -122,7 +121,7 @@ export default class VendorAuthenticationControllerRest {
           response.status(result.status).send(responseBody)
         })
         .catch((error: Error) => {
-          response.status(500).json(
+          response.status(500).send(
             new Result<null>(
               500,
                     `Register by method ${method} failed: ${error.message}`,
@@ -131,7 +130,7 @@ export default class VendorAuthenticationControllerRest {
           )
         })
     } else {
-      response.status(400).json(
+      response.status(400).send(
         new Result<null>(
           400,
               `Register by method ${method as string} failed, unknown method.`,
@@ -139,5 +138,34 @@ export default class VendorAuthenticationControllerRest {
         )
       )
     }
+  }
+
+  refreshAccessToken = (request: Request, response: Response): void => {
+    const requestToRefreshAccessToken: VendorRefreshAccessTokenRequest = request.body
+    this.vendorRefreshAuthentication.refreshAccessToken(requestToRefreshAccessToken)
+      .then((result: Result<Session | null>) => {
+        let data: VendorLoginByEmailAndPasswordResponse | null = null
+        if (result.data !== null) {
+          data = new VendorLoginByEmailAndPasswordResponse(
+            result.data
+          )
+        }
+        const responseBody: ResponseBody<VendorLoginByEmailAndPasswordResponse | null> = new ResponseBody<VendorLoginByEmailAndPasswordResponse | null>(
+          result.message,
+          data
+        )
+        response
+          .status(result.status)
+          .send(responseBody)
+      })
+      .catch((error: Error) => {
+        response.status(500).send(
+          new Result<null>(
+            500,
+                  `Refresh access token failed: ${error.message}`,
+                  null
+          )
+        )
+      })
   }
 }
