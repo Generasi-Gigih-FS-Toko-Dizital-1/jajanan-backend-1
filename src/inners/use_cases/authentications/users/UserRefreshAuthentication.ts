@@ -115,7 +115,7 @@ export default class UserRefreshAuthentication {
 
     const newSession: Session = new Session(
       foundUserById.data.id,
-      'ADMIN',
+      oldSession.data.accountType,
       newAccessToken,
       oldSession.data.refreshToken,
       oldSession.data.expiredAt
