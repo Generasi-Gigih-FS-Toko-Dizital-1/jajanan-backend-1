@@ -19,11 +19,16 @@ import VendorControllerRest from '../controllers/rests/VendorControllerRest'
 import AdminRepository from '../repositories/AdminRepository'
 import AdminManagement from '../../inners/use_cases/managements/AdminManagement'
 import AdminControllerRest from '../controllers/rests/AdminControllerRest'
+import JajanItemRepository from '../repositories/JajanItemRepository'
+import JajanItemManagement from '../../inners/use_cases/managements/JajanItemManagement'
+import JajanItemControllerRest from '../controllers/rests/JajanItemControllerRest'
 import type TwoDatastore from '../datastores/TwoDatastore'
 import SessionRepository from '../repositories/SessionRepository'
 import SessionManagement from '../../inners/use_cases/managements/SessionManagement'
-import AdminValidateAuthentication from '../../inners/use_cases/authentications/AuthenticationValidation'
 import AuthenticationValidation from '../../inners/use_cases/authentications/AuthenticationValidation'
+import AdminRefreshAuthentication from '../../inners/use_cases/authentications/admins/AdminRefreshAuthentication'
+import VendorRefreshAuthentication from '../../inners/use_cases/authentications/vendors/VendorRefreshAuthentication'
+import UserRefreshAuthentication from '../../inners/use_cases/authentications/users/UserRefreshAuthentication'
 
 export default class RootRoute {
   app: Application
@@ -47,18 +52,24 @@ export default class RootRoute {
     const userRepository: UserRepository = new UserRepository(this.datastoreOne)
     const vendorRepository: VendorRepository = new VendorRepository(this.datastoreOne)
     const adminRepository: AdminRepository = new AdminRepository(this.datastoreOne)
+    const jajanItemRepository: JajanItemRepository = new JajanItemRepository(this.datastoreOne)
 
     const sessionManagement: SessionManagement = new SessionManagement(sessionRepository, objectUtility)
     const authenticationValidation: AuthenticationValidation = new AuthenticationValidation(sessionManagement)
     const userManagement: UserManagement = new UserManagement(userRepository, objectUtility)
     const vendorManagement: VendorManagement = new VendorManagement(vendorRepository, objectUtility)
     const adminManagement: AdminManagement = new AdminManagement(adminRepository, objectUtility)
+    const jajanItemManagement: JajanItemManagement = new JajanItemManagement(jajanItemRepository, objectUtility)
 
     const userLoginAuthentication: UserLoginAuthentication = new UserLoginAuthentication(userManagement, sessionManagement)
     const userRegisterAuthentication: UserRegisterAuthentication = new UserRegisterAuthentication(userManagement)
     const vendorLoginAuthentication: VendorLoginAuthentication = new VendorLoginAuthentication(vendorManagement, sessionManagement)
     const vendorRegisterAuthentication: VendorRegisterAuthentication = new VendorRegisterAuthentication(vendorManagement)
     const adminLoginAuthentication: AdminLoginAuthentication = new AdminLoginAuthentication(adminManagement, sessionManagement)
+
+    const userRefreshAuthentication: UserRefreshAuthentication = new UserRefreshAuthentication(userManagement, sessionManagement)
+    const vendorRefreshAuthentication: VendorRefreshAuthentication = new VendorRefreshAuthentication(vendorManagement, sessionManagement)
+    const adminRefreshAuthentication: AdminRefreshAuthentication = new AdminRefreshAuthentication(adminManagement, sessionManagement)
 
     const userControllerRest: UserControllerRest = new UserControllerRest(
       Router(),
@@ -76,6 +87,13 @@ export default class RootRoute {
     vendorControllerRest.registerRoutes()
     routerVersionOne.use('/vendors', vendorControllerRest.router)
 
+    const jajanItemControllerRest: JajanItemControllerRest = new JajanItemControllerRest(
+      Router(),
+      jajanItemManagement
+    )
+    jajanItemControllerRest.registerRoutes()
+    routerVersionOne.use('/jajan-items', jajanItemControllerRest.router)
+
     const adminControllerRest: AdminControllerRest = new AdminControllerRest(
       Router(),
       adminManagement,
@@ -87,7 +105,8 @@ export default class RootRoute {
     const userAuthenticationControllerRest: UserAuthenticationControllerRest = new UserAuthenticationControllerRest(
       Router(),
       userLoginAuthentication,
-      userRegisterAuthentication
+      userRegisterAuthentication,
+      userRefreshAuthentication
     )
     userAuthenticationControllerRest.registerRoutes()
     routerVersionOne.use('/authentications/users', userAuthenticationControllerRest.router)
@@ -95,14 +114,16 @@ export default class RootRoute {
     const vendorAuthenticationControllerRest: VendorAuthenticationControllerRest = new VendorAuthenticationControllerRest(
       Router(),
       vendorLoginAuthentication,
-      vendorRegisterAuthentication
+      vendorRegisterAuthentication,
+      vendorRefreshAuthentication
     )
     vendorAuthenticationControllerRest.registerRoutes()
     routerVersionOne.use('/authentications/vendors', vendorAuthenticationControllerRest.router)
 
     const adminAuthenticationControllerRest: AdminAuthenticationControllerRest = new AdminAuthenticationControllerRest(
       Router(),
-      adminLoginAuthentication
+      adminLoginAuthentication,
+      adminRefreshAuthentication
     )
     adminAuthenticationControllerRest.registerRoutes()
     routerVersionOne.use('/authentications/admins', adminAuthenticationControllerRest.router)

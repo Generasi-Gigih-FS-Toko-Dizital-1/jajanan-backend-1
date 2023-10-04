@@ -1,6 +1,5 @@
 import type TwoDatastore from '../datastores/TwoDatastore'
 import Session from '../../inners/models/value_objects/Session'
-import bcrypt from 'bcrypt'
 
 export default class SessionRepository {
   twoDatastore: TwoDatastore
@@ -9,18 +8,11 @@ export default class SessionRepository {
     this.twoDatastore = twoDatastore
   }
 
-  setOne = async (session: Session): Promise<void> => {
+  setOneById = async (id: string, session: Session): Promise<void> => {
     if (this.twoDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-
-    const salt: string | undefined = process.env.BCRYPT_SALT
-    if (salt === undefined) {
-      throw new Error('Salt is undefined.')
-    }
-
     const sessionString: string = JSON.stringify(session)
-    const id: string = bcrypt.hashSync(sessionString, salt)
     await this.twoDatastore.client.set(id, sessionString)
   }
 

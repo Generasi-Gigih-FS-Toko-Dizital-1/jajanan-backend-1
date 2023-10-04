@@ -1,5 +1,4 @@
-import { Prisma, PrismaClient } from '@prisma/client'
-import waitUntil from 'async-wait-until'
+import { PrismaClient } from '@prisma/client'
 
 export default class OneDatastore {
   client: PrismaClient | undefined

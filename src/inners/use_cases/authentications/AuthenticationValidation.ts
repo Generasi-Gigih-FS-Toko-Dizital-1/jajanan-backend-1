@@ -1,10 +1,9 @@
 import type SessionManagement from '../managements/SessionManagement'
 import Result from '../../models/value_objects/Result'
-import Session from '../../models/value_objects/Session'
+import type Session from '../../models/value_objects/Session'
 import bcrypt from 'bcrypt'
-
-import moment from 'moment'
-import jwt, { TokenExpiredError, type VerifyErrors } from 'jsonwebtoken'
+import jwt, { type VerifyErrors } from 'jsonwebtoken'
+import type Authorization from '../../models/value_objects/Authorization'
 
 export default class AuthenticationValidation {
   sessionManagement: SessionManagement
@@ -24,7 +23,7 @@ export default class AuthenticationValidation {
     })
   }
 
-  validateSession = async (session: Session): Promise<Result<Session | null>> => {
+  validateAuthorization = async (authorization: Authorization): Promise<Result<Session | null>> => {
     const salt: string | undefined = process.env.BCRYPT_SALT
     if (salt === undefined) {
       return new Result<null>(
@@ -34,15 +33,15 @@ export default class AuthenticationValidation {
       )
     }
 
-    const sessionString: string = JSON.stringify(session)
-    const id: string = bcrypt.hashSync(sessionString, salt)
+    const authorizationString: string = JSON.stringify(authorization)
+    const id: string = bcrypt.hashSync(authorizationString, salt)
 
     const foundSession: Result<Session | null> = await this.sessionManagement.readOneById(id)
 
-    if (foundSession.status !== 200) {
+    if (foundSession.status !== 200 || foundSession.data === null) {
       return new Result<null>(
-        401,
-        'Validate authentication failed, session is unknown.',
+        foundSession.status,
+        'Validate authentication failed, authorization is unknown.',
         null
       )
     }
@@ -55,59 +54,10 @@ export default class AuthenticationValidation {
         null
       )
     }
-
-    if (foundSession.data === null) {
-      return new Result<null>(500, 'Session is null.', null)
-    }
     try {
       await this.jwtVerifyAsync(foundSession.data.accessToken, jwtSecret)
       return new Result<Session>(200, 'Validate authentication succeed.', foundSession.data)
     } catch (error) {
-      if (error instanceof TokenExpiredError) {
-        const jwtAccessTokenExpirationTime: string | undefined = process.env.JWT_ACCESS_TOKEN_EXPIRATION_TIME
-        if (jwtAccessTokenExpirationTime === undefined) {
-          return new Result<null>(
-            500,
-            'JWT access token expiration time is undefined.',
-            null
-          )
-        }
-
-        if (moment().isAfter(foundSession.data.expiredAt)) {
-          return new Result<null>(
-            401,
-            'Validate authentication failed, session refresh token is expired.',
-            null
-          )
-        }
-
-        const newAccessToken = jwt.sign(
-          {
-            accountId: foundSession.data.accountId,
-            accountType: foundSession.data.accountType
-          },
-          jwtSecret,
-          {
-            expiresIn: Number(jwtAccessTokenExpirationTime)
-          }
-        )
-
-        const newSession = new Session(
-          foundSession.data.accountId,
-          foundSession.data.accountType,
-          newAccessToken,
-          foundSession.data.refreshToken,
-          moment().add(jwtAccessTokenExpirationTime, 'seconds').toDate()
-        )
-
-        const setSessionResult = await this.sessionManagement.setOne(newSession)
-        if (setSessionResult.status !== 200 || setSessionResult.data === null) {
-          return new Result<null>(500, 'Set session failed.', null)
-        }
-
-        return new Result<Session>(200, 'Validate authentication succeed.', newSession)
-      }
-
       return new Result<null>(500, `Validate authentication failed, ${(error as VerifyErrors).message}.`, null)
     }
   }

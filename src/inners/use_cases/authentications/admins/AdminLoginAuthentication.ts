@@ -8,6 +8,8 @@ import type SessionManagement from '../../managements/SessionManagement'
 import Session from '../../../models/value_objects/Session'
 import jwt from 'jsonwebtoken'
 import moment from 'moment'
+import Authorization from '../../../models/value_objects/Authorization'
+import bcrypt from 'bcrypt'
 
 export default class AdminLoginAuthentication {
   adminManagement: AdminManagement
@@ -65,7 +67,7 @@ export default class AdminLoginAuthentication {
     if (jwtRefreshTokenExpirationTime === undefined) {
       return new Result<null>(
         500,
-        'Admin login by email and password failedw, JWT refresh token expiration time is undefined.',
+        'Admin login by email and password failed, JWT refresh token expiration time is undefined.',
         null
       )
     }
@@ -78,9 +80,24 @@ export default class AdminLoginAuthentication {
       moment().add(jwtRefreshTokenExpirationTime, 'seconds').toDate()
     )
 
+    const authorization: Authorization = new Authorization(
+      session.accessToken,
+      'Bearer'
+    )
+    const salt: string | undefined = process.env.BCRYPT_SALT
+    if (salt === undefined) {
+      return new Result<null>(
+        500,
+        'Admin login by email and password failed, bcrypt salt is undefined.',
+        null
+      )
+    }
+    const authorizationString: string = JSON.stringify(authorization)
+    const id: string = bcrypt.hashSync(authorizationString, salt)
+
     let setSession: Result<null>
     try {
-      setSession = await this.sessionManagement.setOne(session)
+      setSession = await this.sessionManagement.setOneById(id, session)
     } catch (error) {
       return new Result<null>(
         500,
