@@ -93,11 +93,12 @@ export default class VendorAuthenticationControllerRest {
       this.vendorRegisterAuthentication.registerByEmailAndPassword(registerByEmailAndPasswordRequest)
         .then((result: Result<Vendor | null>) => {
           let data: VendorRegisterByEmailAndPasswordResponse | null
-          if (result.status === 200 && result.data !== null) {
+          if (result.status === 201 && result.data !== null) {
             data = new VendorRegisterByEmailAndPasswordResponse(
               result.data.id,
               result.data.fullName,
               result.data.gender,
+              result.data.address,
               result.data.username,
               result.data.email,
               result.data.balance,

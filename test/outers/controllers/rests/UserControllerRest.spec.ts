@@ -124,6 +124,7 @@ describe('UserControllerRest', () => {
         user.should.has.property('full_name')
         user.should.has.property('email')
         user.should.has.property('gender')
+        user.should.has.property('address')
         user.should.has.property('balance')
         user.should.has.property('experience')
         user.should.has.property('last_latitude')
@@ -158,6 +159,7 @@ describe('UserControllerRest', () => {
       response.body.data.should.has.property('full_name').equal(requestUser.fullName)
       response.body.data.should.has.property('email').equal(requestUser.email)
       response.body.data.should.has.property('gender').equal(requestUser.gender)
+      response.body.data.should.has.property('address').equal(requestUser.address)
       response.body.data.should.has.property('balance').equal(requestUser.balance)
       response.body.data.should.has.property('experience').equal(requestUser.experience)
       response.body.data.should.has.property('last_latitude').equal(requestUser.lastLatitude)
@@ -172,6 +174,7 @@ describe('UserControllerRest', () => {
       const requestBody: UserManagementCreateRequest = new UserManagementCreateRequest(
         userMock.data[0].fullName,
         userMock.data[0].gender,
+        userMock.data[0].address,
         userMock.data[0].username,
         userMock.data[0].email,
         userMock.data[0].password,
@@ -194,6 +197,7 @@ describe('UserControllerRest', () => {
       response.body.data.should.has.property('full_name').equal(requestBody.fullName)
       response.body.data.should.has.property('email').equal(requestBody.email)
       response.body.data.should.has.property('gender').equal(requestBody.gender)
+      response.body.data.should.has.property('address').equal(requestBody.address)
       response.body.data.should.has.property('balance')
       response.body.data.should.has.property('experience')
       response.body.data.should.has.property('last_latitude')
@@ -231,6 +235,7 @@ describe('UserControllerRest', () => {
       response.body.data.should.has.property('full_name').equal(requestBody.fullName)
       response.body.data.should.has.property('email').equal(requestBody.email)
       response.body.data.should.has.property('gender').equal(requestBody.gender)
+      response.body.data.should.has.property('address').equal(requestUser.address)
       response.body.data.should.has.property('balance')
       response.body.data.should.has.property('experience')
       response.body.data.should.has.property('last_latitude')

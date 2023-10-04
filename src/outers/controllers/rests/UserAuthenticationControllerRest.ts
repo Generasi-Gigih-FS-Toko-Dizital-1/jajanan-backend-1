@@ -91,11 +91,12 @@ export default class UserAuthenticationControllerRest {
       this.userRegisterAuthentication.registerByEmailAndPassword(registerByEmailAndPasswordRequest)
         .then((result: Result<User | null>) => {
           let data: UserRegisterByEmailAndPasswordResponse | null
-          if (result.status === 200 && result.data !== null) {
+          if (result.status === 201 && result.data !== null) {
             data = new UserRegisterByEmailAndPasswordResponse(
               result.data.id,
               result.data.fullName,
               result.data.gender,
+              result.data.address,
               result.data.username,
               result.data.email,
               result.data.balance,

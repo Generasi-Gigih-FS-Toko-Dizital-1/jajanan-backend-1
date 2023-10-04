@@ -82,7 +82,7 @@ export default class VendorManagement {
     const vendorToCreate: Vendor = {
       id: randomUUID(),
       fullName: request.fullName,
-      address: '',
+      address: request.address,
       email: request.email,
       password: bcrypt.hashSync(request.password, salt),
       username: request.username,
@@ -93,8 +93,8 @@ export default class VendorManagement {
       jajanName: request.jajanName,
       jajanDescription: request.jajanDescription,
       status: request.status,
-      lastLatitude: 0,
-      lastLongitude: 0,
+      lastLatitude: request.lastLatitude,
+      lastLongitude: request.lastLongitude,
       updatedAt: new Date(),
       createdAt: new Date(),
       deletedAt: null
