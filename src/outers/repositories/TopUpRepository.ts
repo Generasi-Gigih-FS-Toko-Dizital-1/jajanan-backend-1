@@ -2,15 +2,17 @@ import type TopUpCreateRequest from '../../inners/models/value_objects/requests/
 import { type User } from '@prisma/client'
 
 export default class TopUpRepository {
-  snap
-  constructor (snap: any) {
-    this.snap = snap
+  paymentGateway
+  idGenerator
+  constructor (paymentGateway: any, idGenerator: () => string) {
+    this.paymentGateway = paymentGateway
+    this.idGenerator = idGenerator
   }
 
   generateTopUpUrl = async (topUpData: TopUpCreateRequest, user: User): Promise<string> => {
     const parameter = {
       transaction_details: {
-        order_id: '123',
+        order_id: `topup-${this.idGenerator()}`,
         gross_amount: topUpData.amount
       },
       customer_details: {
@@ -18,7 +20,7 @@ export default class TopUpRepository {
       }
     }
 
-    const generatedTopUpUrl = this.snap.createTransactionRedirectUrl(parameter)
+    const generatedTopUpUrl = this.paymentGateway.snap.createTransactionRedirectUrl(parameter)
       .then((redirectUrl: string) => {
         return redirectUrl
       })
