@@ -19,6 +19,9 @@ import VendorControllerRest from '../controllers/rests/VendorControllerRest'
 import AdminRepository from '../repositories/AdminRepository'
 import AdminManagement from '../../inners/use_cases/managements/AdminManagement'
 import AdminControllerRest from '../controllers/rests/AdminControllerRest'
+import JajanItemRepository from '../repositories/JajanItemRepository'
+import JajanItemManagement from '../../inners/use_cases/managements/JajanItemManagement'
+import JajanItemControllerRest from '../controllers/rests/JajanItemControllerRest'
 
 export default class RootRoute {
   app: Application
@@ -53,6 +56,16 @@ export default class RootRoute {
     )
     vendorControllerRest.registerRoutes()
     routerVersionOne.use('/vendors', vendorControllerRest.router)
+
+    const jajanItemRepository: JajanItemRepository = new JajanItemRepository(this.datastoreOne)
+    const jajanItemManagement: JajanItemManagement = new JajanItemManagement(jajanItemRepository, objectUtility)
+    const jajanItemControllerRest: JajanItemControllerRest = new JajanItemControllerRest(
+      Router(),
+      jajanItemManagement
+    )
+
+    jajanItemControllerRest.registerRoutes()
+    routerVersionOne.use('/jajan-items', jajanItemControllerRest.router)
 
     const adminRepository: AdminRepository = new AdminRepository(this.datastoreOne)
     const adminManagement: AdminManagement = new AdminManagement(adminRepository, objectUtility)
