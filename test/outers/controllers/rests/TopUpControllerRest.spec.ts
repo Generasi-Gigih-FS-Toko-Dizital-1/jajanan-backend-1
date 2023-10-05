@@ -49,7 +49,6 @@ describe('TopUpControllerRest', () => {
         amount: 20000
       })
       assert.equal(res.status, 201)
-      console.log(res.body)
       res.body.data.should.have.property('redirect_url')
     })
   })
