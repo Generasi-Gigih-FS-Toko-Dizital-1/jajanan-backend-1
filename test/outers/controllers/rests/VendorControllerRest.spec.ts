@@ -7,16 +7,19 @@ import { server } from '../../../../src/App'
 import waitUntil from 'async-wait-until'
 import VendorManagementCreateRequest
   from '../../../../src/inners/models/value_objects/requests/vendor_managements/VendorManagementCreateRequest'
-import { type Vendor } from '@prisma/client'
+import { type Admin, type Vendor } from '@prisma/client'
 import VendorManagementPatchRequest
   from '../../../../src/inners/models/value_objects/requests/vendor_managements/VendorManagementPatchRequest'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
+import AdminMock from '../../../mocks/AdminMock'
+import AdminLoginByEmailAndPasswordRequest
+  from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
 
 chai.use(chaiHttp)
 chai.should()
 
 describe('VendorControllerRest', () => {
-  const authVendorMock: VendorMock = new VendorMock()
+  const authAdminMock: AdminMock = new AdminMock()
   const vendorMock: VendorMock = new VendorMock()
   const oneDatastore: OneDatastore = new OneDatastore()
   let agent: ChaiHttp.Agent
@@ -29,18 +32,19 @@ describe('VendorControllerRest', () => {
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-    await oneDatastore.client.vendor.createMany({
-      data: authVendorMock.data
+    await oneDatastore.client.admin.createMany({
+      data: authAdminMock.data
     })
 
     agent = chai.request.agent(server)
-    const requestVendor = authVendorMock.data[0]
+    const requestAuthAdmin: Admin = authAdminMock.data[0]
+    const requestBodyLogin: AdminLoginByEmailAndPasswordRequest = new AdminLoginByEmailAndPasswordRequest(
+      requestAuthAdmin.email,
+      requestAuthAdmin.password
+    )
     const response = await agent
-      .post('/api/v1/authentications/vendors/login?method=email_and_password')
-      .send({
-        email: requestVendor.email,
-        password: requestVendor.password
-      })
+      .post('/api/v1/authentications/admins/login?method=email_and_password')
+      .send(requestBodyLogin)
 
     response.should.has.status(200)
     response.body.should.be.an('object')
@@ -48,8 +52,8 @@ describe('VendorControllerRest', () => {
     response.body.should.has.property('data')
     response.body.data.should.has.property('session')
     response.body.data.session.should.be.an('object')
-    response.body.data.session.should.has.property('account_id').equal(requestVendor.id)
-    response.body.data.session.should.has.property('account_type').equal('VENDOR')
+    response.body.data.session.should.has.property('account_id').equal(requestAuthAdmin.id)
+    response.body.data.session.should.has.property('account_type').equal('ADMIN')
     response.body.data.session.should.has.property('access_token')
     response.body.data.session.should.has.property('refresh_token')
     response.body.data.session.should.has.property('expired_at')
@@ -88,11 +92,11 @@ describe('VendorControllerRest', () => {
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-    await oneDatastore.client.vendor.deleteMany(
+    await oneDatastore.client.admin.deleteMany(
       {
         where: {
           id: {
-            in: authVendorMock.data.map((vendor: Vendor) => vendor.id)
+            in: authAdminMock.data.map((admin: Admin) => admin.id)
           }
         }
       }
@@ -122,6 +126,7 @@ describe('VendorControllerRest', () => {
         vendor.should.has.property('id')
         vendor.should.has.property('username')
         vendor.should.has.property('full_name')
+        vendor.should.has.property('address')
         vendor.should.has.property('email')
         vendor.should.has.property('gender')
         vendor.should.has.property('balance')
@@ -162,6 +167,7 @@ describe('VendorControllerRest', () => {
       response.body.data.should.has.property('full_name').equal(requestVendor.fullName)
       response.body.data.should.has.property('email').equal(requestVendor.email)
       response.body.data.should.has.property('gender').equal(requestVendor.gender)
+      response.body.data.should.has.property('address').equal(requestVendor.address)
       response.body.data.should.has.property('balance').equal(requestVendor.balance)
       response.body.data.should.has.property('experience').equal(requestVendor.experience)
       response.body.data.should.has.property('jajan_image_url').equal(requestVendor.jajanImageUrl)
@@ -180,6 +186,7 @@ describe('VendorControllerRest', () => {
       const requestBody: VendorManagementCreateRequest = new VendorManagementCreateRequest(
         vendorMock.data[0].fullName,
         vendorMock.data[0].gender,
+        vendorMock.data[0].address,
         vendorMock.data[0].username,
         vendorMock.data[0].email,
         vendorMock.data[0].password,
@@ -206,6 +213,7 @@ describe('VendorControllerRest', () => {
       response.body.data.should.has.property('full_name').equal(requestBody.fullName)
       response.body.data.should.has.property('email').equal(requestBody.email)
       response.body.data.should.has.property('gender').equal(requestBody.gender)
+      response.body.data.should.has.property('address').equal(requestBody.address)
       response.body.data.should.has.property('balance')
       response.body.data.should.has.property('experience')
       response.body.data.should.has.property('jajan_image_url').equal(requestBody.jajanImageUrl)
@@ -251,6 +259,7 @@ describe('VendorControllerRest', () => {
       response.body.data.should.has.property('full_name').equal(requestBody.fullName)
       response.body.data.should.has.property('email').equal(requestBody.email)
       response.body.data.should.has.property('gender').equal(requestBody.gender)
+      response.body.data.should.has.property('address').equal(requestVendor.address)
       response.body.data.should.has.property('balance')
       response.body.data.should.has.property('experience')
       response.body.data.should.has.property('jajan_image_url').equal(requestBody.jajanImageUrl)

@@ -50,15 +50,61 @@ describe('UserAuthenticationControllerRest', () => {
 
   describe('POST /api/v1/authentications/users/login?method=email_and_password', () => {
     it('should return 200 OK', async () => {
+      const requestUser = userMock.data[0]
+      const requestBodyLogin: UserLoginByEmailAndPasswordRequest = new UserLoginByEmailAndPasswordRequest(
+        requestUser.email,
+        requestUser.password
+      )
+      const response = await chai
+        .request(server)
+        .post('/api/v1/authentications/users/login?method=email_and_password')
+        .send(requestBodyLogin)
 
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      response.body.data.should.has.property('session')
+      response.body.data.session.should.be.an('object')
+      response.body.data.session.should.has.property('account_id').equal(requestUser.id)
+      response.body.data.session.should.has.property('account_type').equal('USER')
+      response.body.data.session.should.has.property('access_token')
+      response.body.data.session.should.has.property('refresh_token')
+      response.body.data.session.should.has.property('expired_at')
     })
 
     it('should return 404 NOT FOUND: Unknown email', async () => {
+      const requestUser = userMock.data[0]
+      const requestBodyLogin: UserLoginByEmailAndPasswordRequest = new UserLoginByEmailAndPasswordRequest(
+        'unknown_email',
+        requestUser.password
+      )
+      const response = await chai
+        .request(server)
+        .post('/api/v1/authentications/users/login?method=email_and_password')
+        .send(requestBodyLogin)
 
+      response.should.has.status(404)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data').equal(null)
     })
 
     it('should return 404 NOT FOUND: Unknown email or password', async () => {
+      const requestUser = userMock.data[0]
+      const requestBodyLogin: UserLoginByEmailAndPasswordRequest = new UserLoginByEmailAndPasswordRequest(
+        requestUser.email,
+        'unknown_password'
+      )
+      const response = await chai
+        .request(server)
+        .post('/api/v1/authentications/users/login?method=email_and_password')
+        .send(requestBodyLogin)
 
+      response.should.has.status(404)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data').equal(null)
     })
   })
 
@@ -75,6 +121,17 @@ describe('UserAuthenticationControllerRest', () => {
         2
       )
 
+      if (oneDatastore.client === undefined) {
+        throw new Error('Client is undefined.')
+      }
+
+      await oneDatastore.client.user.deleteMany({
+        where: {
+          email: requestBody.email,
+          username: requestBody.username
+        }
+      })
+
       const response = await chai
         .request(server)
         .post('/api/v1/authentications/users/register?method=email_and_password')
@@ -90,6 +147,7 @@ describe('UserAuthenticationControllerRest', () => {
       response.body.data.should.has.property('full_name').equal(requestBody.fullName)
       response.body.data.should.has.property('email').equal(requestBody.email)
       response.body.data.should.has.property('gender').equal(requestBody.gender)
+      response.body.data.should.has.property('address').equal(requestBody.address)
       response.body.data.should.has.property('balance')
       response.body.data.should.has.property('experience')
       response.body.data.should.has.property('last_latitude')
@@ -97,9 +155,6 @@ describe('UserAuthenticationControllerRest', () => {
       response.body.data.should.has.property('created_at')
       response.body.data.should.has.property('updated_at')
 
-      if (oneDatastore.client === undefined) {
-        throw new Error('Client is undefined.')
-      }
       await oneDatastore.client.user.deleteMany({
         where: {
           email: requestBody.email,

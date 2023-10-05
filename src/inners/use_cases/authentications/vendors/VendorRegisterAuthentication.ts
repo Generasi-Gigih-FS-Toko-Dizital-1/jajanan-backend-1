@@ -67,7 +67,7 @@ export default class VendorRegisterAuthentication {
       deletedAt: null
     }
 
-    const createdVendor: Result<Vendor> = await this.vendorManagement.createOne(vendorToCreate)
+    const createdVendor: Result<Vendor> = await this.vendorManagement.createOneRaw(vendorToCreate)
 
     return new Result<Vendor>(
       201,

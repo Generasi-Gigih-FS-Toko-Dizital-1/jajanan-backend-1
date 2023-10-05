@@ -89,7 +89,8 @@ export default class RootRoute {
 
     const jajanItemControllerRest: JajanItemControllerRest = new JajanItemControllerRest(
       Router(),
-      jajanItemManagement
+      jajanItemManagement,
+      authenticationValidation
     )
     jajanItemControllerRest.registerRoutes()
     routerVersionOne.use('/jajan-items', jajanItemControllerRest.router)

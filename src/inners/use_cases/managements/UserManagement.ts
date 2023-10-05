@@ -82,7 +82,7 @@ export default class UserManagement {
     const userToCreate: User = {
       id: randomUUID(),
       fullName: request.fullName,
-      address: '',
+      address: request.address,
       email: request.email,
       password: bcrypt.hashSync(request.password, salt),
       username: request.username,
@@ -99,6 +99,20 @@ export default class UserManagement {
     return new Result<User>(
       201,
       'User create one succeed.',
+      createdUser
+    )
+  }
+
+  createOneRaw = async (user: User): Promise<Result<User>> => {
+    const salt: string | undefined = process.env.BCRYPT_SALT
+    if (salt === undefined) {
+      throw new Error('Salt is undefined.')
+    }
+
+    const createdUser: any = await this.userRepository.createOne(user)
+    return new Result<User>(
+      201,
+      'User create one raw succeed.',
       createdUser
     )
   }

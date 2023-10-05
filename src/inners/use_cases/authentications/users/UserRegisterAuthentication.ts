@@ -62,7 +62,7 @@ export default class UserRegisterAuthentication {
       deletedAt: null
     }
 
-    const createdUser: Result<User> = await this.userManagement.createOne(userToCreate)
+    const createdUser: Result<User> = await this.userManagement.createOneRaw(userToCreate)
 
     return new Result<User>(
       201,

@@ -11,6 +11,8 @@ import { type Admin } from '@prisma/client'
 import AdminManagementPatchRequest
   from '../../../../src/inners/models/value_objects/requests/admin_managements/AdminManagementPatchRequest'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
+import AdminLoginByEmailAndPasswordRequest
+  from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
 
 chai.use(chaiHttp)
 chai.should()
@@ -34,13 +36,14 @@ describe('AdminControllerRest', () => {
     })
 
     agent = chai.request.agent(server)
-    const requestAdmin = authAdminMock.data[0]
+    const requestAuthAdmin: Admin = authAdminMock.data[0]
+    const requestBodyLogin: AdminLoginByEmailAndPasswordRequest = new AdminLoginByEmailAndPasswordRequest(
+      requestAuthAdmin.email,
+      requestAuthAdmin.password
+    )
     const response = await agent
       .post('/api/v1/authentications/admins/login?method=email_and_password')
-      .send({
-        email: requestAdmin.email,
-        password: requestAdmin.password
-      })
+      .send(requestBodyLogin)
 
     response.should.has.status(200)
     response.body.should.be.an('object')
@@ -48,7 +51,7 @@ describe('AdminControllerRest', () => {
     response.body.should.has.property('data')
     response.body.data.should.has.property('session')
     response.body.data.session.should.be.an('object')
-    response.body.data.session.should.has.property('account_id').equal(requestAdmin.id)
+    response.body.data.session.should.has.property('account_id').equal(requestAuthAdmin.id)
     response.body.data.session.should.has.property('account_type').equal('ADMIN')
     response.body.data.session.should.has.property('access_token')
     response.body.data.session.should.has.property('refresh_token')

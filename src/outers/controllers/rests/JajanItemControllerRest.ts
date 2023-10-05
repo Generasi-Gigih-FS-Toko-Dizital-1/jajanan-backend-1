@@ -13,17 +13,22 @@ import JajanItemManagementCreateResponse
   from '../../../inners/models/value_objects/responses/jajan_item_managements/JajanItemManagementCreateResponse'
 import JajanItemManagementPatchResponse
   from '../../../inners/models/value_objects/responses/jajan_item_managements/JajanItemManagementPatchResponse'
+import type AuthenticationValidation from '../../../inners/use_cases/authentications/AuthenticationValidation'
+import validateAuthenticationMiddleware from '../../middlewares/ValidateAuthenticationMiddleware'
 
 export default class JajanItemControllerRest {
   router: Router
   jajanItemManagement: JajanItemManagement
+  authenticationValidation: AuthenticationValidation
 
-  constructor (router: Router, jajanItemManagement: JajanItemManagement) {
+  constructor (router: Router, jajanItemManagement: JajanItemManagement, authenticationValidation: AuthenticationValidation) {
     this.router = router
     this.jajanItemManagement = jajanItemManagement
+    this.authenticationValidation = authenticationValidation
   }
 
   registerRoutes = (): void => {
+    this.router.use(validateAuthenticationMiddleware(this.authenticationValidation))
     this.router.get('', this.readMany)
     this.router.post('', this.createOne)
     this.router.patch('/:id', this.patchOneById)

@@ -49,9 +49,9 @@ export default class VendorRefreshAuthentication {
     }
 
     const authorizationString: string = JSON.stringify(oldAuthorization)
-    const id: string = bcrypt.hashSync(authorizationString, salt)
+    const oldId: string = bcrypt.hashSync(authorizationString, salt)
 
-    const oldSession: Result<Session | null> = await this.sessionManagement.readOneById(id)
+    const oldSession: Result<Session | null> = await this.sessionManagement.readOneById(oldId)
     if (oldSession.status !== 200 || oldSession.data === null) {
       return new Result<null>(
         404,
@@ -73,6 +73,16 @@ export default class VendorRefreshAuthentication {
         404,
         'Vendor refresh access token failed, refresh token is expired.',
         null
+      )
+    }
+
+    try {
+      await this.sessionManagement.deleteOneById(oldId)
+    } catch (error) {
+      return new Result<null>(
+        500,
+          `Vendor refresh access token failed, ${(error as Error).message}`,
+          null
       )
     }
 

@@ -6,12 +6,10 @@ import AdminMock from '../../../mocks/AdminMock'
 import { server } from '../../../../src/App'
 import waitUntil from 'async-wait-until'
 import { type Admin } from '@prisma/client'
-import type Session from '../../../../src/inners/models/value_objects/Session'
-import cookie from 'cookie'
-import AdminRefreshAccessTokenRequest
-  from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminRefreshAccessTokenRequest'
 import AdminLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
+import AdminRefreshAccessTokenRequest
+  from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminRefreshAccessTokenRequest'
 
 chai.use(chaiHttp)
 chai.should()

@@ -10,7 +10,7 @@ const validateAuthenticationMiddleware = (authenticationValidation: Authenticati
     if (request.headers.authorization === undefined) {
       response.status(401).send(
         new ResponseBody<null>(
-          'Validate authentication failed, session is undefined.',
+          'Validate authentication failed, authorization is undefined.',
           null
         )
       )
