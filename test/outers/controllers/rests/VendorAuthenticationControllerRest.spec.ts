@@ -198,7 +198,7 @@ describe('VendorAuthenticationControllerRest', () => {
       assert.isNull(response.body.data)
     })
 
-    it('should return 409 CONFLICT: Vendorname already exists', async () => {
+    it('should return 409 CONFLICT: Username already exists', async () => {
       const requestBody: VendorRegisterByEmailAndPasswordRequest = new VendorRegisterByEmailAndPasswordRequest(
         'fullName2',
         'MALE',

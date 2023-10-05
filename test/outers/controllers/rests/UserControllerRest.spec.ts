@@ -7,17 +7,20 @@ import { server } from '../../../../src/App'
 import waitUntil from 'async-wait-until'
 import UserManagementCreateRequest
   from '../../../../src/inners/models/value_objects/requests/user_managements/UserManagementCreateRequest'
-import { type User } from '@prisma/client'
+import { type Admin, type User } from '@prisma/client'
 import UserManagementPatchRequest
   from '../../../../src/inners/models/value_objects/requests/user_managements/UserManagementPatchRequest'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
+import AdminLoginByEmailAndPasswordRequest
+  from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
+import AdminMock from '../../../mocks/AdminMock'
 
 chai.use(chaiHttp)
 chai.should()
 
 describe('UserControllerRest', () => {
+  const authAdminMock: AdminMock = new AdminMock()
   const userMock: UserMock = new UserMock()
-  const authUserMock: UserMock = new UserMock()
   const oneDatastore = new OneDatastore()
   let agent: ChaiHttp.Agent
   let authorization: Authorization
@@ -29,18 +32,19 @@ describe('UserControllerRest', () => {
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-    await oneDatastore.client.user.createMany({
-      data: authUserMock.data
+    await oneDatastore.client.admin.createMany({
+      data: authAdminMock.data
     })
 
     agent = chai.request.agent(server)
-    const requestUser = authUserMock.data[0]
+    const requestAuthAdmin: Admin = authAdminMock.data[0]
+    const requestBodyLogin: AdminLoginByEmailAndPasswordRequest = new AdminLoginByEmailAndPasswordRequest(
+      requestAuthAdmin.email,
+      requestAuthAdmin.password
+    )
     const response = await agent
-      .post('/api/v1/authentications/users/login?method=email_and_password')
-      .send({
-        email: requestUser.email,
-        password: requestUser.password
-      })
+      .post('/api/v1/authentications/admins/login?method=email_and_password')
+      .send(requestBodyLogin)
 
     response.should.has.status(200)
     response.body.should.be.an('object')
@@ -48,8 +52,8 @@ describe('UserControllerRest', () => {
     response.body.should.has.property('data')
     response.body.data.should.has.property('session')
     response.body.data.session.should.be.an('object')
-    response.body.data.session.should.has.property('account_id').equal(requestUser.id)
-    response.body.data.session.should.has.property('account_type').equal('USER')
+    response.body.data.session.should.has.property('account_id').equal(requestAuthAdmin.id)
+    response.body.data.session.should.has.property('account_type').equal('ADMIN')
     response.body.data.session.should.has.property('access_token')
     response.body.data.session.should.has.property('refresh_token')
     response.body.data.session.should.has.property('expired_at')
@@ -92,7 +96,7 @@ describe('UserControllerRest', () => {
       {
         where: {
           id: {
-            in: authUserMock.data.map((user: User) => user.id)
+            in: authAdminMock.data.map((admin: Admin) => admin.id)
           }
         }
       }
