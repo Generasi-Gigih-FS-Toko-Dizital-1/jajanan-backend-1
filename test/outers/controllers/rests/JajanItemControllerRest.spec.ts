@@ -233,6 +233,11 @@ describe('JajanItemControllerRest', () => {
         .send()
 
       response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      assert.isNull(response.body.data)
+
       if (oneDatastore.client === undefined) {
         throw new Error('oneDatastore client is undefined')
       }

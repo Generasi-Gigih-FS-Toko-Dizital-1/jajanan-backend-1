@@ -21,16 +21,14 @@ export default class UserLoginAuthentication {
   }
 
   loginByEmailAndPassword = async (request: UserLoginByEmailAndPasswordRequest): Promise<Result<Session | null>> => {
-    let foundUserByEmailAndPassword: Result<User>
-    try {
-      foundUserByEmailAndPassword = await this.userManagement.readOneByEmailAndPassword(
-        request.email,
-        request.password
-      )
-    } catch (error) {
+    const foundUserByEmailAndPassword: Result<User | null> = await this.userManagement.readOneByEmailAndPassword(
+      request.email,
+      request.password
+    )
+    if (foundUserByEmailAndPassword.status !== 200 || foundUserByEmailAndPassword.data === null) {
       return new Result<null>(
         404,
-        'User login by email and password failed, unknown email or password.',
+        'User login by email and password failed, user is not found.',
         null
       )
     }

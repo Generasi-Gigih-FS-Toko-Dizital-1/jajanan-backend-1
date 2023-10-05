@@ -99,10 +99,10 @@ export default class JajanItemControllerRest {
     const { id } = request.params
     this.jajanItemManagement
       .patchOneById(id, request.body)
-      .then((result: Result<JajanItem>) => {
-        const responseBody: ResponseBody<JajanItemManagementPatchResponse> = new ResponseBody<JajanItemManagementPatchResponse>(
-          result.message,
-          new JajanItemManagementPatchResponse(
+      .then((result: Result<JajanItem | null>) => {
+        let data: JajanItemManagementPatchResponse | null
+        if (result.status === 200 && result.data !== null) {
+          data = new JajanItemManagementPatchResponse(
             result.data.id,
             result.data.vendorId,
             result.data.categoryId,
@@ -112,6 +112,12 @@ export default class JajanItemControllerRest {
             result.data.createdAt,
             result.data.updatedAt
           )
+        } else {
+          data = null
+        }
+        const responseBody: ResponseBody<JajanItemManagementPatchResponse | null> = new ResponseBody<JajanItemManagementPatchResponse | null>(
+          result.message,
+          data
         )
         response.status(result.status).send(responseBody)
       })
@@ -124,7 +130,14 @@ export default class JajanItemControllerRest {
     const { id } = request.params
     this.jajanItemManagement
       .deleteOneById(id)
-      .then((result: Result<JajanItem>) => {
+      .then((result: Result<JajanItem | null>) => {
+        const responseBody: ResponseBody<null> = new ResponseBody<null>(
+          result.message,
+          null
+        )
+        response
+          .status(result.status)
+          .send(responseBody)
         response.status(result.status).send()
       })
       .catch((error: Error) => {

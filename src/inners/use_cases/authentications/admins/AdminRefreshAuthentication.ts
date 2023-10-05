@@ -21,15 +21,13 @@ export default class AdminRefreshAuthentication {
   }
 
   refreshAccessToken = async (request: AdminRefreshAccessTokenRequest): Promise<Result<Session | null>> => {
-    let foundAdminById: Result<Admin>
-    try {
-      foundAdminById = await this.adminManagement.readOneById(
-        request.session.accountId
-      )
-    } catch (error) {
+    const foundAdminById: Result<Admin | null> = await this.adminManagement.readOneById(
+      request.session.accountId
+    )
+    if (foundAdminById.status !== 200 || foundAdminById.data === null) {
       return new Result<null>(
         404,
-        'Admin refresh access token failed, unknown email or password.',
+        'Admin refresh access token failed, admin not found.',
         null
       )
     }

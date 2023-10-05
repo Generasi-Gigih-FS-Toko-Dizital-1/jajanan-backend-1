@@ -13,15 +13,8 @@ export default class UserRegisterAuthentication {
   }
 
   registerByEmailAndPassword = async (request: UserRegisterByEmailAndPasswordRequest): Promise<Result<User | null>> => {
-    let isUserEmailFound: boolean
-    try {
-      await this.userManagement.readOneByEmail(request.email)
-      isUserEmailFound = true
-    } catch (error) {
-      isUserEmailFound = false
-    }
-
-    if (isUserEmailFound) {
+    const foundUserByEmail: Result<User | null> = await this.userManagement.readOneByEmail(request.email)
+    if (foundUserByEmail.status === 200 && foundUserByEmail.data !== null) {
       return new Result<null>(
         409,
         'User register by email and password failed, email already exists.',
@@ -29,15 +22,8 @@ export default class UserRegisterAuthentication {
       )
     }
 
-    let isUserUsernameFound: boolean
-    try {
-      await this.userManagement.readOneByUsername(request.username)
-      isUserUsernameFound = true
-    } catch (error) {
-      isUserUsernameFound = false
-    }
-
-    if (isUserUsernameFound) {
+    const foundUserByUsername: Result<User | null> = await this.userManagement.readOneByUsername(request.username)
+    if (foundUserByUsername.status === 200 && foundUserByUsername.data !== null) {
       return new Result<null>(
         409,
         'User register by email and password failed, username already exists.',

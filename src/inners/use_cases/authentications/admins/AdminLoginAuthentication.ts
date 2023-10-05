@@ -21,16 +21,14 @@ export default class AdminLoginAuthentication {
   }
 
   loginByEmailAndPassword = async (request: AdminLoginByEmailAndPasswordRequest): Promise<Result<Session | null>> => {
-    let foundAdminByEmailAndPassword: Result<Admin>
-    try {
-      foundAdminByEmailAndPassword = await this.adminManagement.readOneByEmailAndPassword(
-        request.email,
-        request.password
-      )
-    } catch (error) {
+    const foundAdminByEmailAndPassword: Result<Admin | null> = await this.adminManagement.readOneByEmailAndPassword(
+      request.email,
+      request.password
+    )
+    if (foundAdminByEmailAndPassword.status !== 200 || foundAdminByEmailAndPassword.data === null) {
       return new Result<null>(
         404,
-        'Admin login by email and password failed, unknown email or password.',
+        'Admin login by email and password failed, admin is not found.',
         null
       )
     }

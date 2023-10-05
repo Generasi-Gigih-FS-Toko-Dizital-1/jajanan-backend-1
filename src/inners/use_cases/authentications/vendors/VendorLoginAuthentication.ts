@@ -21,16 +21,14 @@ export default class VendorLoginAuthentication {
   }
 
   loginByEmailAndPassword = async (request: VendorLoginByEmailAndPasswordRequest): Promise<Result<Session | null>> => {
-    let foundVendorByEmailAndPassword: Result<Vendor>
-    try {
-      foundVendorByEmailAndPassword = await this.vendorManagement.readOneByEmailAndPassword(
-        request.email,
-        request.password
-      )
-    } catch (error) {
+    const foundVendorByEmailAndPassword: Result<Vendor | null> = await this.vendorManagement.readOneByEmailAndPassword(
+      request.email,
+      request.password
+    )
+    if (foundVendorByEmailAndPassword.status !== 200 || foundVendorByEmailAndPassword.data === null) {
       return new Result<null>(
         404,
-        'Vendor login by email and password failed, unknown email or password.',
+        'Vendor login by email and password failed, vendor is not found.',
         null
       )
     }
