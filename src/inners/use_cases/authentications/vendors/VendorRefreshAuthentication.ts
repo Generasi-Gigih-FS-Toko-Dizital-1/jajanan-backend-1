@@ -114,15 +114,6 @@ export default class VendorRefreshAuthentication {
       }
     )
 
-    const jwtRefreshTokenExpirationTime: string | undefined = process.env.JWT_REFRESH_TOKEN_EXPIRATION_TIME
-    if (jwtRefreshTokenExpirationTime === undefined) {
-      return new Result<null>(
-        500,
-        'Vendor refresh access token failed, JWT refresh token expiration time is undefined.',
-        null
-      )
-    }
-
     const newSession: Session = new Session(
       foundVendorById.data.id,
       oldSession.data.accountType,

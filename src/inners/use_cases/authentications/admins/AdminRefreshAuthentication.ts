@@ -114,15 +114,6 @@ export default class AdminRefreshAuthentication {
       }
     )
 
-    const jwtRefreshTokenExpirationTime: string | undefined = process.env.JWT_REFRESH_TOKEN_EXPIRATION_TIME
-    if (jwtRefreshTokenExpirationTime === undefined) {
-      return new Result<null>(
-        500,
-        'Admin refresh access token failed, JWT refresh token expiration time is undefined.',
-        null
-      )
-    }
-
     const newSession: Session = new Session(
       foundAdminById.data.id,
       oldSession.data.accountType,
