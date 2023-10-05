@@ -8,6 +8,11 @@ import LoginAuthentication from '../../inners/use_cases/authentications/LoginAut
 import RegisterAuthentication from '../../inners/use_cases/authentications/RegisterAuthentication'
 import AuthenticationControllerRest from '../controllers/rests/AuthenticationControllerRest'
 import ObjectUtility from '../utilities/ObjectUtility'
+import TopUpRepository from '../repositories/TopUpRepository'
+import Midtrans from '../payment_gateway/midtrans'
+import { randomUUID } from 'crypto'
+import TopUp from '../../inners/use_cases/top_up/TopUp'
+import TopUpControllerRest from '../controllers/rests/TopUpControllerRest'
 
 export default class RootRoute {
   app: Application
@@ -43,6 +48,13 @@ export default class RootRoute {
     )
     authenticationControllerRest.registerRoutes()
     routerVersionOne.use('/authentications', authenticationControllerRest.router)
+
+    const paymentGateway = new Midtrans()
+    const topUpRepository = new TopUpRepository(paymentGateway, randomUUID)
+    const topUpUseCase = new TopUp(topUpRepository, userRepository)
+    const topUpControllerRest = new TopUpControllerRest(Router(), topUpUseCase)
+    topUpControllerRest.registerRoutes()
+    routerVersionOne.use('/topup', topUpControllerRest.router)
 
     this.app.use('/api/v1', routerVersionOne)
   }
