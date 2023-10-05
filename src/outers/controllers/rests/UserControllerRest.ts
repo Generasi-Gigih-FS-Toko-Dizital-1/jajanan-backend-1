@@ -52,6 +52,7 @@ export default class UserControllerRest {
               user.id,
               user.fullName,
               user.gender,
+              user.address,
               user.username,
               user.email,
               user.balance,
@@ -67,15 +68,7 @@ export default class UserControllerRest {
           result.message,
           data
         )
-        const sessionString = JSON.stringify(response.locals.session)
         response
-          .cookie(
-            'session',
-            sessionString,
-            {
-              expires: response.locals.session.expiredAt
-            }
-          )
           .status(result.status)
           .send(responseBody)
       })
@@ -93,6 +86,7 @@ export default class UserControllerRest {
           result.data.id,
           result.data.fullName,
           result.data.gender,
+          result.data.address,
           result.data.username,
           result.data.email,
           result.data.balance,
@@ -106,15 +100,7 @@ export default class UserControllerRest {
           result.message,
           data
         )
-        const sessionString = JSON.stringify(response.locals.session)
         response
-          .cookie(
-            'session',
-            sessionString,
-            {
-              expires: response.locals.session.expiredAt
-            }
-          )
           .status(result.status)
           .send(responseBody)
       })
@@ -131,6 +117,7 @@ export default class UserControllerRest {
           result.data.id,
           result.data.fullName,
           result.data.gender,
+          result.data.address,
           result.data.username,
           result.data.email,
           result.data.balance,
@@ -144,15 +131,7 @@ export default class UserControllerRest {
           result.message,
           data
         )
-        const sessionString = JSON.stringify(response.locals.session)
         response
-          .cookie(
-            'session',
-            sessionString,
-            {
-              expires: response.locals.session.expiredAt
-            }
-          )
           .status(result.status)
           .send(responseBody)
       })
@@ -172,6 +151,7 @@ export default class UserControllerRest {
             result.data.id,
             result.data.fullName,
             result.data.gender,
+            result.data.address,
             result.data.username,
             result.data.email,
             result.data.balance,
@@ -182,15 +162,7 @@ export default class UserControllerRest {
             result.data.updatedAt
           )
         )
-        const sessionString = JSON.stringify(response.locals.session)
         response
-          .cookie(
-            'session',
-            sessionString,
-            {
-              expires: response.locals.session.expiredAt
-            }
-          )
           .status(result.status)
           .send(responseBody)
       })

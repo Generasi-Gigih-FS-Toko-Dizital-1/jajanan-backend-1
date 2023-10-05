@@ -4,6 +4,7 @@ export default class VendorManagementCreateResponse {
   id: string
   fullName: string
   gender: Gender
+  address: string
   username: string
   email: string
   balance: number
@@ -17,26 +18,11 @@ export default class VendorManagementCreateResponse {
   createdAt: Date
   updatedAt: Date
 
-  constructor (
-    id: string,
-    fullName: string,
-    gender: Gender,
-    username: string,
-    email: string,
-    balance: number,
-    experience: number,
-    jajanImageUrl: string,
-    jajanName: string,
-    jajanDescription: string,
-    status: Status,
-    lastLatitude: number,
-    lastLongitude: number,
-    createdAt: Date,
-    updatedAt: Date
-  ) {
+  constructor (id: string, fullName: string, gender: Gender, address: string, username: string, email: string, balance: number, experience: number, jajanImageUrl: string, jajanName: string, jajanDescription: string, status: Status, lastLatitude: number, lastLongitude: number, createdAt: Date, updatedAt: Date) {
     this.id = id
     this.fullName = fullName
     this.gender = gender
+    this.address = address
     this.username = username
     this.email = email
     this.balance = balance

@@ -26,6 +26,9 @@ import type TwoDatastore from '../datastores/TwoDatastore'
 import SessionRepository from '../repositories/SessionRepository'
 import SessionManagement from '../../inners/use_cases/managements/SessionManagement'
 import AuthenticationValidation from '../../inners/use_cases/authentications/AuthenticationValidation'
+import AdminRefreshAuthentication from '../../inners/use_cases/authentications/admins/AdminRefreshAuthentication'
+import VendorRefreshAuthentication from '../../inners/use_cases/authentications/vendors/VendorRefreshAuthentication'
+import UserRefreshAuthentication from '../../inners/use_cases/authentications/users/UserRefreshAuthentication'
 
 export default class RootRoute {
   app: Application
@@ -64,6 +67,10 @@ export default class RootRoute {
     const vendorRegisterAuthentication: VendorRegisterAuthentication = new VendorRegisterAuthentication(vendorManagement)
     const adminLoginAuthentication: AdminLoginAuthentication = new AdminLoginAuthentication(adminManagement, sessionManagement)
 
+    const userRefreshAuthentication: UserRefreshAuthentication = new UserRefreshAuthentication(userManagement, sessionManagement)
+    const vendorRefreshAuthentication: VendorRefreshAuthentication = new VendorRefreshAuthentication(vendorManagement, sessionManagement)
+    const adminRefreshAuthentication: AdminRefreshAuthentication = new AdminRefreshAuthentication(adminManagement, sessionManagement)
+
     const userControllerRest: UserControllerRest = new UserControllerRest(
       Router(),
       userManagement,
@@ -98,7 +105,8 @@ export default class RootRoute {
     const userAuthenticationControllerRest: UserAuthenticationControllerRest = new UserAuthenticationControllerRest(
       Router(),
       userLoginAuthentication,
-      userRegisterAuthentication
+      userRegisterAuthentication,
+      userRefreshAuthentication
     )
     userAuthenticationControllerRest.registerRoutes()
     routerVersionOne.use('/authentications/users', userAuthenticationControllerRest.router)
@@ -106,14 +114,16 @@ export default class RootRoute {
     const vendorAuthenticationControllerRest: VendorAuthenticationControllerRest = new VendorAuthenticationControllerRest(
       Router(),
       vendorLoginAuthentication,
-      vendorRegisterAuthentication
+      vendorRegisterAuthentication,
+      vendorRefreshAuthentication
     )
     vendorAuthenticationControllerRest.registerRoutes()
     routerVersionOne.use('/authentications/vendors', vendorAuthenticationControllerRest.router)
 
     const adminAuthenticationControllerRest: AdminAuthenticationControllerRest = new AdminAuthenticationControllerRest(
       Router(),
-      adminLoginAuthentication
+      adminLoginAuthentication,
+      adminRefreshAuthentication
     )
     adminAuthenticationControllerRest.registerRoutes()
     routerVersionOne.use('/authentications/admins', adminAuthenticationControllerRest.router)

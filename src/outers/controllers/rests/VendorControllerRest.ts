@@ -52,6 +52,7 @@ export default class VendorControllerRest {
               vendor.id,
               vendor.fullName,
               vendor.gender,
+              vendor.address,
               vendor.username,
               vendor.email,
               vendor.balance,
@@ -71,15 +72,7 @@ export default class VendorControllerRest {
           result.message,
           data
         )
-        const sessionString = JSON.stringify(response.locals.session)
         response
-          .cookie(
-            'session',
-            sessionString,
-            {
-              expires: response.locals.session.expiredAt
-            }
-          )
           .status(result.status)
           .send(responseBody)
       })
@@ -97,6 +90,7 @@ export default class VendorControllerRest {
           result.data.id,
           result.data.fullName,
           result.data.gender,
+          result.data.address,
           result.data.username,
           result.data.email,
           result.data.balance,
@@ -114,15 +108,7 @@ export default class VendorControllerRest {
           result.message,
           data
         )
-        const sessionString = JSON.stringify(response.locals.session)
         response
-          .cookie(
-            'session',
-            sessionString,
-            {
-              expires: response.locals.session.expiredAt
-            }
-          )
           .status(result.status)
           .send(responseBody)
       })
@@ -139,6 +125,7 @@ export default class VendorControllerRest {
           result.data.id,
           result.data.fullName,
           result.data.gender,
+          result.data.address,
           result.data.username,
           result.data.email,
           result.data.balance,
@@ -156,15 +143,7 @@ export default class VendorControllerRest {
           result.message,
           data
         )
-        const sessionString = JSON.stringify(response.locals.session)
         response
-          .cookie(
-            'session',
-            sessionString,
-            {
-              expires: response.locals.session.expiredAt
-            }
-          )
           .status(result.status)
           .send(responseBody)
       })
@@ -184,6 +163,7 @@ export default class VendorControllerRest {
             result.data.id,
             result.data.fullName,
             result.data.gender,
+            result.data.address,
             result.data.username,
             result.data.email,
             result.data.balance,
@@ -198,15 +178,7 @@ export default class VendorControllerRest {
             result.data.updatedAt
           )
         )
-        const sessionString = JSON.stringify(response.locals.session)
         response
-          .cookie(
-            'session',
-            sessionString,
-            {
-              expires: response.locals.session.expiredAt
-            }
-          )
           .status(result.status)
           .send(responseBody)
       })

@@ -10,7 +10,7 @@ import VendorMock from '../../../test/mocks/VendorMock'
 import UserSubscriptionMock from '../../../test/mocks/UserSubscriptionMock'
 import UserLevelMock from '../../../test/mocks/UserLevelMock'
 import VendorLevelMock from '../../../test/mocks/VendorLevelMock'
-import waitUntil from 'async-wait-until'
+import { randomUUID } from 'crypto'
 
 export default class OneSeeder {
   oneDatastore: OneDatastore
@@ -39,6 +39,19 @@ export default class OneSeeder {
     this.userSubscriptionMock = new UserSubscriptionMock(this.userMock, this.categoryMock)
     this.userLevelMock = new UserLevelMock()
     this.vendorLevelMock = new VendorLevelMock()
+
+    this.adminMock.data.push(
+      {
+        id: randomUUID(),
+        fullName: 'admin0',
+        email: 'email0@mail.com',
+        password: 'password0',
+        gender: 'MALE',
+        updatedAt: new Date(),
+        createdAt: new Date(),
+        deletedAt: null
+      }
+    )
   }
 
   up = async (): Promise<void> => {

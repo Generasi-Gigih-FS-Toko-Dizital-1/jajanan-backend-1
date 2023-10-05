@@ -1,9 +1,8 @@
-export default class UserLoginByEmailAndPasswordResponse {
-  accessToken: string
-  refreshToken: string
+import type Session from '../../../Session'
 
-  constructor (accessToken: string, refreshToken: string) {
-    this.accessToken = accessToken
-    this.refreshToken = refreshToken
+export default class UserLoginByEmailAndPasswordResponse {
+  session: Session
+  constructor (session: Session) {
+    this.session = session
   }
 }

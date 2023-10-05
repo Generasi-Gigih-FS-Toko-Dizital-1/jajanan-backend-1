@@ -19,7 +19,7 @@ pipeline {
             steps {
                 sh 'docker system prune --all --force'
                 jiraSendBuildInfo()
-                jiraSendDeploymentInfo environmentId: 'sg-staging-1', environmentName: 'sg-staging-1', environmentType: 'staging'
+                jiraSendDeploymentInfo environmentId: 'sg-staging-1', environmentName: 'sg-staging-1', environmentType: 'staging', state: 'successful'
                 publishHTML (
                      target : [
                          allowMissing: false,

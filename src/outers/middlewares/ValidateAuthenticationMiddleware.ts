@@ -1,23 +1,24 @@
 import { type NextFunction, type Request, type Response } from 'express'
-import Session from '../../inners/models/value_objects/Session'
+import type Session from '../../inners/models/value_objects/Session'
 import type Result from '../../inners/models/value_objects/Result'
 import ResponseBody from '../../inners/models/value_objects/responses/ResponseBody'
 import type AuthenticationValidation from '../../inners/use_cases/authentications/AuthenticationValidation'
+import Authorization from '../../inners/models/value_objects/Authorization'
 
 const validateAuthenticationMiddleware = (authenticationValidation: AuthenticationValidation): any[] => {
   const validateSession = async (request: Request, response: Response, next: NextFunction): Promise<void> => {
-    if (request.cookies.session === undefined) {
+    if (request.headers.authorization === undefined) {
       response.status(401).send(
         new ResponseBody<null>(
-          'Validate authentication failed, session is undefined.',
+          'Validate authentication failed, authorization is undefined.',
           null
         )
       )
       return
     }
 
-    const session: Session = Session.parseFromJsonString(request.cookies.session)
-    const validatedSession: Result<Session | null> = await authenticationValidation.validateSession(session)
+    const authorization: Authorization = Authorization.parseFromString(request.headers.authorization)
+    const validatedSession: Result<Session | null> = await authenticationValidation.validateAuthorization(authorization)
     if (validatedSession.status !== 200 || validatedSession.data === null) {
       response.status(validatedSession.status).send(
         new ResponseBody<null>(
@@ -37,8 +38,6 @@ const validateAuthenticationMiddleware = (authenticationValidation: Authenticati
       )
       return
     }
-
-    response.locals.session = validatedSession.data
 
     next()
   }
