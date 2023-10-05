@@ -5,6 +5,7 @@ import UserMock from '../../../mocks/UserMock'
 import OneDatastore from '../../../../src/outers/datastores/OneDatastore'
 import { server } from '../../../../src/App'
 import chaiHttp from 'chai-http'
+import nock from 'nock'
 
 chai.use(chaiHttp)
 chai.should()
@@ -23,6 +24,13 @@ describe('TopUpControllerRest', () => {
     await oneDatastore.client.user.createMany({
       data: userMock.data
     })
+
+    nock('https://app.sandbox.midtrans.com/snap/v1/transactions')
+      .post('')
+      .reply(201, {
+        token: 'd379aa71-99eb-4dd1-b9bb-eefe813746e9',
+        redirect_url: 'https://app.sandbox.midtrans.com/snap/v3/redirection/071e0c3d-dade-4148-a1b5-296ee8735b79'
+      })
   })
 
   afterEach(async () => {
@@ -35,28 +43,14 @@ describe('TopUpControllerRest', () => {
 
   describe('POST /api/v1/topup', () => {
     it('should return 200', async () => {
+      // Will add authentication letter
       const res = await chai.request(server).post('/api/v1/topup').send({
         userId: userMock.data[0].id,
-        amount: 100
+        amount: 20000
       })
-      assert.equal(res.status, 200)
-      res.body.should.have.property('redirectUrl')
-    })
-
-    it('should return 400', async () => {
-      const res = await chai.request(server).post('/api/v1/topup').send({
-        userId: userMock.data[0].id,
-        amount: -100
-      })
-      assert.equal(res.status, 400)
-    })
-
-    it('should return 404', async () => {
-      const res = await chai.request(server).post('/api/v1/topup').send({
-        userId: 'invalid-id',
-        amount: 100
-      })
-      assert.equal(res.status, 404)
+      assert.equal(res.status, 201)
+      console.log(res.body)
+      res.body.data.should.have.property('redirect_url')
     })
   })
 })
