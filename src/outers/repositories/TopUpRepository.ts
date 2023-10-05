@@ -15,16 +15,14 @@ export default class TopUpRepository {
         order_id: `topup-${this.idGenerator()}`,
         gross_amount: topUpData.amount
       },
-      customer_details: {
-        email: user.email
-      }
+      user_id: user.id
     }
 
-    const generatedTopUpUrl = this.paymentGateway.snap.createTransactionRedirectUrl(parameter)
-      .then((redirectUrl: string) => {
-        return redirectUrl
+    const generatedTopUpUrl = await this.paymentGateway.snap.createTransaction(parameter)
+      .then((transaction: any) => {
+        // transaction redirect_url
+        return transaction.redirect_url
       })
-
     return generatedTopUpUrl
   }
 }

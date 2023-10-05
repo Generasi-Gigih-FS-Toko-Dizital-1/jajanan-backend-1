@@ -13,11 +13,16 @@ export default class TopUpControllerRest {
     this.router.post('', this.generateTopUp)
   }
 
-  generateTopUp = async (req: Request, res: Response): void => {
-    await this.topUp
+  generateTopUp = (req: Request, res: Response): void => {
+    this.topUp
       .generateTopUpUrl(req.body)
       .then((result) => {
-        res.status(result.status).send(result.data)
+        res.status(result.status).json({
+          message: result.message,
+          data: {
+            redirectUrl: result.data
+          }
+        })
       })
       .catch((error) => {
         res.status(500).send(error.message)
