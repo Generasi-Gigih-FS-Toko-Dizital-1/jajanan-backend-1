@@ -10,6 +10,7 @@ import CategoryMock from '../../../mocks/CategoryMock'
 import { type Vendor, type Category, type JajanItem } from '@prisma/client'
 import JajanItemManagementCreateRequest from '../../../../src/inners/models/value_objects/requests/jajan_item_management/JajanItemManagementCreateRequest'
 import JajanItemManagementPatchRequest from '../../../../src/inners/models/value_objects/requests/jajan_item_management/JajanItemManagementPatchRequest'
+import Authorization from '../../../../src/inners/models/value_objects/Authorization'
 
 chai.use(chaiHttp)
 chai.should()
@@ -18,11 +19,50 @@ describe('JajanItemControllerRest', () => {
   const vendorMock: VendorMock = new VendorMock()
   const categoryMock: CategoryMock = new CategoryMock()
   const jajanItemMock: JajanItemMock = new JajanItemMock(vendorMock, categoryMock)
+  const authVendorMock: VendorMock = new VendorMock()
   const oneDatastore = new OneDatastore()
+  let agent: ChaiHttp.Agent
+  let authorization: Authorization
+
+  before(async () => {
+    await waitUntil(() => server !== undefined)
+    await oneDatastore.connect()
+
+    if (oneDatastore.client === undefined) {
+      throw new Error('Client is undefined.')
+    }
+    await oneDatastore.client.vendor.createMany({
+      data: authVendorMock.data
+    })
+
+    agent = chai.request.agent(server)
+    const requestUser = authVendorMock.data[0]
+    const response = await agent
+      .post('/api/v1/authentications/vendors/login?method=email_and_password')
+      .send({
+        email: requestUser.email,
+        password: requestUser.password
+      })
+
+    response.should.has.status(200)
+    response.body.should.be.an('object')
+    response.body.should.has.property('message')
+    response.body.should.has.property('data')
+    response.body.data.should.has.property('session')
+    response.body.data.session.should.be.an('object')
+    response.body.data.session.should.has.property('account_id').equal(requestUser.id)
+    response.body.data.session.should.has.property('account_type').equal('VENDOR')
+    response.body.data.session.should.has.property('access_token')
+    response.body.data.session.should.has.property('refresh_token')
+    response.body.data.session.should.has.property('expired_at')
+
+    authorization = new Authorization(
+      response.body.data.session.access_token,
+      'Bearer'
+    )
+  })
 
   beforeEach(async () => {
-    await waitUntil(() => server !== undefined)
-
     await oneDatastore.connect()
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
@@ -82,6 +122,8 @@ describe('JajanItemControllerRest', () => {
       const response = await chai
         .request(server)
         .get(`/api/v1/jajan-items?page_number=${pageNumber}&page_size=${pageSize}`)
+        .set('Authorization', authorization.convertToString())
+        .send()
 
       response.should.has.status(200)
       response.body.should.be.an('object')
@@ -114,6 +156,7 @@ describe('JajanItemControllerRest', () => {
       const response = await chai
         .request(server)
         .post('/api/v1/jajan-items')
+        .set('Authorization', authorization.convertToString())
         .send(requestBody)
 
       response.should.has.status(201)
@@ -144,6 +187,7 @@ describe('JajanItemControllerRest', () => {
       const response = await chai
         .request(server)
         .patch(`/api/v1/jajan-items/${requestJajanItem.id}`)
+        .set('Authorization', authorization.convertToString())
         .send(requestBody)
 
       response.should.has.status(200)
@@ -167,6 +211,8 @@ describe('JajanItemControllerRest', () => {
       const response = await chai
         .request(server)
         .delete(`/api/v1/jajan-items/${requestJajanItem.id}`)
+        .set('Authorization', authorization.convertToString())
+        .send()
 
       response.should.has.status(200)
       if (oneDatastore.client === undefined) {
