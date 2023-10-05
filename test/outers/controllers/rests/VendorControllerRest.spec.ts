@@ -7,16 +7,19 @@ import { server } from '../../../../src/App'
 import waitUntil from 'async-wait-until'
 import VendorManagementCreateRequest
   from '../../../../src/inners/models/value_objects/requests/vendor_managements/VendorManagementCreateRequest'
-import { type Vendor } from '@prisma/client'
+import { type Admin, type Vendor } from '@prisma/client'
 import VendorManagementPatchRequest
   from '../../../../src/inners/models/value_objects/requests/vendor_managements/VendorManagementPatchRequest'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
+import AdminMock from '../../../mocks/AdminMock'
+import AdminLoginByEmailAndPasswordRequest
+  from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
 
 chai.use(chaiHttp)
 chai.should()
 
 describe('VendorControllerRest', () => {
-  const authVendorMock: VendorMock = new VendorMock()
+  const authAdminMock: AdminMock = new AdminMock()
   const vendorMock: VendorMock = new VendorMock()
   const oneDatastore: OneDatastore = new OneDatastore()
   let agent: ChaiHttp.Agent
@@ -29,18 +32,19 @@ describe('VendorControllerRest', () => {
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-    await oneDatastore.client.vendor.createMany({
-      data: authVendorMock.data
+    await oneDatastore.client.admin.createMany({
+      data: authAdminMock.data
     })
 
     agent = chai.request.agent(server)
-    const requestVendor = authVendorMock.data[0]
+    const requestAuthAdmin: Admin = authAdminMock.data[0]
+    const requestBodyLogin: AdminLoginByEmailAndPasswordRequest = new AdminLoginByEmailAndPasswordRequest(
+      requestAuthAdmin.email,
+      requestAuthAdmin.password
+    )
     const response = await agent
-      .post('/api/v1/authentications/vendors/login?method=email_and_password')
-      .send({
-        email: requestVendor.email,
-        password: requestVendor.password
-      })
+      .post('/api/v1/authentications/admins/login?method=email_and_password')
+      .send(requestBodyLogin)
 
     response.should.has.status(200)
     response.body.should.be.an('object')
@@ -48,8 +52,8 @@ describe('VendorControllerRest', () => {
     response.body.should.has.property('data')
     response.body.data.should.has.property('session')
     response.body.data.session.should.be.an('object')
-    response.body.data.session.should.has.property('account_id').equal(requestVendor.id)
-    response.body.data.session.should.has.property('account_type').equal('VENDOR')
+    response.body.data.session.should.has.property('account_id').equal(requestAuthAdmin.id)
+    response.body.data.session.should.has.property('account_type').equal('ADMIN')
     response.body.data.session.should.has.property('access_token')
     response.body.data.session.should.has.property('refresh_token')
     response.body.data.session.should.has.property('expired_at')
@@ -88,11 +92,11 @@ describe('VendorControllerRest', () => {
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-    await oneDatastore.client.vendor.deleteMany(
+    await oneDatastore.client.admin.deleteMany(
       {
         where: {
           id: {
-            in: authVendorMock.data.map((vendor: Vendor) => vendor.id)
+            in: authAdminMock.data.map((admin: Admin) => admin.id)
           }
         }
       }
