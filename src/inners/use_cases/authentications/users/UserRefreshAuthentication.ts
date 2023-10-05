@@ -21,15 +21,13 @@ export default class UserRefreshAuthentication {
   }
 
   refreshAccessToken = async (request: UserRefreshAccessTokenRequest): Promise<Result<Session | null>> => {
-    let foundUserById: Result<User>
-    try {
-      foundUserById = await this.userManagement.readOneById(
-        request.session.accountId
-      )
-    } catch (error) {
+    const foundUserById: Result<User | null> = await this.userManagement.readOneById(
+      request.session.accountId
+    )
+    if (foundUserById.status !== 200 || foundUserById.data === null) {
       return new Result<null>(
         404,
-        'User refresh access token failed, unknown email or password.',
+        'User refresh access token failed, user not found.',
         null
       )
     }

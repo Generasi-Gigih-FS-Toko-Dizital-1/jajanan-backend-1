@@ -85,26 +85,31 @@ export default class VendorControllerRest {
     const { id } = request.params
     this.vendorManagement
       .readOneById(id)
-      .then((result: Result<Vendor>) => {
-        const data: VendorManagementReadOneResponse = new VendorManagementReadOneResponse(
-          result.data.id,
-          result.data.fullName,
-          result.data.gender,
-          result.data.address,
-          result.data.username,
-          result.data.email,
-          result.data.balance,
-          result.data.experience,
-          result.data.jajanImageUrl,
-          result.data.jajanName,
-          result.data.jajanDescription,
-          result.data.status,
-          result.data.lastLatitude,
-          result.data.lastLongitude,
-          result.data.createdAt,
-          result.data.updatedAt
-        )
-        const responseBody: ResponseBody<VendorManagementReadOneResponse> = new ResponseBody<VendorManagementReadOneResponse>(
+      .then((result: Result<Vendor | null>) => {
+        let data: VendorManagementReadOneResponse | null
+        if (result.status === 200 && result.data !== null) {
+          data = new VendorManagementReadOneResponse(
+            result.data.id,
+            result.data.fullName,
+            result.data.gender,
+            result.data.address,
+            result.data.username,
+            result.data.email,
+            result.data.balance,
+            result.data.experience,
+            result.data.jajanImageUrl,
+            result.data.jajanName,
+            result.data.jajanDescription,
+            result.data.status,
+            result.data.lastLatitude,
+            result.data.lastLongitude,
+            result.data.createdAt,
+            result.data.updatedAt
+          )
+        } else {
+          data = null
+        }
+        const responseBody: ResponseBody<VendorManagementReadOneResponse | null> = new ResponseBody<VendorManagementReadOneResponse | null>(
           result.message,
           data
         )
@@ -156,10 +161,10 @@ export default class VendorControllerRest {
     const { id } = request.params
     this.vendorManagement
       .patchOneById(id, request.body)
-      .then((result: Result<Vendor>) => {
-        const responseBody: ResponseBody<VendorManagementPatchResponse> = new ResponseBody<VendorManagementPatchResponse>(
-          result.message,
-          new VendorManagementPatchResponse(
+      .then((result: Result<Vendor | null>) => {
+        let data: VendorManagementPatchResponse | null
+        if (result.status === 200 && result.data !== null) {
+          data = new VendorManagementPatchResponse(
             result.data.id,
             result.data.fullName,
             result.data.gender,
@@ -177,6 +182,12 @@ export default class VendorControllerRest {
             result.data.createdAt,
             result.data.updatedAt
           )
+        } else {
+          data = null
+        }
+        const responseBody: ResponseBody<VendorManagementPatchResponse | null> = new ResponseBody<VendorManagementPatchResponse | null>(
+          result.message,
+          data
         )
         response
           .status(result.status)
@@ -192,6 +203,13 @@ export default class VendorControllerRest {
     this.vendorManagement
       .deleteOneById(id)
       .then((result: Result<Vendor>) => {
+        const responseBody: ResponseBody<null> = new ResponseBody<null>(
+          result.message,
+          null
+        )
+        response
+          .status(result.status)
+          .send(responseBody)
         response.status(result.status).send()
       })
       .catch((error: Error) => {

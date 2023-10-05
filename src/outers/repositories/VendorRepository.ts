@@ -28,7 +28,7 @@ export default class VendorRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const foundVendor: Vendor[] | VendorAggregate[] = await this.oneDatastore.client.vendor.findMany(args)
@@ -49,7 +49,7 @@ export default class VendorRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const foundVendor: Vendor | VendorAggregate | null = await this.oneDatastore.client.vendor.findFirst(args)
@@ -70,7 +70,7 @@ export default class VendorRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const foundVendor: Vendor | VendorAggregate | null = await this.oneDatastore.client.vendor.findFirst(args)
@@ -91,7 +91,7 @@ export default class VendorRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const foundVendor: Vendor | VendorAggregate | null = await this.oneDatastore.client.vendor.findFirst(args)
@@ -113,7 +113,7 @@ export default class VendorRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const foundVendor: Vendor | VendorAggregate | null = await this.oneDatastore.client.vendor.findFirst(args)
@@ -135,7 +135,7 @@ export default class VendorRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const foundVendor: Vendor | VendorAggregate | null = await this.oneDatastore.client.vendor.findFirst(args)
@@ -154,7 +154,7 @@ export default class VendorRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const createdVendor: Vendor | VendorAggregate = await this.oneDatastore.client.vendor.create(args)
@@ -176,7 +176,7 @@ export default class VendorRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const patchedVendor: Vendor | VendorAggregate = await this.oneDatastore.client.vendor.update(args)
@@ -197,7 +197,7 @@ export default class VendorRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const deletedVendor: Vendor | VendorAggregate = await this.oneDatastore.client.vendor.delete(args)

@@ -12,6 +12,7 @@ import UserLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/users/UserLoginByEmailAndPasswordRequest'
 import UserRefreshAccessTokenRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/users/UserRefreshAccessTokenRequest'
+import { randomUUID } from 'crypto'
 
 chai.use(chaiHttp)
 chai.should()
@@ -113,8 +114,8 @@ describe('UserAuthenticationControllerRest', () => {
       const requestBody: UserRegisterByEmailAndPasswordRequest = new UserRegisterByEmailAndPasswordRequest(
         'fullName2',
         'MALE',
-        'username2',
-        'email2@mail.com',
+        randomUUID(),
+        `${randomUUID()}@mail.com`,
         'password2',
         'address2',
         2,

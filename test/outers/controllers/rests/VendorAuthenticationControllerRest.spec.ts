@@ -12,6 +12,7 @@ import VendorLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/vendors/VendorLoginByEmailAndPasswordRequest'
 import VendorRefreshAccessTokenRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/vendors/VendorRefreshAccessTokenRequest'
+import { randomUUID } from 'crypto'
 
 chai.use(chaiHttp)
 chai.should()
@@ -113,8 +114,8 @@ describe('VendorAuthenticationControllerRest', () => {
       const requestBody: VendorRegisterByEmailAndPasswordRequest = new VendorRegisterByEmailAndPasswordRequest(
         'fullName2',
         'MALE',
-        'username2',
-        'email2@mail.com',
+        randomUUID(),
+        `${randomUUID()}@mail.com`,
         'password2',
         'address2',
         'https://placehold.co/400x400?text=jajanImageUrl2',

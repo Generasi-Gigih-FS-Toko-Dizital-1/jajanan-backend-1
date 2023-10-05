@@ -28,8 +28,17 @@ export default class VendorManagement {
     )
   }
 
-  readOneById = async (id: string): Promise<Result<Vendor>> => {
-    const foundVendor: Vendor = await this.vendorRepository.readOneById(id)
+  readOneById = async (id: string): Promise<Result<Vendor | null>> => {
+    let foundVendor: Vendor
+    try {
+      foundVendor = await this.vendorRepository.readOneById(id)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'Vendor read one by id failed, vendor is not found.',
+        null
+      )
+    }
     return new Result<Vendor>(
       200,
       'Vendor read one by id succeed.',
@@ -37,8 +46,17 @@ export default class VendorManagement {
     )
   }
 
-  readOneByUsername = async (username: string): Promise<Result<Vendor>> => {
-    const foundVendor: Vendor = await this.vendorRepository.readOneByUsername(username)
+  readOneByUsername = async (username: string): Promise<Result<Vendor | null>> => {
+    let foundVendor: Vendor
+    try {
+      foundVendor = await this.vendorRepository.readOneByUsername(username)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'Vendor read one by username failed, vendor is not found.',
+        null
+      )
+    }
     return new Result<Vendor>(
       200,
       'Vendor read one by username succeed.',
@@ -46,8 +64,17 @@ export default class VendorManagement {
     )
   }
 
-  readOneByEmail = async (email: string): Promise<Result<Vendor>> => {
-    const foundVendor: Vendor = await this.vendorRepository.readOneByEmail(email)
+  readOneByEmail = async (email: string): Promise<Result<Vendor | null>> => {
+    let foundVendor: Vendor
+    try {
+      foundVendor = await this.vendorRepository.readOneByEmail(email)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'Vendor read one by email failed, vendor is not found.',
+        null
+      )
+    }
     return new Result<Vendor>(
       200,
       'Vendor read one by email succeed.',
@@ -55,8 +82,17 @@ export default class VendorManagement {
     )
   }
 
-  readOneByUsernameAndPassword = async (username: string, password: string): Promise<Result<Vendor>> => {
-    const foundVendor: Vendor = await this.vendorRepository.readOneByUsernameAndPassword(username, password)
+  readOneByUsernameAndPassword = async (username: string, password: string): Promise<Result<Vendor | null>> => {
+    let foundVendor: Vendor
+    try {
+      foundVendor = await this.vendorRepository.readOneByUsernameAndPassword(username, password)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'Vendor read one by username and password failed, vendor is not found.',
+        null
+      )
+    }
     return new Result<Vendor>(
       200,
       'Vendor read one by username and password succeed.',
@@ -64,8 +100,17 @@ export default class VendorManagement {
     )
   }
 
-  readOneByEmailAndPassword = async (email: string, password: string): Promise<Result<Vendor>> => {
-    const foundVendor: Vendor = await this.vendorRepository.readOneByEmailAndPassword(email, password)
+  readOneByEmailAndPassword = async (email: string, password: string): Promise<Result<Vendor | null>> => {
+    let foundVendor: Vendor
+    try {
+      foundVendor = await this.vendorRepository.readOneByEmailAndPassword(email, password)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'Vendor read one by email and password failed, vendor is not found.',
+        null
+      )
+    }
     return new Result<Vendor>(
       200,
       'Vendor read one by email and password succeed.',
@@ -121,17 +166,22 @@ export default class VendorManagement {
     )
   }
 
-  patchOneById = async (id: string, request: VendorManagementPatchRequest): Promise<Result<Vendor>> => {
+  patchOneById = async (id: string, request: VendorManagementPatchRequest): Promise<Result<Vendor | null>> => {
     const salt: string | undefined = process.env.BCRYPT_SALT
     if (salt === undefined) {
       throw new Error('Salt is undefined.')
     }
 
-    if (request.password !== undefined) {
-      request.password = bcrypt.hashSync(request.password, salt)
-    }
+    request.password = bcrypt.hashSync(request.password, salt)
 
-    const foundVendor: Result<Vendor> = await this.readOneById(id)
+    const foundVendor: Result<Vendor | null> = await this.readOneById(id)
+    if (foundVendor.status !== 200 || foundVendor.data === null) {
+      return new Result<null>(
+        foundVendor.status,
+        'Vendor patch one by id failed, vendor is not found.',
+        null
+      )
+    }
     this.objectUtility.patch(foundVendor.data, request)
     const patchedVendor: Vendor = await this.vendorRepository.patchOneById(id, foundVendor.data)
     return new Result<Vendor>(

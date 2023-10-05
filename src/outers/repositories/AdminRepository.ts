@@ -18,7 +18,7 @@ export default class AdminRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const foundAdmin: Admin[] = await this.oneDatastore.client.admin.findMany(args)
@@ -36,25 +36,7 @@ export default class AdminRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
-    }
-
-    const foundAdmin: Admin | null = await this.oneDatastore.client.admin.findFirst(args)
-    if (foundAdmin === null) {
-      throw new Error('Found admins is null.')
-    }
-    return foundAdmin
-  }
-
-  readOneByAdminname = async (adminname: string): Promise<Admin > => {
-    const args: any = {
-      where: {
-        adminname
-      }
-    }
-
-    if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const foundAdmin: Admin | null = await this.oneDatastore.client.admin.findFirst(args)
@@ -72,7 +54,7 @@ export default class AdminRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const foundAdmin: Admin | null = await this.oneDatastore.client.admin.findFirst(args)
@@ -82,16 +64,16 @@ export default class AdminRepository {
     return foundAdmin
   }
 
-  readOneByAdminnameAndPassword = async (adminname: string, password: string): Promise<Admin > => {
+  readOneByUsernameAndPassword = async (username: string, password: string): Promise<Admin > => {
     const args: any = {
       where: {
-        adminname,
+        username,
         password
       }
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const foundAdmin: Admin | null = await this.oneDatastore.client.admin.findFirst(args)
@@ -110,7 +92,7 @@ export default class AdminRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const foundAdmin: Admin | null = await this.oneDatastore.client.admin.findFirst(args)
@@ -126,7 +108,7 @@ export default class AdminRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const createdAdmin: Admin = await this.oneDatastore.client.admin.create(args)
@@ -145,7 +127,7 @@ export default class AdminRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const patchedAdmin: Admin = await this.oneDatastore.client.admin.update(args)
@@ -163,7 +145,7 @@ export default class AdminRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const deletedAdmin: Admin = await this.oneDatastore.client.admin.delete(args)

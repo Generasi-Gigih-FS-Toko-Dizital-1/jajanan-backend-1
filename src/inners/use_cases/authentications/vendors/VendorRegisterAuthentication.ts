@@ -1,7 +1,7 @@
 import type VendorManagement from '../../managements/VendorManagement'
 
 import Result from '../../../models/value_objects/Result'
-import { type Vendor } from '@prisma/client'
+import { type User, type Vendor } from '@prisma/client'
 import type VendorRegisterByEmailAndPasswordRequest
   from '../../../models/value_objects/requests/authentications/vendors/VendorRegisterByEmailAndPasswordRequest'
 import { randomUUID } from 'crypto'
@@ -14,34 +14,20 @@ export default class VendorRegisterAuthentication {
   }
 
   registerByEmailAndPassword = async (request: VendorRegisterByEmailAndPasswordRequest): Promise<Result<Vendor | null>> => {
-    let isVendorEmailFound: boolean
-    try {
-      await this.vendorManagement.readOneByEmail(request.email)
-      isVendorEmailFound = true
-    } catch (error) {
-      isVendorEmailFound = false
-    }
-
-    if (isVendorEmailFound) {
+    const foundVendorByEmail: Result<Vendor | null> = await this.vendorManagement.readOneByEmail(request.email)
+    if (foundVendorByEmail.status === 200 && foundVendorByEmail.data !== null) {
       return new Result<null>(
         409,
-        'Register by email and password failed, email already exists.',
+        'Vendor register by email and password failed, email already exists.',
         null
       )
     }
 
-    let isVendorUsernameFound: boolean
-    try {
-      await this.vendorManagement.readOneByUsername(request.username)
-      isVendorUsernameFound = true
-    } catch (error) {
-      isVendorUsernameFound = false
-    }
-
-    if (isVendorUsernameFound) {
+    const foundVendorByUsername: Result<Vendor | null> = await this.vendorManagement.readOneByUsername(request.username)
+    if (foundVendorByUsername.status === 200 && foundVendorByUsername.data !== null) {
       return new Result<null>(
         409,
-        'Register by email and password failed, username already exists.',
+        'Vendor register by email and password failed, username already exists.',
         null
       )
     }

@@ -21,15 +21,13 @@ export default class VendorRefreshAuthentication {
   }
 
   refreshAccessToken = async (request: VendorRefreshAccessTokenRequest): Promise<Result<Session | null>> => {
-    let foundVendorById: Result<Vendor>
-    try {
-      foundVendorById = await this.vendorManagement.readOneById(
-        request.session.accountId
-      )
-    } catch (error) {
+    const foundVendorById: Result<Vendor | null> = await this.vendorManagement.readOneById(
+      request.session.accountId
+    )
+    if (foundVendorById.status !== 200 || foundVendorById.data === null) {
       return new Result<null>(
         404,
-        'Vendor refresh access token failed, unknown email or password.',
+        'Vendor refresh access token failed, vendor not found.',
         null
       )
     }

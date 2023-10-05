@@ -31,7 +31,7 @@ export default class JajanItemRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const foundJajanItems: JajanItem[] | JajanItemAggregate[] = await this.oneDatastore.client.jajanItem.findMany(args)
@@ -50,7 +50,7 @@ export default class JajanItemRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const createdItem: JajanItem | JajanItemAggregate = await this.oneDatastore.client.jajanItem.create(args)
@@ -71,7 +71,7 @@ export default class JajanItemRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const foundJajanItem: JajanItem | JajanItemAggregate | null = await this.oneDatastore.client.jajanItem.findFirst(args)
@@ -93,7 +93,7 @@ export default class JajanItemRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const patchedUser: JajanItem | JajanItemAggregate = await this.oneDatastore.client.jajanItem.update(args)
@@ -114,7 +114,7 @@ export default class JajanItemRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const deletedJajanItem: JajanItem | JajanItemAggregate = await this.oneDatastore.client.jajanItem.delete(args)
