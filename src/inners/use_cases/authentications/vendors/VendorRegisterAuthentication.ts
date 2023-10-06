@@ -53,7 +53,14 @@ export default class VendorRegisterAuthentication {
       deletedAt: null
     }
 
-    const createdVendor: Result<Vendor> = await this.vendorManagement.createOneRaw(vendorToCreate)
+    const createdVendor: Result<Vendor | null> = await this.vendorManagement.createOneRaw(vendorToCreate)
+    if (createdVendor.status !== 201 || createdVendor.data === null) {
+      return new Result<null>(
+        createdVendor.status,
+            `Vendor register by email and password failed, ${createdVendor.message}`,
+            null
+      )
+    }
 
     return new Result<Vendor>(
       201,
