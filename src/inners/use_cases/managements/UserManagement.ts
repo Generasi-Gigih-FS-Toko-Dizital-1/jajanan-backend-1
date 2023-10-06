@@ -118,7 +118,7 @@ export default class UserManagement {
     )
   }
 
-  createOne = async (request: UserManagementCreateRequest): Promise<Result<User>> => {
+  createOne = async (request: UserManagementCreateRequest): Promise<Result<User | null>> => {
     const salt: string | undefined = process.env.BCRYPT_SALT
     if (salt === undefined) {
       throw new Error('Salt is undefined.')
@@ -140,11 +140,18 @@ export default class UserManagement {
       createdAt: new Date(),
       deletedAt: null
     }
-    const createdUser: any = await this.userRepository.createOne(userToCreate)
+    const createdUser: Result<User | null> = await this.createOneRaw(userToCreate)
+    if (createdUser.status !== 201 || createdUser.data === null) {
+      return new Result<null>(
+        500,
+        `User create one failed, ${createdUser.message}`,
+        null
+      )
+    }
     return new Result<User>(
       201,
       'User create one succeed.',
-      createdUser
+      createdUser.data
     )
   }
 
@@ -170,10 +177,26 @@ export default class UserManagement {
 
     request.password = bcrypt.hashSync(request.password, salt)
 
+    const patchedUser: Result<User | null> = await this.patchOneRawById(id, request)
+    if (patchedUser.status !== 200 || patchedUser.data === null) {
+      return new Result<null>(
+        patchedUser.status,
+        `User patch one by id failed, ${patchedUser.message}`,
+        null
+      )
+    }
+    return new Result<User>(
+      200,
+      'User patch one by id succeed.',
+      patchedUser.data
+    )
+  }
+
+  patchOneRawById = async (id: string, request: UserManagementPatchRequest): Promise<Result<User | null>> => {
     const foundUser: Result<User | null> = await this.readOneById(id)
     if (foundUser.status !== 200 || foundUser.data === null) {
       return new Result<null>(
-        foundUser.status,
+        404,
         'User patch one by id failed, user is not found.',
         null
       )

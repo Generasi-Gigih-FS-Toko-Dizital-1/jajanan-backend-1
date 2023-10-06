@@ -93,9 +93,7 @@ export default class TransactionHistoryRepository {
     }
 
     const createdTransactionHistory: TransactionHistory | TransactionHistoryAggregate = await this.oneDatastore.client.transactionHistory.create(args)
-    if (createdTransactionHistory === undefined) {
-      throw new Error('Created transactionHistory is undefined.')
-    }
+
     return createdTransactionHistory
   }
 
