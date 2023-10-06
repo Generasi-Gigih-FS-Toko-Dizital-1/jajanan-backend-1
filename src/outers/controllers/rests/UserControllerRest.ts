@@ -117,22 +117,27 @@ export default class UserControllerRest {
   createOne = (request: Request, response: Response): void => {
     this.userManagement
       .createOne(request.body)
-      .then((result: Result<User>) => {
-        const data: UserManagementCreateResponse = new UserManagementCreateResponse(
-          result.data.id,
-          result.data.fullName,
-          result.data.gender,
-          result.data.address,
-          result.data.username,
-          result.data.email,
-          result.data.balance,
-          result.data.experience,
-          result.data.lastLatitude,
-          result.data.lastLongitude,
-          result.data.createdAt,
-          result.data.updatedAt
-        )
-        const responseBody: ResponseBody<UserManagementCreateResponse> = new ResponseBody<UserManagementCreateResponse>(
+      .then((result: Result<User | null>) => {
+        let data: UserManagementCreateResponse | null
+        if (result.status === 201 && result.data !== null) {
+          data = new UserManagementCreateResponse(
+            result.data.id,
+            result.data.fullName,
+            result.data.gender,
+            result.data.address,
+            result.data.username,
+            result.data.email,
+            result.data.balance,
+            result.data.experience,
+            result.data.lastLatitude,
+            result.data.lastLongitude,
+            result.data.createdAt,
+            result.data.updatedAt
+          )
+        } else {
+          data = null
+        }
+        const responseBody: ResponseBody<UserManagementCreateResponse | null> = new ResponseBody<UserManagementCreateResponse | null>(
           result.message,
           data
         )

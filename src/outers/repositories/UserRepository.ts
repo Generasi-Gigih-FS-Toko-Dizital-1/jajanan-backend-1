@@ -160,9 +160,7 @@ export default class UserRepository {
     }
 
     const createdUser: User | UserAggregate = await this.oneDatastore.client.user.create(args)
-    if (createdUser === undefined) {
-      throw new Error('Created user is undefined.')
-    }
+
     return createdUser
   }
 

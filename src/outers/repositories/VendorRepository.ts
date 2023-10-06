@@ -158,9 +158,7 @@ export default class VendorRepository {
     }
 
     const createdVendor: Vendor | VendorAggregate = await this.oneDatastore.client.vendor.create(args)
-    if (createdVendor === undefined) {
-      throw new Error('Created vendor is undefined.')
-    }
+
     return createdVendor
   }
 
