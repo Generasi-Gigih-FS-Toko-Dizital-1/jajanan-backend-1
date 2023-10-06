@@ -26,7 +26,8 @@
 		"redis": "^4.6.10",
 		"socket.io": "^4.7.1",
 		"socket.io-client": "^4.7.1",
-		"underscore": "^1.13.6"
+		"underscore": "^1.13.6",
+		"xendit-node": "^3.2.0"
 	},
 	"devDependencies": {
 		"@istanbuljs/nyc-config-typescript": "^1.0.2",

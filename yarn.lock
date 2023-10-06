@@ -4702,6 +4702,11 @@ ws@~8.11.0:
   resolved "https://registry.yarnpkg.com/ws/-/ws-8.11.0.tgz#6a0d36b8edfd9f96d8b25683db2f8d7de6e8e143"
   integrity sha512-HPG3wQd9sNQoT9xHyNCXoDUa+Xw/VevmY9FoHyQ+g+rrMn4j6FB4np7Z0OhdTgjx6MgQLK7jwSy1YecU1+4Asg==
 
+xendit-node@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/xendit-node/-/xendit-node-3.2.0.tgz#e67985324dfedc0e6a09a7c2307db062f9612457"
+  integrity sha512-KuBiAmjeX0t2Ufolrvie1fiqaw5YcgfvvnKDo/Flqgsdczm5MgoqGtHnmF/4gu/EQdcBHWg7qf4kHTClsaJMYg==
+
 xmlhttprequest-ssl@~2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/xmlhttprequest-ssl/-/xmlhttprequest-ssl-2.0.0.tgz#91360c86b914e67f44dce769180027c0da618c67"
