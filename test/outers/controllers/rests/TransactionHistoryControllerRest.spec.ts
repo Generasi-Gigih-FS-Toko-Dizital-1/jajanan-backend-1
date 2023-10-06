@@ -4,27 +4,39 @@ import { beforeEach, describe, it } from 'mocha'
 import OneDatastore from '../../../../src/outers/datastores/OneDatastore'
 import { server } from '../../../../src/App'
 import waitUntil from 'async-wait-until'
+import TransactionHistoryMock from '../../../mocks/TransactionHistoryMock'
+import UserMock from '../../../mocks/UserMock'
 import JajanItemMock from '../../../mocks/JajanItemMock'
-import VendorMock from '../../../mocks/VendorMock'
-import CategoryMock from '../../../mocks/CategoryMock'
-import { type Admin, type Category, type JajanItem, type Prisma, type Vendor } from '@prisma/client'
-import JajanItemManagementCreateRequest
-  from '../../../../src/inners/models/value_objects/requests/jajan_item_management/JajanItemManagementCreateRequest'
-import JajanItemManagementPatchRequest
-  from '../../../../src/inners/models/value_objects/requests/jajan_item_management/JajanItemManagementPatchRequest'
+import {
+  type Admin,
+  type Category,
+  type JajanItem,
+  type Prisma,
+  type TransactionHistory,
+  type User,
+  type Vendor
+} from '@prisma/client'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
 import AdminMock from '../../../mocks/AdminMock'
 import AdminLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
+import TransactionHistoryManagementCreateRequest
+  from '../../../../src/inners/models/value_objects/requests/transaction_history_management/TransactionHistoryManagementCreateRequest'
+import TransactionHistoryManagementPatchRequest
+  from '../../../../src/inners/models/value_objects/requests/transaction_history_management/TransactionHistoryManagementPatchRequest'
+import VendorMock from '../../../mocks/VendorMock'
+import CategoryMock from '../../../mocks/CategoryMock'
 
 chai.use(chaiHttp)
 chai.should()
 
-describe('JajanItemControllerRest', () => {
+describe('TransactionHistoryControllerRest', () => {
   const authAdminMock: AdminMock = new AdminMock()
+  const userMock: UserMock = new UserMock()
   const vendorMock: VendorMock = new VendorMock()
   const categoryMock: CategoryMock = new CategoryMock()
   const jajanItemMock: JajanItemMock = new JajanItemMock(vendorMock, categoryMock)
+  const transactionHistoryMock: TransactionHistoryMock = new TransactionHistoryMock(userMock, jajanItemMock)
   const oneDatastore = new OneDatastore()
   let agent: ChaiHttp.Agent
   let authorization: Authorization
@@ -74,6 +86,10 @@ describe('JajanItemControllerRest', () => {
       throw new Error('Client is undefined.')
     }
 
+    await oneDatastore.client.user.createMany({
+      data: userMock.data
+    })
+
     await oneDatastore.client.vendor.createMany({
       data: vendorMock.data
     })
@@ -85,12 +101,24 @@ describe('JajanItemControllerRest', () => {
     await oneDatastore.client.jajanItem.createMany({
       data: jajanItemMock.data
     })
+
+    await oneDatastore.client.transactionHistory.createMany({
+      data: transactionHistoryMock.data
+    })
   })
 
   afterEach(async () => {
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
+
+    await oneDatastore.client.transactionHistory.deleteMany({
+      where: {
+        id: {
+          in: transactionHistoryMock.data.map((transactionHistory: TransactionHistory) => transactionHistory.id)
+        }
+      }
+    })
 
     await oneDatastore.client.jajanItem.deleteMany({
       where: {
@@ -118,6 +146,16 @@ describe('JajanItemControllerRest', () => {
       }
     )
 
+    await oneDatastore.client.user.deleteMany(
+      {
+        where: {
+          id: {
+            in: userMock.data.map((user: User) => user.id)
+          }
+        }
+      }
+    )
+
     await oneDatastore.disconnect()
   })
 
@@ -137,12 +175,12 @@ describe('JajanItemControllerRest', () => {
     await oneDatastore.disconnect()
   })
 
-  describe('GET /api/v1/jajan-items?page_number={}&page_size={}', () => {
+  describe('GET /api/v1/transaction-histories?page_number={}&page_size={}', () => {
     it('should return 200 OK', async () => {
       const pageNumber: number = 1
-      const pageSize: number = jajanItemMock.data.length
+      const pageSize: number = transactionHistoryMock.data.length
       const response = await agent
-        .get(`/api/v1/jajan-items?page_number=${pageNumber}&page_size=${pageSize}`)
+        .get(`/api/v1/transaction-histories?page_number=${pageNumber}&page_size=${pageSize}`)
         .set('Authorization', authorization.convertToString())
         .send()
 
@@ -150,27 +188,28 @@ describe('JajanItemControllerRest', () => {
       response.body.should.be.an('object')
       response.body.should.has.property('message')
       response.body.should.has.property('data')
-      response.body.data.should.has.property('total_jajan_items')
-      response.body.data.should.has.property('jajan_items')
-      response.body.data.jajan_items.should.be.an('array')
-      response.body.data.jajan_items.forEach((jajanItem: JajanItem) => {
-        jajanItem.should.has.property('id')
-        jajanItem.should.has.property('vendor_id')
-        jajanItem.should.has.property('category_id')
-        jajanItem.should.has.property('name')
-        jajanItem.should.has.property('price')
-        jajanItem.should.has.property('image_url')
-        jajanItem.should.has.property('updated_at')
-        jajanItem.should.has.property('created_at')
+      response.body.data.should.has.property('total_transaction_histories')
+      response.body.data.should.has.property('transaction_histories')
+      response.body.data.transaction_histories.should.be.an('array')
+      response.body.data.transaction_histories.forEach((transactionHistory: TransactionHistory) => {
+        transactionHistory.should.has.property('id')
+        transactionHistory.should.has.property('user_id')
+        transactionHistory.should.has.property('jajan_item_id')
+        transactionHistory.should.has.property('amount')
+        transactionHistory.should.has.property('payment_method')
+        transactionHistory.should.has.property('last_latitude')
+        transactionHistory.should.has.property('last_longitude')
+        transactionHistory.should.has.property('updated_at')
+        transactionHistory.should.has.property('created_at')
       })
     })
   })
 
-  describe('GET /api/v1/jajan-items/:id', () => {
+  describe('GET /api/v1/transaction-histories/:id', () => {
     it('should return 200 OK', async () => {
-      const requestJajanItem: JajanItem = jajanItemMock.data[0]
+      const requestTransactionHistory: TransactionHistory = transactionHistoryMock.data[0]
       const response = await agent
-        .get(`/api/v1/jajan-items/${requestJajanItem.id}`)
+        .get(`/api/v1/transaction-histories/${requestTransactionHistory.id}`)
         .set('Authorization', authorization.convertToString())
         .send()
 
@@ -179,29 +218,31 @@ describe('JajanItemControllerRest', () => {
       response.body.should.has.property('message')
       response.body.should.has.property('data')
       response.body.data.should.be.an('object')
-      response.body.data.should.has.property('id').equal(requestJajanItem.id)
-      response.body.data.should.has.property('vendor_id').equal(requestJajanItem.vendorId)
-      response.body.data.should.has.property('category_id').equal(requestJajanItem.categoryId)
-      response.body.data.should.has.property('name').equal(requestJajanItem.name)
-      response.body.data.should.has.property('price').equal(requestJajanItem.price)
-      response.body.data.should.has.property('image_url').equal(requestJajanItem.imageUrl)
-      response.body.data.should.has.property('updated_at').equal(requestJajanItem.updatedAt.toISOString())
-      response.body.data.should.has.property('created_at').equal(requestJajanItem.createdAt.toISOString())
+      response.body.data.should.has.property('id').equal(requestTransactionHistory.id)
+      response.body.data.should.has.property('user_id').equal(requestTransactionHistory.userId)
+      response.body.data.should.has.property('jajan_item_id').equal(requestTransactionHistory.jajanItemId)
+      response.body.data.should.has.property('amount').equal(requestTransactionHistory.amount)
+      response.body.data.should.has.property('payment_method').equal(requestTransactionHistory.paymentMethod)
+      response.body.data.should.has.property('last_latitude').equal(requestTransactionHistory.lastLatitude)
+      response.body.data.should.has.property('last_longitude').equal(requestTransactionHistory.lastLongitude)
+      response.body.data.should.has.property('updated_at').equal(requestTransactionHistory.updatedAt.toISOString())
+      response.body.data.should.has.property('created_at').equal(requestTransactionHistory.createdAt.toISOString())
     })
   })
 
-  describe('POST /api/v1/jajan-items', () => {
+  describe('POST /api/v1/transaction-histories', () => {
     it('should return 201 CREATED', async () => {
-      const requestBody: JajanItemManagementCreateRequest = new JajanItemManagementCreateRequest(
-        jajanItemMock.data[0].vendorId,
-        jajanItemMock.data[0].categoryId,
-        'name2',
-        2.0,
-        'https://placehold.co/400x400?text=imageUrl2'
+      const requestBody: TransactionHistoryManagementCreateRequest = new TransactionHistoryManagementCreateRequest(
+        transactionHistoryMock.data[0].userId,
+        transactionHistoryMock.data[0].jajanItemId,
+        transactionHistoryMock.data[0].amount,
+        transactionHistoryMock.data[0].paymentMethod,
+        transactionHistoryMock.data[0].lastLatitude,
+        transactionHistoryMock.data[0].lastLongitude
       )
 
       const response = await agent
-        .post('/api/v1/jajan-items')
+        .post('/api/v1/transaction-histories')
         .set('Authorization', authorization.convertToString())
         .send(requestBody)
 
@@ -211,18 +252,19 @@ describe('JajanItemControllerRest', () => {
       response.body.should.has.property('data')
       response.body.data.should.be.an('object')
       response.body.data.should.has.property('id')
-      response.body.data.should.has.property('vendor_id').equal(requestBody.vendorId)
-      response.body.data.should.has.property('category_id').equal(requestBody.categoryId)
-      response.body.data.should.has.property('name').equal(requestBody.name)
-      response.body.data.should.has.property('price').equal(requestBody.price)
-      response.body.data.should.has.property('image_url').equal(requestBody.imageUrl)
+      response.body.data.should.has.property('user_id').equal(requestBody.userId)
+      response.body.data.should.has.property('jajan_item_id').equal(requestBody.jajanItemId)
+      response.body.data.should.has.property('amount').equal(requestBody.amount)
+      response.body.data.should.has.property('payment_method').equal(requestBody.paymentMethod)
+      response.body.data.should.has.property('last_latitude').equal(requestBody.lastLatitude)
+      response.body.data.should.has.property('last_longitude').equal(requestBody.lastLongitude)
       response.body.data.should.has.property('updated_at')
       response.body.data.should.has.property('created_at')
 
       if (oneDatastore.client === undefined) {
         throw new Error('oneDatastore client is undefined')
       }
-      const deleteResult: Prisma.BatchPayload = await oneDatastore.client.jajanItem.deleteMany({
+      const deleteResult: Prisma.BatchPayload = await oneDatastore.client.transactionHistory.deleteMany({
         where: {
           id: response.body.data.id
         }
@@ -231,19 +273,20 @@ describe('JajanItemControllerRest', () => {
     })
   })
 
-  describe('PATCH /api/v1/jajan-items/:id', () => {
+  describe('PATCH /api/v1/transaction-histories/:id', () => {
     it('should return 200 OK', async () => {
-      const requestJajanItem: JajanItem = jajanItemMock.data[0]
-      const requestBody: JajanItemManagementPatchRequest = new JajanItemManagementPatchRequest(
-        vendorMock.data[1].id,
-        categoryMock.data[1].id,
-        `patched${requestJajanItem.name}`,
-        requestJajanItem.price + 1,
-        'https://placehold.co/400x400?text=patched'
+      const requestTransactionHistory: TransactionHistory = transactionHistoryMock.data[0]
+      const requestBody: TransactionHistoryManagementPatchRequest = new TransactionHistoryManagementPatchRequest(
+        transactionHistoryMock.data[1].userId,
+        transactionHistoryMock.data[1].jajanItemId,
+        transactionHistoryMock.data[1].amount,
+        transactionHistoryMock.data[1].paymentMethod,
+        transactionHistoryMock.data[1].lastLatitude,
+        transactionHistoryMock.data[1].lastLongitude
       )
 
       const response = await agent
-        .patch(`/api/v1/jajan-items/${requestJajanItem.id}`)
+        .patch(`/api/v1/transaction-histories/${requestTransactionHistory.id}`)
         .set('Authorization', authorization.convertToString())
         .send(requestBody)
 
@@ -253,22 +296,23 @@ describe('JajanItemControllerRest', () => {
       response.body.should.has.property('data')
       response.body.data.should.be.an('object')
       response.body.data.should.has.property('id')
-      response.body.data.should.has.property('vendor_id').equal(requestBody.vendorId)
-      response.body.data.should.has.property('category_id').equal(requestBody.categoryId)
-      response.body.data.should.has.property('name').equal(requestBody.name)
-      response.body.data.should.has.property('price').equal(requestBody.price)
-      response.body.data.should.has.property('image_url').equal(requestBody.imageUrl)
+      response.body.data.should.has.property('user_id').equal(requestBody.userId)
+      response.body.data.should.has.property('jajan_item_id').equal(requestBody.jajanItemId)
+      response.body.data.should.has.property('amount').equal(requestBody.amount)
+      response.body.data.should.has.property('payment_method').equal(requestBody.paymentMethod)
+      response.body.data.should.has.property('last_latitude').equal(requestBody.lastLatitude)
+      response.body.data.should.has.property('last_longitude').equal(requestBody.lastLongitude)
       response.body.data.should.has.property('updated_at')
       response.body.data.should.has.property('created_at')
     })
   })
 
-  describe('DELETE /api/v1/jajan-items/:id', () => {
+  describe('DELETE /api/v1/transaction-histories/:id', () => {
     it('should return 200 OK', async () => {
-      const requestJajanItem: JajanItem = jajanItemMock.data[0]
+      const requestTransactionHistory: TransactionHistory = transactionHistoryMock.data[0]
 
       const response = await agent
-        .delete(`/api/v1/jajan-items/${requestJajanItem.id}`)
+        .delete(`/api/v1/transaction-histories/${requestTransactionHistory.id}`)
         .set('Authorization', authorization.convertToString())
         .send()
 
@@ -281,9 +325,9 @@ describe('JajanItemControllerRest', () => {
       if (oneDatastore.client === undefined) {
         throw new Error('oneDatastore client is undefined')
       }
-      const result: JajanItem | null = await oneDatastore.client.jajanItem.findFirst({
+      const result: TransactionHistory | null = await oneDatastore.client.transactionHistory.findFirst({
         where: {
-          id: requestJajanItem.id
+          id: requestTransactionHistory.id
         }
       })
       assert.isNull(result)

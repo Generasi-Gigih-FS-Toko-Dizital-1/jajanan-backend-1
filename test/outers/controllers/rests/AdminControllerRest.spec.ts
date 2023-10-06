@@ -7,7 +7,7 @@ import { server } from '../../../../src/App'
 import waitUntil from 'async-wait-until'
 import AdminManagementCreateRequest
   from '../../../../src/inners/models/value_objects/requests/admin_managements/AdminManagementCreateRequest'
-import { type Admin } from '@prisma/client'
+import { type Admin, type Prisma } from '@prisma/client'
 import AdminManagementPatchRequest
   from '../../../../src/inners/models/value_objects/requests/admin_managements/AdminManagementPatchRequest'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
@@ -157,8 +157,8 @@ describe('AdminControllerRest', () => {
       response.body.data.should.has.property('full_name').equal(requestAdmin.fullName)
       response.body.data.should.has.property('email').equal(requestAdmin.email)
       response.body.data.should.has.property('gender').equal(requestAdmin.gender)
-      response.body.data.should.has.property('created_at')
-      response.body.data.should.has.property('updated_at')
+      response.body.data.should.has.property('updated_at').equal(requestAdmin.updatedAt.toISOString())
+      response.body.data.should.has.property('created_at').equal(requestAdmin.updatedAt.toISOString())
     })
   })
 
@@ -185,8 +185,18 @@ describe('AdminControllerRest', () => {
       response.body.data.should.has.property('full_name').equal(requestBody.fullName)
       response.body.data.should.has.property('email').equal(requestBody.email)
       response.body.data.should.has.property('gender').equal(requestBody.gender)
-      response.body.data.should.has.property('created_at')
       response.body.data.should.has.property('updated_at')
+      response.body.data.should.has.property('created_at')
+
+      if (oneDatastore.client === undefined) {
+        throw new Error('oneDatastore client is undefined')
+      }
+      const deleteResult: Prisma.BatchPayload = await oneDatastore.client.admin.deleteMany({
+        where: {
+          id: response.body.data.id
+        }
+      })
+      deleteResult.should.has.property('count').greaterThanOrEqual(1)
     })
   })
 
@@ -214,8 +224,8 @@ describe('AdminControllerRest', () => {
       response.body.data.should.has.property('full_name').equal(requestBody.fullName)
       response.body.data.should.has.property('email').equal(requestBody.email)
       response.body.data.should.has.property('gender').equal(requestBody.gender)
-      response.body.data.should.has.property('created_at')
       response.body.data.should.has.property('updated_at')
+      response.body.data.should.has.property('created_at')
     })
   })
 
@@ -229,6 +239,11 @@ describe('AdminControllerRest', () => {
         .send()
 
       response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      assert.isNull(response.body.data)
+
       if (oneDatastore.client === undefined) {
         throw new Error('oneDatastore client is undefined')
       }

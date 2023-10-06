@@ -81,22 +81,27 @@ export default class UserControllerRest {
     const { id } = request.params
     this.userManagement
       .readOneById(id)
-      .then((result: Result<User>) => {
-        const data: UserManagementReadOneResponse = new UserManagementReadOneResponse(
-          result.data.id,
-          result.data.fullName,
-          result.data.gender,
-          result.data.address,
-          result.data.username,
-          result.data.email,
-          result.data.balance,
-          result.data.experience,
-          result.data.lastLatitude,
-          result.data.lastLongitude,
-          result.data.createdAt,
-          result.data.updatedAt
-        )
-        const responseBody: ResponseBody<UserManagementReadOneResponse> = new ResponseBody<UserManagementReadOneResponse>(
+      .then((result: Result<User | null>) => {
+        let data: UserManagementReadOneResponse | null
+        if (result.status === 200 && result.data !== null) {
+          data = new UserManagementReadOneResponse(
+            result.data.id,
+            result.data.fullName,
+            result.data.gender,
+            result.data.address,
+            result.data.username,
+            result.data.email,
+            result.data.balance,
+            result.data.experience,
+            result.data.lastLatitude,
+            result.data.lastLongitude,
+            result.data.createdAt,
+            result.data.updatedAt
+          )
+        } else {
+          data = null
+        }
+        const responseBody: ResponseBody<UserManagementReadOneResponse | null> = new ResponseBody<UserManagementReadOneResponse | null>(
           result.message,
           data
         )
@@ -144,10 +149,10 @@ export default class UserControllerRest {
     const { id } = request.params
     this.userManagement
       .patchOneById(id, request.body)
-      .then((result: Result<User>) => {
-        const responseBody: ResponseBody<UserManagementPatchResponse> = new ResponseBody<UserManagementPatchResponse>(
-          result.message,
-          new UserManagementPatchResponse(
+      .then((result: Result<User | null>) => {
+        let data: UserManagementPatchResponse | null
+        if (result.status === 200 && result.data !== null) {
+          data = new UserManagementPatchResponse(
             result.data.id,
             result.data.fullName,
             result.data.gender,
@@ -161,6 +166,12 @@ export default class UserControllerRest {
             result.data.createdAt,
             result.data.updatedAt
           )
+        } else {
+          data = null
+        }
+        const responseBody: ResponseBody<UserManagementPatchResponse | null> = new ResponseBody<UserManagementPatchResponse | null>(
+          result.message,
+          data
         )
         response
           .status(result.status)
@@ -175,7 +186,14 @@ export default class UserControllerRest {
     const { id } = request.params
     this.userManagement
       .deleteOneById(id)
-      .then((result: Result<User>) => {
+      .then((result: Result<User | null>) => {
+        const responseBody: ResponseBody<null> = new ResponseBody<null>(
+          result.message,
+          null
+        )
+        response
+          .status(result.status)
+          .send(responseBody)
         response.status(result.status).send()
       })
       .catch((error: Error) => {

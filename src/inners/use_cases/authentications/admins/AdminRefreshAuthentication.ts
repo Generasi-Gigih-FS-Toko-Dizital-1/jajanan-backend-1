@@ -21,15 +21,13 @@ export default class AdminRefreshAuthentication {
   }
 
   refreshAccessToken = async (request: AdminRefreshAccessTokenRequest): Promise<Result<Session | null>> => {
-    let foundAdminById: Result<Admin>
-    try {
-      foundAdminById = await this.adminManagement.readOneById(
-        request.session.accountId
-      )
-    } catch (error) {
+    const foundAdminById: Result<Admin | null> = await this.adminManagement.readOneById(
+      request.session.accountId
+    )
+    if (foundAdminById.status !== 200 || foundAdminById.data === null) {
       return new Result<null>(
         404,
-        'Admin refresh access token failed, unknown email or password.',
+        'Admin refresh access token failed, admin not found.',
         null
       )
     }
@@ -113,15 +111,6 @@ export default class AdminRefreshAuthentication {
         expiresIn: Number(jwtAccessTokenExpirationTime)
       }
     )
-
-    const jwtRefreshTokenExpirationTime: string | undefined = process.env.JWT_REFRESH_TOKEN_EXPIRATION_TIME
-    if (jwtRefreshTokenExpirationTime === undefined) {
-      return new Result<null>(
-        500,
-        'Admin refresh access token failed, JWT refresh token expiration time is undefined.',
-        null
-      )
-    }
 
     const newSession: Session = new Session(
       foundAdminById.data.id,

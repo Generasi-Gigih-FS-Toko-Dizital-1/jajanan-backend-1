@@ -75,16 +75,21 @@ export default class AdminControllerRest {
     const { id } = request.params
     this.adminManagement
       .readOneById(id)
-      .then((result: Result<Admin>) => {
-        const data: AdminManagementReadOneResponse = new AdminManagementReadOneResponse(
-          result.data.id,
-          result.data.fullName,
-          result.data.gender,
-          result.data.email,
-          result.data.createdAt,
-          result.data.updatedAt
-        )
-        const responseBody: ResponseBody<AdminManagementReadOneResponse> = new ResponseBody<AdminManagementReadOneResponse>(
+      .then((result: Result<Admin | null>) => {
+        let data: AdminManagementReadOneResponse | null
+        if (result.status === 200 && result.data !== null) {
+          data = new AdminManagementReadOneResponse(
+            result.data.id,
+            result.data.fullName,
+            result.data.gender,
+            result.data.email,
+            result.data.createdAt,
+            result.data.updatedAt
+          )
+        } else {
+          data = null
+        }
+        const responseBody: ResponseBody<AdminManagementReadOneResponse | null> = new ResponseBody<AdminManagementReadOneResponse | null>(
           result.message,
           data
         )
@@ -126,10 +131,10 @@ export default class AdminControllerRest {
     const { id } = request.params
     this.adminManagement
       .patchOneById(id, request.body)
-      .then((result: Result<Admin>) => {
-        const responseBody: ResponseBody<AdminManagementPatchResponse> = new ResponseBody<AdminManagementPatchResponse>(
-          result.message,
-          new AdminManagementPatchResponse(
+      .then((result: Result<Admin | null>) => {
+        let data: AdminManagementPatchResponse | null
+        if (result.status === 200 && result.data !== null) {
+          data = new AdminManagementPatchResponse(
             result.data.id,
             result.data.fullName,
             result.data.gender,
@@ -137,6 +142,12 @@ export default class AdminControllerRest {
             result.data.createdAt,
             result.data.updatedAt
           )
+        } else {
+          data = null
+        }
+        const responseBody: ResponseBody<AdminManagementPatchResponse | null> = new ResponseBody<AdminManagementPatchResponse | null>(
+          result.message,
+          data
         )
         response
           .status(result.status)
@@ -151,10 +162,14 @@ export default class AdminControllerRest {
     const { id } = request.params
     this.adminManagement
       .deleteOneById(id)
-      .then((result: Result<Admin>) => {
+      .then((result: Result<Admin | null>) => {
+        const responseBody: ResponseBody<null> = new ResponseBody<null>(
+          result.message,
+          null
+        )
         response
           .status(result.status)
-          .send()
+          .send(responseBody)
       })
       .catch((error: Error) => {
         response.status(500).send(error.message)

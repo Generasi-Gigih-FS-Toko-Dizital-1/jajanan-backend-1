@@ -19,16 +19,16 @@ export default class JajanItemManagement {
   }
 
   readMany = async (pagination: Pagination): Promise<Result<JajanItem[]>> => {
-    const foundAdmins: JajanItem[] = await this.jajanItemRepository.readMany(pagination)
+    const foundJajanItems: JajanItem[] = await this.jajanItemRepository.readMany(pagination)
     return new Result<JajanItem[]>(
       200,
       'Jajan Items read all succeed.',
-      foundAdmins
+      foundJajanItems
     )
   }
 
   createOne = async (request: JajanItemManagementCreateRequest): Promise<Result<JajanItem>> => {
-    const userToCreate: JajanItem = {
+    const jajanItemToCreate: JajanItem = {
       id: randomUUID(),
       vendorId: request.vendorId,
       categoryId: request.categoryId,
@@ -39,25 +39,41 @@ export default class JajanItemManagement {
       createdAt: new Date(),
       deletedAt: null
     }
-    const createdUser: any = await this.jajanItemRepository.createOne(userToCreate)
+    const createdJajanItem: any = await this.jajanItemRepository.createOne(jajanItemToCreate)
     return new Result<JajanItem>(
       201,
       'Jajan Item create one succeed.',
-      createdUser
+      createdJajanItem
     )
   }
 
-  readOneById = async (id: string): Promise<Result<JajanItem>> => {
-    const foundItem: JajanItem = await this.jajanItemRepository.readOneById(id)
+  readOneById = async (id: string): Promise<Result<JajanItem | null>> => {
+    let foundJajanItem: JajanItem
+    try {
+      foundJajanItem = await this.jajanItemRepository.readOneById(id)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'Jajan Item read one by id failed, jajan item is not found.',
+        null
+      )
+    }
     return new Result<JajanItem>(
       200,
       'Jajan Item read one by id succeed.',
-      foundItem
+      foundJajanItem
     )
   }
 
-  patchOneById = async (id: string, request: JajanItemManagementPatchRequest): Promise<Result<JajanItem>> => {
-    const foundJajanItem: Result<JajanItem> = await this.readOneById(id)
+  patchOneById = async (id: string, request: JajanItemManagementPatchRequest): Promise<Result<JajanItem | null>> => {
+    const foundJajanItem: Result<JajanItem | null> = await this.readOneById(id)
+    if (foundJajanItem.status !== 200 || foundJajanItem.data === null) {
+      return new Result<null>(
+        404,
+        'Jajan Item patch one by id failed, jajan item is not found.',
+        null
+      )
+    }
     this.objectUtility.patch(foundJajanItem.data, request)
     const patchedJajanItem: JajanItem = await this.jajanItemRepository.patchOneById(id, foundJajanItem.data)
     return new Result<JajanItem>(
@@ -67,12 +83,21 @@ export default class JajanItemManagement {
     )
   }
 
-  deleteOneById = async (id: string): Promise<Result<JajanItem>> => {
-    const deletedUser: any = await this.jajanItemRepository.deleteOneById(id)
+  deleteOneById = async (id: string): Promise<Result<JajanItem | null>> => {
+    let deletedJajanItem: JajanItem
+    try {
+      deletedJajanItem = await this.jajanItemRepository.deleteOneById(id)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'JajanItem delete one by id failed, jajanItem is not found.',
+        null
+      )
+    }
     return new Result<JajanItem>(
       200,
       'Jajan Item delete one by id succeed.',
-      deletedUser
+      deletedJajanItem
     )
   }
 }

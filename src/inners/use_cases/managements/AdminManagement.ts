@@ -28,8 +28,18 @@ export default class AdminManagement {
     )
   }
 
-  readOneById = async (id: string): Promise<Result<Admin>> => {
-    const foundAdmin: Admin = await this.adminRepository.readOneById(id)
+  readOneById = async (id: string): Promise<Result<Admin | null>> => {
+    let foundAdmin: Admin
+    try {
+      foundAdmin = await this.adminRepository.readOneById(id)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'Admin read one by id failed, admin is not found.',
+        null
+      )
+    }
+
     return new Result<Admin>(
       200,
       'Admin read one by id succeed.',
@@ -37,17 +47,17 @@ export default class AdminManagement {
     )
   }
 
-  readOneByAdminname = async (username: string): Promise<Result<Admin>> => {
-    const foundAdmin: Admin = await this.adminRepository.readOneByAdminname(username)
-    return new Result<Admin>(
-      200,
-      'Admin read one by username succeed.',
-      foundAdmin
-    )
-  }
-
-  readOneByEmail = async (email: string): Promise<Result<Admin>> => {
-    const foundAdmin: Admin = await this.adminRepository.readOneByEmail(email)
+  readOneByEmail = async (email: string): Promise<Result<Admin | null>> => {
+    let foundAdmin: Admin
+    try {
+      foundAdmin = await this.adminRepository.readOneByEmail(email)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'Admin read one by email failed, admin is not found.',
+        null
+      )
+    }
     return new Result<Admin>(
       200,
       'Admin read one by email succeed.',
@@ -55,17 +65,17 @@ export default class AdminManagement {
     )
   }
 
-  readOneByAdminnameAndPassword = async (username: string, password: string): Promise<Result<Admin>> => {
-    const foundAdmin: Admin = await this.adminRepository.readOneByAdminnameAndPassword(username, password)
-    return new Result<Admin>(
-      200,
-      'Admin read one by username and password succeed.',
-      foundAdmin
-    )
-  }
-
-  readOneByEmailAndPassword = async (email: string, password: string): Promise<Result<Admin>> => {
-    const foundAdmin: Admin = await this.adminRepository.readOneByEmailAndPassword(email, password)
+  readOneByEmailAndPassword = async (email: string, password: string): Promise<Result<Admin | null>> => {
+    let foundAdmin: Admin
+    try {
+      foundAdmin = await this.adminRepository.readOneByEmailAndPassword(email, password)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'Admin read one by email and password failed, admin is not found.',
+        null
+      )
+    }
     return new Result<Admin>(
       200,
       'Admin read one by email and password succeed.',
@@ -97,7 +107,7 @@ export default class AdminManagement {
     )
   }
 
-  patchOneById = async (id: string, request: AdminManagementPatchRequest): Promise<Result<Admin>> => {
+  patchOneById = async (id: string, request: AdminManagementPatchRequest): Promise<Result<Admin | null>> => {
     const salt: string | undefined = process.env.BCRYPT_SALT
     if (salt === undefined) {
       throw new Error('Salt is undefined.')
@@ -107,7 +117,15 @@ export default class AdminManagement {
       request.password = bcrypt.hashSync(request.password, salt)
     }
 
-    const foundAdmin: Result<Admin> = await this.readOneById(id)
+    const foundAdmin: Result<Admin | null> = await this.readOneById(id)
+    if (foundAdmin.status !== 200 || foundAdmin.data === null) {
+      return new Result<null>(
+        foundAdmin.status,
+        'Admin patch one by id failed, admin is not found.',
+        null
+      )
+    }
+
     this.objectUtility.patch(foundAdmin.data, request)
     const patchedAdmin: Admin = await this.adminRepository.patchOneById(id, foundAdmin.data)
     return new Result<Admin>(
@@ -117,8 +135,17 @@ export default class AdminManagement {
     )
   }
 
-  deleteOneById = async (id: string): Promise<Result<Admin>> => {
-    const deletedAdmin: any = await this.adminRepository.deleteOneById(id)
+  deleteOneById = async (id: string): Promise<Result<Admin | null>> => {
+    let deletedAdmin: Admin
+    try {
+      deletedAdmin = await this.adminRepository.deleteOneById(id)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'Admin delete one by id failed, admin is not found.',
+        null
+      )
+    }
     return new Result<Admin>(
       200,
       'Admin delete one by id succeed.',

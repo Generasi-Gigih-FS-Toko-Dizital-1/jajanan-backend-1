@@ -7,7 +7,7 @@ import { server } from '../../../../src/App'
 import waitUntil from 'async-wait-until'
 import UserManagementCreateRequest
   from '../../../../src/inners/models/value_objects/requests/user_managements/UserManagementCreateRequest'
-import { type Admin, type User } from '@prisma/client'
+import { type Admin, type Prisma, type User } from '@prisma/client'
 import UserManagementPatchRequest
   from '../../../../src/inners/models/value_objects/requests/user_managements/UserManagementPatchRequest'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
@@ -168,8 +168,8 @@ describe('UserControllerRest', () => {
       response.body.data.should.has.property('experience').equal(requestUser.experience)
       response.body.data.should.has.property('last_latitude').equal(requestUser.lastLatitude)
       response.body.data.should.has.property('last_longitude').equal(requestUser.lastLongitude)
-      response.body.data.should.has.property('created_at')
-      response.body.data.should.has.property('updated_at')
+      response.body.data.should.has.property('updated_at').equal(requestUser.updatedAt.toISOString())
+      response.body.data.should.has.property('created_at').equal(requestUser.createdAt.toISOString())
     })
   })
 
@@ -208,6 +208,16 @@ describe('UserControllerRest', () => {
       response.body.data.should.has.property('last_longitude')
       response.body.data.should.has.property('created_at')
       response.body.data.should.has.property('updated_at')
+
+      if (oneDatastore.client === undefined) {
+        throw new Error('oneDatastore client is undefined')
+      }
+      const deleteResult: Prisma.BatchPayload = await oneDatastore.client.user.deleteMany({
+        where: {
+          id: response.body.data.id
+        }
+      })
+      deleteResult.should.has.property('count').greaterThanOrEqual(1)
     })
   })
 
@@ -259,6 +269,11 @@ describe('UserControllerRest', () => {
         .send()
 
       response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      assert.isNull(response.body.data)
+
       if (oneDatastore.client === undefined) {
         throw new Error('oneDatastore client is undefined')
       }

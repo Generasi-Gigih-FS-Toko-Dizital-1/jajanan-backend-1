@@ -7,7 +7,7 @@ import { server } from '../../../../src/App'
 import waitUntil from 'async-wait-until'
 import VendorManagementCreateRequest
   from '../../../../src/inners/models/value_objects/requests/vendor_managements/VendorManagementCreateRequest'
-import { type Admin, type Vendor } from '@prisma/client'
+import { type Admin, type Prisma, type Vendor } from '@prisma/client'
 import VendorManagementPatchRequest
   from '../../../../src/inners/models/value_objects/requests/vendor_managements/VendorManagementPatchRequest'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
@@ -176,8 +176,8 @@ describe('VendorControllerRest', () => {
       response.body.data.should.has.property('status').equal(requestVendor.status)
       response.body.data.should.has.property('last_latitude').equal(requestVendor.lastLatitude)
       response.body.data.should.has.property('last_longitude').equal(requestVendor.lastLongitude)
-      response.body.data.should.has.property('created_at')
-      response.body.data.should.has.property('updated_at')
+      response.body.data.should.has.property('updated_at').equal(requestVendor.updatedAt.toISOString())
+      response.body.data.should.has.property('created_at').equal(requestVendor.createdAt.toISOString())
     })
   })
 
@@ -222,8 +222,18 @@ describe('VendorControllerRest', () => {
       response.body.data.should.has.property('status').equal(requestBody.status)
       response.body.data.should.has.property('last_latitude').equal(requestBody.lastLatitude)
       response.body.data.should.has.property('last_longitude').equal(requestBody.lastLongitude)
-      response.body.data.should.has.property('created_at')
       response.body.data.should.has.property('updated_at')
+      response.body.data.should.has.property('created_at')
+
+      if (oneDatastore.client === undefined) {
+        throw new Error('oneDatastore client is undefined')
+      }
+      const deleteResult: Prisma.BatchPayload = await oneDatastore.client.vendor.deleteMany({
+        where: {
+          id: response.body.data.id
+        }
+      })
+      deleteResult.should.has.property('count').greaterThanOrEqual(1)
     })
   })
 
@@ -268,8 +278,8 @@ describe('VendorControllerRest', () => {
       response.body.data.should.has.property('status').equal(requestBody.status)
       response.body.data.should.has.property('last_latitude').equal(requestBody.lastLatitude)
       response.body.data.should.has.property('last_longitude').equal(requestBody.lastLongitude)
-      response.body.data.should.has.property('created_at')
       response.body.data.should.has.property('updated_at')
+      response.body.data.should.has.property('created_at')
     })
   })
 
@@ -283,6 +293,11 @@ describe('VendorControllerRest', () => {
         .send()
 
       response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      assert.isNull(response.body.data)
+
       if (oneDatastore.client === undefined) {
         throw new Error('oneDatastore client is undefined')
       }

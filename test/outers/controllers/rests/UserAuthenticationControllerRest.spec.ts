@@ -7,11 +7,12 @@ import { server } from '../../../../src/App'
 import waitUntil from 'async-wait-until'
 import UserRegisterByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/users/UserRegisterByEmailAndPasswordRequest'
-import { type User } from '@prisma/client'
+import { type Prisma, type User } from '@prisma/client'
 import UserLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/users/UserLoginByEmailAndPasswordRequest'
 import UserRefreshAccessTokenRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/users/UserRefreshAccessTokenRequest'
+import { randomUUID } from 'crypto'
 
 chai.use(chaiHttp)
 chai.should()
@@ -113,8 +114,8 @@ describe('UserAuthenticationControllerRest', () => {
       const requestBody: UserRegisterByEmailAndPasswordRequest = new UserRegisterByEmailAndPasswordRequest(
         'fullName2',
         'MALE',
-        'username2',
-        'email2@mail.com',
+        randomUUID(),
+        `${randomUUID()}@mail.com`,
         'password2',
         'address2',
         2,
@@ -152,15 +153,16 @@ describe('UserAuthenticationControllerRest', () => {
       response.body.data.should.has.property('experience')
       response.body.data.should.has.property('last_latitude')
       response.body.data.should.has.property('last_longitude')
-      response.body.data.should.has.property('created_at')
       response.body.data.should.has.property('updated_at')
+      response.body.data.should.has.property('created_at')
 
-      await oneDatastore.client.user.deleteMany({
+      const deleteResult: Prisma.BatchPayload = await oneDatastore.client.user.deleteMany({
         where: {
-          email: requestBody.email,
-          username: requestBody.username
+          username: requestBody.username,
+          email: requestBody.email
         }
       })
+      deleteResult.should.has.property('count').greaterThanOrEqual(1)
     })
 
     it('should return 409 CONFLICT: Email already exists', async () => {
