@@ -8,6 +8,7 @@ import { randomUUID } from 'crypto'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
 import type JajanItemManagementPatchRequest
   from '../../models/value_objects/requests/jajan_item_management/JajanItemManagementPatchRequest'
+import VendorManagement from './VendorManagement'
 
 export default class JajanItemManagement {
   jajanItemRepository: JajanItemRepository
@@ -24,26 +25,6 @@ export default class JajanItemManagement {
       200,
       'Jajan Items read all succeed.',
       foundJajanItems
-    )
-  }
-
-  createOne = async (request: JajanItemManagementCreateRequest): Promise<Result<JajanItem>> => {
-    const jajanItemToCreate: JajanItem = {
-      id: randomUUID(),
-      vendorId: request.vendorId,
-      categoryId: request.categoryId,
-      imageUrl: request.imageUrl,
-      name: request.name,
-      price: request.price,
-      updatedAt: new Date(),
-      createdAt: new Date(),
-      deletedAt: null
-    }
-    const createdJajanItem: any = await this.jajanItemRepository.createOne(jajanItemToCreate)
-    return new Result<JajanItem>(
-      201,
-      'Jajan Item create one succeed.',
-      createdJajanItem
     )
   }
 
@@ -65,12 +46,73 @@ export default class JajanItemManagement {
     )
   }
 
+  createOne = async (request: JajanItemManagementCreateRequest): Promise<Result<JajanItem | null>> => {
+    const jajanItemToCreate: JajanItem = {
+      id: randomUUID(),
+      vendorId: request.vendorId,
+      categoryId: request.categoryId,
+      imageUrl: request.imageUrl,
+      name: request.name,
+      price: request.price,
+      updatedAt: new Date(),
+      createdAt: new Date(),
+      deletedAt: null
+    }
+    const createdJajanItem: Result<JajanItem | null> = await this.createOneRaw(jajanItemToCreate)
+    if (createdJajanItem.status !== 201 || createdJajanItem.data === null) {
+      return new Result<null>(
+        createdJajanItem.status,
+        `Jajan Item create one failed, ${createdJajanItem.message}`,
+        null
+      )
+    }
+    return new Result<JajanItem>(
+      201,
+      'Jajan Item create one succeed.',
+      createdJajanItem.data
+    )
+  }
+
+  createOneRaw = async (jajanItem: JajanItem): Promise<Result<JajanItem | null>> => {
+    let createdJajanItem: JajanItem
+    try {
+      createdJajanItem = await this.jajanItemRepository.createOne(jajanItem)
+    } catch (error) {
+      return new Result<null>(
+        500,
+        `Jajan Item create one failed, ${(error as Error).message}`,
+        null
+      )
+    }
+    return new Result<JajanItem>(
+      201,
+      'Jajan Item create one succeed.',
+      createdJajanItem
+    )
+  }
+
   patchOneById = async (id: string, request: JajanItemManagementPatchRequest): Promise<Result<JajanItem | null>> => {
+    const patchedJajanItem: Result<JajanItem | null> = await this.patchOneRawById(id, request)
+    if (patchedJajanItem.status !== 200 || patchedJajanItem.data === null) {
+      return new Result<null>(
+        patchedJajanItem.status,
+            `Jajan Item patch one failed, ${patchedJajanItem.message}`,
+            null
+      )
+    }
+    return new Result<JajanItem>(
+      200,
+      'Jajan Item patch one succeed.',
+      patchedJajanItem.data
+    )
+  }
+
+  patchOneRawById = async (id: string, request: JajanItemManagementPatchRequest): Promise<Result<JajanItem | null>> => {
     const foundJajanItem: Result<JajanItem | null> = await this.readOneById(id)
     if (foundJajanItem.status !== 200 || foundJajanItem.data === null) {
       return new Result<null>(
         404,
-        'Jajan Item patch one by id failed, jajan item is not found.',
+        'Jajan Item patch one raw by id failed, jajan item is not found.',
         null
       )
     }
@@ -78,7 +120,7 @@ export default class JajanItemManagement {
     const patchedJajanItem: JajanItem = await this.jajanItemRepository.patchOneById(id, foundJajanItem.data)
     return new Result<JajanItem>(
       200,
-      'Jajan Item patch one by id succeed.',
+      'Jajan Item patch one raw by id succeed.',
       patchedJajanItem
     )
   }

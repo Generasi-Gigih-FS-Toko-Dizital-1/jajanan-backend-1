@@ -125,26 +125,31 @@ export default class VendorControllerRest {
   createOne = (request: Request, response: Response): void => {
     this.vendorManagement
       .createOne(request.body)
-      .then((result: Result<Vendor>) => {
-        const data: VendorManagementCreateResponse = new VendorManagementCreateResponse(
-          result.data.id,
-          result.data.fullName,
-          result.data.gender,
-          result.data.address,
-          result.data.username,
-          result.data.email,
-          result.data.balance,
-          result.data.experience,
-          result.data.jajanImageUrl,
-          result.data.jajanName,
-          result.data.jajanDescription,
-          result.data.status,
-          result.data.lastLatitude,
-          result.data.lastLongitude,
-          result.data.createdAt,
-          result.data.updatedAt
-        )
-        const responseBody: ResponseBody<VendorManagementCreateResponse> = new ResponseBody<VendorManagementCreateResponse>(
+      .then((result: Result<Vendor | null>) => {
+        let data: VendorManagementCreateResponse | null
+        if (result.status === 201 && result.data !== null) {
+          data = new VendorManagementCreateResponse(
+            result.data.id,
+            result.data.fullName,
+            result.data.gender,
+            result.data.address,
+            result.data.username,
+            result.data.email,
+            result.data.balance,
+            result.data.experience,
+            result.data.jajanImageUrl,
+            result.data.jajanName,
+            result.data.jajanDescription,
+            result.data.status,
+            result.data.lastLatitude,
+            result.data.lastLongitude,
+            result.data.createdAt,
+            result.data.updatedAt
+          )
+        } else {
+          data = null
+        }
+        const responseBody: ResponseBody<VendorManagementCreateResponse | null> = new ResponseBody<VendorManagementCreateResponse | null>(
           result.message,
           data
         )

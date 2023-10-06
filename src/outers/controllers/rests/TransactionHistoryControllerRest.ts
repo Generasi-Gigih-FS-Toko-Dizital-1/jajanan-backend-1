@@ -1,7 +1,7 @@
 import { type Request, type Response, type Router } from 'express'
 
 import type Result from '../../../inners/models/value_objects/Result'
-import { PaymentMethod, type TransactionHistory } from '@prisma/client'
+import { type TransactionHistory } from '@prisma/client'
 import Pagination from '../../../inners/models/value_objects/Pagination'
 import ResponseBody from '../../../inners/models/value_objects/responses/ResponseBody'
 import type TransactionHistoryManagement from '../../../inners/use_cases/managements/TransactionHistoryManagement'
@@ -107,19 +107,24 @@ export default class TransactionHistoryControllerRest {
   createOne = (request: Request, response: Response): void => {
     this.transactionHistoryManagement
       .createOne(request.body)
-      .then((result: Result<TransactionHistory>) => {
-        const data: TransactionHistoryManagementCreateResponse = new TransactionHistoryManagementCreateResponse(
-          result.data.id,
-          result.data.userId,
-          result.data.jajanItemId,
-          result.data.amount,
-          result.data.paymentMethod,
-          result.data.lastLatitude,
-          result.data.lastLongitude,
-          result.data.updatedAt,
-          result.data.createdAt
-        )
-        const responseBody: ResponseBody<TransactionHistoryManagementCreateResponse> = new ResponseBody<TransactionHistoryManagementCreateResponse>(
+      .then((result: Result<TransactionHistory | null>) => {
+        let data: TransactionHistoryManagementCreateResponse | null
+        if (result.status === 201 && result.data !== null) {
+          data = new TransactionHistoryManagementCreateResponse(
+            result.data.id,
+            result.data.userId,
+            result.data.jajanItemId,
+            result.data.amount,
+            result.data.paymentMethod,
+            result.data.lastLatitude,
+            result.data.lastLongitude,
+            result.data.updatedAt,
+            result.data.createdAt
+          )
+        } else {
+          data = null
+        }
+        const responseBody: ResponseBody<TransactionHistoryManagementCreateResponse | null> = new ResponseBody<TransactionHistoryManagementCreateResponse | null>(
           result.message,
           data
         )

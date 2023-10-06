@@ -105,18 +105,23 @@ export default class JajanItemControllerRest {
   createOne = (request: Request, response: Response): void => {
     this.jajanItemManagement
       .createOne(request.body)
-      .then((result: Result<JajanItem>) => {
-        const data: JajanItemManagementCreateResponse = new JajanItemManagementCreateResponse(
-          result.data.id,
-          result.data.vendorId,
-          result.data.categoryId,
-          result.data.name,
-          result.data.price,
-          result.data.imageUrl,
-          result.data.createdAt,
-          result.data.updatedAt
-        )
-        const responseBody: ResponseBody<JajanItemManagementCreateResponse> = new ResponseBody<JajanItemManagementCreateResponse>(
+      .then((result: Result<JajanItem | null>) => {
+        let data: JajanItemManagementCreateResponse | null
+        if (result.status === 201 && result.data !== null) {
+          data = new JajanItemManagementCreateResponse(
+            result.data.id,
+            result.data.vendorId,
+            result.data.categoryId,
+            result.data.name,
+            result.data.price,
+            result.data.imageUrl,
+            result.data.createdAt,
+            result.data.updatedAt
+          )
+        } else {
+          data = null
+        }
+        const responseBody: ResponseBody<JajanItemManagementCreateResponse | null> = new ResponseBody<JajanItemManagementCreateResponse | null>(
           result.message,
           data
         )

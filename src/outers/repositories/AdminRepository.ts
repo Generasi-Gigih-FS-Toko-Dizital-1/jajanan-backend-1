@@ -112,9 +112,7 @@ export default class AdminRepository {
     }
 
     const createdAdmin: Admin = await this.oneDatastore.client.admin.create(args)
-    if (createdAdmin === undefined) {
-      throw new Error('Created admins is undefined.')
-    }
+
     return createdAdmin
   }
 

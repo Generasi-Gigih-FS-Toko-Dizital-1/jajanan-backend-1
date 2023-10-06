@@ -54,9 +54,7 @@ export default class JajanItemRepository {
     }
 
     const createdItem: JajanItem | JajanItemAggregate = await this.oneDatastore.client.jajanItem.create(args)
-    if (createdItem === undefined) {
-      throw new Error('Created jajan item is undefined.')
-    }
+
     return createdItem
   }
 
