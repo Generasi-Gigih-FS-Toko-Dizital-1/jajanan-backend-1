@@ -11,7 +11,7 @@ export default class TransactionHistoryRepository {
     this.oneDatastore = oneDatastore
     this.aggregatedArgs = {
       include: {
-        transactionHistory: true,
+        user: true,
         jajanItem: true
       }
     }
