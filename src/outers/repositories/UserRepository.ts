@@ -7,8 +7,8 @@ export default class UserRepository {
   oneDatastore: OneDatastore
   aggregatedArgs: any
 
-  constructor (datastoreOne: OneDatastore) {
-    this.oneDatastore = datastoreOne
+  constructor (oneDatastore: OneDatastore) {
+    this.oneDatastore = oneDatastore
     this.aggregatedArgs = {
       include: {
         notificationHistories: true,
@@ -20,9 +20,9 @@ export default class UserRepository {
   }
 
   readMany = async (pagination: Pagination, isAggregated?: boolean): Promise<User[] | UserAggregate[]> => {
-    const offset: number = (pagination.pageNumber - 1) * pagination.itemPerPage
+    const offset: number = (pagination.pageNumber - 1) * pagination.pageSize
     const args: any = {
-      take: pagination.itemPerPage,
+      take: pagination.pageSize,
       skip: offset
     }
     if (isAggregated === true) {
@@ -30,11 +30,11 @@ export default class UserRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const foundUser: User[] | UserAggregate[] = await this.oneDatastore.client.user.findMany(args)
-    if (foundUser === undefined) {
+    if (foundUser === null) {
       throw new Error('Found user is undefined.')
     }
     return foundUser
@@ -51,7 +51,7 @@ export default class UserRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const foundUser: User | UserAggregate | null = await this.oneDatastore.client.user.findFirst(args)
@@ -72,7 +72,7 @@ export default class UserRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const foundUser: User | UserAggregate | null = await this.oneDatastore.client.user.findFirst(args)
@@ -93,7 +93,7 @@ export default class UserRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const foundUser: User | UserAggregate | null = await this.oneDatastore.client.user.findFirst(args)
@@ -115,7 +115,7 @@ export default class UserRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const foundUser: User | UserAggregate | null = await this.oneDatastore.client.user.findFirst(args)
@@ -137,7 +137,7 @@ export default class UserRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const foundUser: User | UserAggregate | null = await this.oneDatastore.client.user.findFirst(args)
@@ -156,7 +156,7 @@ export default class UserRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const createdUser: User | UserAggregate = await this.oneDatastore.client.user.create(args)
@@ -178,11 +178,11 @@ export default class UserRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const patchedUser: User | UserAggregate = await this.oneDatastore.client.user.update(args)
-    if (patchedUser === undefined) {
+    if (patchedUser === null) {
       throw new Error('Patched user is undefined.')
     }
     return patchedUser
@@ -199,7 +199,7 @@ export default class UserRepository {
     }
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const deletedUser: User | UserAggregate = await this.oneDatastore.client.user.delete(args)

@@ -8,6 +8,8 @@ import caseExpressMiddleware from './outers/middlewares/CaseExpressMiddleware'
 import { type AddressInfo } from 'net'
 import cors from 'cors'
 import OneSeeder from './outers/seeders/OneSeeder'
+import TwoDatastore from './outers/datastores/TwoDatastore'
+import cookieParser from 'cookie-parser'
 
 let app: Application | undefined
 let io: socketIo.Server | undefined
@@ -15,6 +17,7 @@ let server: http.Server | undefined
 const main = async (): Promise<void> => {
   app = express()
   app.use(cors())
+  app.use(cookieParser())
   app.use(express.json({ type: '*/*' }))
   app.use(caseExpressMiddleware())
 
@@ -29,7 +32,8 @@ const main = async (): Promise<void> => {
     }
   )
 
-  const oneDatastore = new OneDatastore()
+  const oneDatastore: OneDatastore = new OneDatastore()
+  const twoDatastore: TwoDatastore = new TwoDatastore()
 
   try {
     await oneDatastore.connect()
@@ -38,15 +42,26 @@ const main = async (): Promise<void> => {
     console.log('Error connecting to one datastore: ', error)
   }
 
-  const oneMigration = new OneSeeder(oneDatastore)
-  if (process.env.NODE_ENV !== 'test') {
-    await oneMigration.down()
-    await oneMigration.up()
-  } else {
-    await oneMigration.down()
+  try {
+    await twoDatastore.connect()
+    console.log('Two datastore connected.')
+  } catch (error) {
+    console.log('Error connecting to two datastore: ', error)
   }
 
-  const rootRoute = new RootRoute(app, io, oneDatastore)
+  const oneSeeder = new OneSeeder(oneDatastore)
+  if (process.env.NODE_ENV === undefined) {
+    throw new Error('NODE_ENV is undefined.')
+  } else if (['test'].includes(process.env.NODE_ENV)) {
+    await oneSeeder.down()
+  } else if (['development', 'staging'].includes(process.env.NODE_ENV)) {
+    await oneSeeder.down()
+    await oneSeeder.up()
+  } else {
+    throw new Error('Unknown NODE_ENV.')
+  }
+
+  const rootRoute = new RootRoute(app, io, oneDatastore, twoDatastore)
   await rootRoute.registerRoutes()
   await rootRoute.registerSockets()
 
