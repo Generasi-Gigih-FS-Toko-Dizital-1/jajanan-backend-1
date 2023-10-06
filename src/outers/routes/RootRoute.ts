@@ -32,18 +32,21 @@ import UserRefreshAuthentication from '../../inners/use_cases/authentications/us
 import TransactionHistoryControllerRest from '../controllers/rests/TransactionHistoryControllerRest'
 import TransactionHistoryManagement from '../../inners/use_cases/managements/TransactionHistoryManagement'
 import TransactionHistoryRepository from '../repositories/TransactionHistoryRepository'
+import type PaymentGateway from '../payment_gateway/PaymentGateway'
 
 export default class RootRoute {
   app: Application
   io: Server
   datastoreOne: OneDatastore
   twoDatastore: TwoDatastore
+  paymentGateway: PaymentGateway
 
-  constructor (app: Application, io: Server, datastoreOne: OneDatastore, twoDatastore: TwoDatastore) {
+  constructor (app: Application, io: Server, datastoreOne: OneDatastore, twoDatastore: TwoDatastore, paymentGateway: PaymentGateway) {
     this.app = app
     this.io = io
     this.datastoreOne = datastoreOne
     this.twoDatastore = twoDatastore
+    this.paymentGateway = paymentGateway
   }
 
   registerRoutes = async (): Promise<void> => {
