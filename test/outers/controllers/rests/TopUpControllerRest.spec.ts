@@ -6,6 +6,7 @@ import OneDatastore from '../../../../src/outers/datastores/OneDatastore'
 import { server } from '../../../../src/App'
 import chaiHttp from 'chai-http'
 import nock from 'nock'
+import { type User } from '@prisma/client'
 
 chai.use(chaiHttp)
 chai.should()
@@ -37,7 +38,13 @@ describe('TopUpControllerRest', () => {
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-    await oneDatastore.client.user.deleteMany()
+    await oneDatastore.client.user.deleteMany({
+      where: {
+        id: {
+          in: userMock.data.map((user: User) => user.id)
+        }
+      }
+    })
     await oneDatastore.disconnect()
   })
 
