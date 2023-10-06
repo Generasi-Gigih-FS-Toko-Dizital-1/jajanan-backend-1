@@ -7,7 +7,7 @@ import { server } from '../../../../src/App'
 import waitUntil from 'async-wait-until'
 import VendorRegisterByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/vendors/VendorRegisterByEmailAndPasswordRequest'
-import { type Vendor } from '@prisma/client'
+import { type Prisma, type Vendor } from '@prisma/client'
 import VendorLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/vendors/VendorLoginByEmailAndPasswordRequest'
 import VendorRefreshAccessTokenRequest
@@ -160,15 +160,19 @@ describe('VendorAuthenticationControllerRest', () => {
       response.body.data.should.has.property('status').equal(requestBody.status)
       response.body.data.should.has.property('last_latitude')
       response.body.data.should.has.property('last_longitude')
-      response.body.data.should.has.property('created_at')
       response.body.data.should.has.property('updated_at')
+      response.body.data.should.has.property('created_at')
 
-      await oneDatastore.client.vendor.deleteMany({
+      if (oneDatastore.client === undefined) {
+        throw new Error('oneDatastore client is undefined')
+      }
+      const deleteResult: Prisma.BatchPayload = await oneDatastore.client.vendor.deleteMany({
         where: {
-          email: requestBody.email,
-          username: requestBody.username
+          username: requestBody.username,
+          email: requestBody.email
         }
       })
+      deleteResult.should.has.property('count').greaterThanOrEqual(1)
     })
 
     it('should return 409 CONFLICT: Email already exists', async () => {

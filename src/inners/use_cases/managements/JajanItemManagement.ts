@@ -48,9 +48,9 @@ export default class JajanItemManagement {
   }
 
   readOneById = async (id: string): Promise<Result<JajanItem | null>> => {
-    let foundItem: JajanItem
+    let foundJajanItem: JajanItem
     try {
-      foundItem = await this.jajanItemRepository.readOneById(id)
+      foundJajanItem = await this.jajanItemRepository.readOneById(id)
     } catch (error) {
       return new Result<null>(
         404,
@@ -61,7 +61,7 @@ export default class JajanItemManagement {
     return new Result<JajanItem>(
       200,
       'Jajan Item read one by id succeed.',
-      foundItem
+      foundJajanItem
     )
   }
 

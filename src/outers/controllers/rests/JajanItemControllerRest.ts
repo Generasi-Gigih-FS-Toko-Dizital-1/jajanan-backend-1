@@ -30,6 +30,7 @@ export default class JajanItemControllerRest {
   registerRoutes = (): void => {
     this.router.use(validateAuthenticationMiddleware(this.authenticationValidation))
     this.router.get('', this.readMany)
+    this.router.get('/:id', this.readOneById)
     this.router.post('', this.createOne)
     this.router.patch('/:id', this.patchOneById)
     this.router.delete('/:id', this.deleteOneById)
@@ -60,6 +61,37 @@ export default class JajanItemControllerRest {
           )
         )
         const responseBody: ResponseBody<JajanItemManagementReadManyResponse> = new ResponseBody<JajanItemManagementReadManyResponse>(
+          result.message,
+          data
+        )
+        response.status(result.status).send(responseBody)
+      })
+      .catch((error: Error) => {
+        response.status(500).send(error.message)
+      })
+  }
+
+  readOneById = (request: Request, response: Response): void => {
+    const { id } = request.params
+    this.jajanItemManagement
+      .readOneById(id)
+      .then((result: Result<JajanItem | null>) => {
+        let data: JajanItemManagementReadOneResponse | null
+        if (result.status === 200 && result.data !== null) {
+          data = new JajanItemManagementReadOneResponse(
+            result.data.id,
+            result.data.vendorId,
+            result.data.categoryId,
+            result.data.name,
+            result.data.price,
+            result.data.imageUrl,
+            result.data.createdAt,
+            result.data.updatedAt
+          )
+        } else {
+          data = null
+        }
+        const responseBody: ResponseBody<JajanItemManagementReadOneResponse | null> = new ResponseBody<JajanItemManagementReadOneResponse | null>(
           result.message,
           data
         )

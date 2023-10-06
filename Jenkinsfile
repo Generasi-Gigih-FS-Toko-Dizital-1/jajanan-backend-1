@@ -17,7 +17,8 @@ pipeline {
         }
         stage('post') {
             steps {
-                sh 'docker system prune --all --force'
+                sh 'docker system prune --all --volumes --force'
+                sh 'docker volume prune --filter all=1 --force'
                 jiraSendDeploymentInfo environmentId: 'sg-staging-1', environmentName: 'sg-staging-1', environmentType: 'staging', state: 'successful'
                 publishHTML (
                      target : [
