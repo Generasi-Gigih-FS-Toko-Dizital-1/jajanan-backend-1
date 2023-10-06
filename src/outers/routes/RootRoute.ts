@@ -29,6 +29,9 @@ import AuthenticationValidation from '../../inners/use_cases/authentications/Aut
 import AdminRefreshAuthentication from '../../inners/use_cases/authentications/admins/AdminRefreshAuthentication'
 import VendorRefreshAuthentication from '../../inners/use_cases/authentications/vendors/VendorRefreshAuthentication'
 import UserRefreshAuthentication from '../../inners/use_cases/authentications/users/UserRefreshAuthentication'
+import TransactionHistoryControllerRest from '../controllers/rests/TransactionHistoryControllerRest'
+import TransactionHistoryManagement from '../../inners/use_cases/managements/TransactionHistoryManagement'
+import TransactionHistoryRepository from '../repositories/TransactionHistoryRepository'
 
 export default class RootRoute {
   app: Application
@@ -53,6 +56,7 @@ export default class RootRoute {
     const vendorRepository: VendorRepository = new VendorRepository(this.datastoreOne)
     const adminRepository: AdminRepository = new AdminRepository(this.datastoreOne)
     const jajanItemRepository: JajanItemRepository = new JajanItemRepository(this.datastoreOne)
+    const transactionHistoryRepository: TransactionHistoryRepository = new TransactionHistoryRepository(this.datastoreOne)
 
     const sessionManagement: SessionManagement = new SessionManagement(sessionRepository, objectUtility)
     const authenticationValidation: AuthenticationValidation = new AuthenticationValidation(sessionManagement)
@@ -60,6 +64,7 @@ export default class RootRoute {
     const vendorManagement: VendorManagement = new VendorManagement(vendorRepository, objectUtility)
     const adminManagement: AdminManagement = new AdminManagement(adminRepository, objectUtility)
     const jajanItemManagement: JajanItemManagement = new JajanItemManagement(jajanItemRepository, objectUtility)
+    const transactionHistoryManagement: TransactionHistoryManagement = new TransactionHistoryManagement(transactionHistoryRepository, objectUtility)
 
     const userLoginAuthentication: UserLoginAuthentication = new UserLoginAuthentication(userManagement, sessionManagement)
     const userRegisterAuthentication: UserRegisterAuthentication = new UserRegisterAuthentication(userManagement)
@@ -94,6 +99,14 @@ export default class RootRoute {
     )
     jajanItemControllerRest.registerRoutes()
     routerVersionOne.use('/jajan-items', jajanItemControllerRest.router)
+
+    const transactionHistoryControllerRest: TransactionHistoryControllerRest = new TransactionHistoryControllerRest(
+      Router(),
+      transactionHistoryManagement,
+      authenticationValidation
+    )
+    transactionHistoryControllerRest.registerRoutes()
+    routerVersionOne.use('/transaction-histories', transactionHistoryControllerRest.router)
 
     const adminControllerRest: AdminControllerRest = new AdminControllerRest(
       Router(),

@@ -160,7 +160,7 @@ model TransactionHistory {
   id            String        @id
   userId        String
   jajanItemId   String
-  amount        Int
+  amount        Float
   paymentMethod PaymentMethod
   lastLatitude  Float
   lastLongitude Float
