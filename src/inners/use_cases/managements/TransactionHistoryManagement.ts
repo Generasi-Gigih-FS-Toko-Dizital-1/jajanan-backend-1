@@ -29,7 +29,7 @@ export default class TransactionHistoryManagement {
     const foundTransactionHistories: TransactionHistory[] = await this.transactionHistoryRepository.readMany(pagination)
     return new Result<TransactionHistory[]>(
       200,
-      'TransactionHistory read all succeed.',
+      'TransactionHistory read many succeed.',
       foundTransactionHistories
     )
   }

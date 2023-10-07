@@ -277,4 +277,45 @@ describe('VendorAuthenticationControllerRest', () => {
       response.body.data.session.should.has.property('expired_at')
     })
   })
+
+  describe('POST /api/v1/authentications/vendors/logout', () => {
+    it('should return 200 OK', async () => {
+      const requestVendor = vendorMock.data[0]
+      const requestBodyLogin: VendorLoginByEmailAndPasswordRequest = new VendorLoginByEmailAndPasswordRequest(
+        requestVendor.email,
+        requestVendor.password
+      )
+      const responseLogin = await chai
+        .request(server)
+        .post('/api/v1/authentications/vendors/login?method=email_and_password')
+        .send(requestBodyLogin)
+
+      responseLogin.should.has.status(200)
+      responseLogin.body.should.be.an('object')
+      responseLogin.body.should.has.property('message')
+      responseLogin.body.should.has.property('data')
+      responseLogin.body.data.should.has.property('session')
+      responseLogin.body.data.session.should.be.an('object')
+      responseLogin.body.data.session.should.has.property('account_id').equal(requestVendor.id)
+      responseLogin.body.data.session.should.has.property('account_type').equal('VENDOR')
+      responseLogin.body.data.session.should.has.property('access_token')
+      responseLogin.body.data.session.should.has.property('refresh_token')
+      responseLogin.body.data.session.should.has.property('expired_at')
+
+      const requestBodyRefreshAccessToken: VendorRefreshAccessTokenRequest = new VendorRefreshAccessTokenRequest(
+        responseLogin.body.data.session
+      )
+
+      const response = await chai
+        .request(server)
+        .post('/api/v1/authentications/vendors/logout')
+        .send(requestBodyRefreshAccessToken)
+
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      assert.isNull(response.body.data)
+    })
+  })
 })

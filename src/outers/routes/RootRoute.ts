@@ -32,6 +32,9 @@ import UserRefreshAuthentication from '../../inners/use_cases/authentications/us
 import TransactionHistoryControllerRest from '../controllers/rests/TransactionHistoryControllerRest'
 import TransactionHistoryManagement from '../../inners/use_cases/managements/TransactionHistoryManagement'
 import TransactionHistoryRepository from '../repositories/TransactionHistoryRepository'
+import UserLogoutAuthentication from '../../inners/use_cases/authentications/users/UserLogoutAuthentication'
+import VendorLogoutAuthentication from '../../inners/use_cases/authentications/vendors/VendorLogoutAuthentication'
+import AdminLogoutAuthentication from '../../inners/use_cases/authentications/admins/AdminLogoutAuthentication'
 
 export default class RootRoute {
   app: Application
@@ -66,15 +69,20 @@ export default class RootRoute {
     const jajanItemManagement: JajanItemManagement = new JajanItemManagement(jajanItemRepository, objectUtility)
     const transactionHistoryManagement: TransactionHistoryManagement = new TransactionHistoryManagement(userManagement, jajanItemManagement, transactionHistoryRepository, objectUtility)
 
-    const userLoginAuthentication: UserLoginAuthentication = new UserLoginAuthentication(userManagement, sessionManagement)
     const userRegisterAuthentication: UserRegisterAuthentication = new UserRegisterAuthentication(userManagement)
-    const vendorLoginAuthentication: VendorLoginAuthentication = new VendorLoginAuthentication(vendorManagement, sessionManagement)
     const vendorRegisterAuthentication: VendorRegisterAuthentication = new VendorRegisterAuthentication(vendorManagement)
+
+    const userLoginAuthentication: UserLoginAuthentication = new UserLoginAuthentication(userManagement, sessionManagement)
+    const vendorLoginAuthentication: VendorLoginAuthentication = new VendorLoginAuthentication(vendorManagement, sessionManagement)
     const adminLoginAuthentication: AdminLoginAuthentication = new AdminLoginAuthentication(adminManagement, sessionManagement)
 
     const userRefreshAuthentication: UserRefreshAuthentication = new UserRefreshAuthentication(userManagement, sessionManagement)
     const vendorRefreshAuthentication: VendorRefreshAuthentication = new VendorRefreshAuthentication(vendorManagement, sessionManagement)
     const adminRefreshAuthentication: AdminRefreshAuthentication = new AdminRefreshAuthentication(adminManagement, sessionManagement)
+
+    const userLogoutAuthentication: UserLogoutAuthentication = new UserLogoutAuthentication(userManagement, sessionManagement)
+    const vendorLogoutAuthentication: VendorLogoutAuthentication = new VendorLogoutAuthentication(vendorManagement, sessionManagement)
+    const adminLogoutAuthentication: AdminLogoutAuthentication = new AdminLogoutAuthentication(adminManagement, sessionManagement)
 
     const userControllerRest: UserControllerRest = new UserControllerRest(
       Router(),
@@ -120,7 +128,8 @@ export default class RootRoute {
       Router(),
       userLoginAuthentication,
       userRegisterAuthentication,
-      userRefreshAuthentication
+      userRefreshAuthentication,
+      userLogoutAuthentication
     )
     userAuthenticationControllerRest.registerRoutes()
     routerVersionOne.use('/authentications/users', userAuthenticationControllerRest.router)
@@ -129,7 +138,8 @@ export default class RootRoute {
       Router(),
       vendorLoginAuthentication,
       vendorRegisterAuthentication,
-      vendorRefreshAuthentication
+      vendorRefreshAuthentication,
+      vendorLogoutAuthentication
     )
     vendorAuthenticationControllerRest.registerRoutes()
     routerVersionOne.use('/authentications/vendors', vendorAuthenticationControllerRest.router)
@@ -137,7 +147,8 @@ export default class RootRoute {
     const adminAuthenticationControllerRest: AdminAuthenticationControllerRest = new AdminAuthenticationControllerRest(
       Router(),
       adminLoginAuthentication,
-      adminRefreshAuthentication
+      adminRefreshAuthentication,
+      adminLogoutAuthentication
     )
     adminAuthenticationControllerRest.registerRoutes()
     routerVersionOne.use('/authentications/admins', adminAuthenticationControllerRest.router)

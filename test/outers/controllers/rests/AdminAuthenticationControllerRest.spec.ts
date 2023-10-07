@@ -1,4 +1,4 @@
-import chai from 'chai'
+import chai, { assert, expect } from 'chai'
 import chaiHttp from 'chai-http'
 import { beforeEach, describe, it } from 'mocha'
 import OneDatastore from '../../../../src/outers/datastores/OneDatastore'
@@ -53,6 +53,7 @@ describe('AdminAuthenticationControllerRest', () => {
         requestAdmin.email,
         requestAdmin.password
       )
+
       const response = await chai
         .request(server)
         .post('/api/v1/authentications/admins/login?method=email_and_password')
@@ -133,6 +134,7 @@ describe('AdminAuthenticationControllerRest', () => {
       const requestBodyRefreshAccessToken: AdminRefreshAccessTokenRequest = new AdminRefreshAccessTokenRequest(
         responseLogin.body.data.session
       )
+
       const response = await chai
         .request(server)
         .post('/api/v1/authentications/admins/refreshes/access-token')
@@ -149,6 +151,47 @@ describe('AdminAuthenticationControllerRest', () => {
       response.body.data.session.should.has.property('access_token')
       response.body.data.session.should.has.property('refresh_token').equal(responseLogin.body.data.session.refresh_token)
       response.body.data.session.should.has.property('expired_at')
+    })
+  })
+
+  describe('POST /api/v1/authentications/admins/logout', () => {
+    it('should return 200 OK', async () => {
+      const requestAdmin = adminMock.data[0]
+      const requestBodyLogin: AdminLoginByEmailAndPasswordRequest = new AdminLoginByEmailAndPasswordRequest(
+        requestAdmin.email,
+        requestAdmin.password
+      )
+      const responseLogin = await chai
+        .request(server)
+        .post('/api/v1/authentications/admins/login?method=email_and_password')
+        .send(requestBodyLogin)
+
+      responseLogin.should.has.status(200)
+      responseLogin.body.should.be.an('object')
+      responseLogin.body.should.has.property('message')
+      responseLogin.body.should.has.property('data')
+      responseLogin.body.data.should.has.property('session')
+      responseLogin.body.data.session.should.be.an('object')
+      responseLogin.body.data.session.should.has.property('account_id').equal(requestAdmin.id)
+      responseLogin.body.data.session.should.has.property('account_type').equal('ADMIN')
+      responseLogin.body.data.session.should.has.property('access_token')
+      responseLogin.body.data.session.should.has.property('refresh_token')
+      responseLogin.body.data.session.should.has.property('expired_at')
+
+      const requestBodyRefreshAccessToken: AdminRefreshAccessTokenRequest = new AdminRefreshAccessTokenRequest(
+        responseLogin.body.data.session
+      )
+
+      const response = await chai
+        .request(server)
+        .post('/api/v1/authentications/admins/logout')
+        .send(requestBodyRefreshAccessToken)
+
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      assert.isNull(response.body.data)
     })
   })
 })

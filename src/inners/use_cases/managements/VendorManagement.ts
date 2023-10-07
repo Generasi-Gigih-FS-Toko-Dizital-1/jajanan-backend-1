@@ -23,7 +23,7 @@ export default class VendorManagement {
     const foundVendors: Vendor[] = await this.vendorRepository.readMany(pagination)
     return new Result<Vendor[]>(
       200,
-      'Vendor read all succeed.',
+      'Vendor read many succeed.',
       foundVendors
     )
   }
