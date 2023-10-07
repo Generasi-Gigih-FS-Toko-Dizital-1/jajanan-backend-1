@@ -259,4 +259,45 @@ describe('UserAuthenticationControllerRest', () => {
       response.body.data.session.should.has.property('expired_at')
     })
   })
+
+  describe('POST /api/v1/authentications/users/logout', () => {
+    it('should return 200 OK', async () => {
+      const requestUser = userMock.data[0]
+      const requestBodyLogin: UserLoginByEmailAndPasswordRequest = new UserLoginByEmailAndPasswordRequest(
+        requestUser.email,
+        requestUser.password
+      )
+      const responseLogin = await chai
+        .request(server)
+        .post('/api/v1/authentications/users/login?method=email_and_password')
+        .send(requestBodyLogin)
+
+      responseLogin.should.has.status(200)
+      responseLogin.body.should.be.an('object')
+      responseLogin.body.should.has.property('message')
+      responseLogin.body.should.has.property('data')
+      responseLogin.body.data.should.has.property('session')
+      responseLogin.body.data.session.should.be.an('object')
+      responseLogin.body.data.session.should.has.property('account_id').equal(requestUser.id)
+      responseLogin.body.data.session.should.has.property('account_type').equal('USER')
+      responseLogin.body.data.session.should.has.property('access_token')
+      responseLogin.body.data.session.should.has.property('refresh_token')
+      responseLogin.body.data.session.should.has.property('expired_at')
+
+      const requestBodyRefreshAccessToken: UserRefreshAccessTokenRequest = new UserRefreshAccessTokenRequest(
+        responseLogin.body.data.session
+      )
+
+      const response = await chai
+        .request(server)
+        .post('/api/v1/authentications/users/logout')
+        .send(requestBodyRefreshAccessToken)
+
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      assert.isNull(response.body.data)
+    })
+  })
 })

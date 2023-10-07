@@ -23,7 +23,7 @@ export default class UserManagement {
     const foundUsers: User[] = await this.userRepository.readMany(pagination)
     return new Result<User[]>(
       200,
-      'User read all succeed.',
+      'User read many succeed.',
       foundUsers
     )
   }

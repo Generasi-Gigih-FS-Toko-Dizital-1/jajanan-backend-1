@@ -61,7 +61,7 @@ export default class VendorRefreshAuthentication {
     if (!_.isEqual(JSON.parse(JSON.stringify(oldSession.data)), JSON.parse(JSON.stringify(request.session)))) {
       return new Result<null>(
         404,
-        'Vendor refresh access token failed, unknown session.',
+        'Vendor refresh access token failed, session did not match.',
         null
       )
     }

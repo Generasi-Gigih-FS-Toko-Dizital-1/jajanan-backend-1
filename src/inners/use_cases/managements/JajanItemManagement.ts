@@ -23,7 +23,7 @@ export default class JajanItemManagement {
     const foundJajanItems: JajanItem[] = await this.jajanItemRepository.readMany(pagination)
     return new Result<JajanItem[]>(
       200,
-      'Jajan Items read all succeed.',
+      'Jajan Items read many succeed.',
       foundJajanItems
     )
   }

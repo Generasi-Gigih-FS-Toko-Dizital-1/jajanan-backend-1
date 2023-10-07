@@ -61,7 +61,7 @@ export default class UserRefreshAuthentication {
     if (!_.isEqual(JSON.parse(JSON.stringify(oldSession.data)), JSON.parse(JSON.stringify(request.session)))) {
       return new Result<null>(
         404,
-        'User refresh access token failed, unknown session.',
+        'User refresh access token failed, session did not match.',
         null
       )
     }

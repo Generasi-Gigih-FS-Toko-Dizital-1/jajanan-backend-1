@@ -23,7 +23,7 @@ export default class AdminManagement {
     const foundAdmins: Admin[] = await this.adminRepository.readMany(pagination)
     return new Result<Admin[]>(
       200,
-      'Admin read all succeed.',
+      'Admin read many succeed.',
       foundAdmins
     )
   }
