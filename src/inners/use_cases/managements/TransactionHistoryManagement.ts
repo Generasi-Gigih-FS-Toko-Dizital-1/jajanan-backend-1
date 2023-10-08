@@ -2,11 +2,10 @@ import type TransactionHistoryRepository from '../../../outers/repositories/Tran
 import type Pagination from '../../models/value_objects/Pagination'
 import Result from '../../models/value_objects/Result'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
-import { PaymentMethod, type TransactionHistory } from '@prisma/client'
+import { type TransactionHistory } from '@prisma/client'
 import type TransactionHistoryManagementCreateRequest
   from '../../models/value_objects/requests/transaction_history_management/TransactionHistoryManagementCreateRequest'
 import { randomUUID } from 'crypto'
-import { $Enums } from '.prisma/client'
 import type TransactionHistoryManagementPatchRequest
   from '../../models/value_objects/requests/transaction_history_management/TransactionHistoryManagementPatchRequest'
 import type UserManagement from './UserManagement'

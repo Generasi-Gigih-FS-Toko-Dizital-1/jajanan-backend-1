@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt'
 import type VendorRepository from '../../../outers/repositories/VendorRepository'
 import type Pagination from '../../models/value_objects/Pagination'
 import Result from '../../models/value_objects/Result'
-import { User, type Vendor } from '@prisma/client'
+import { type Vendor } from '@prisma/client'
 import type VendorManagementCreateRequest
   from '../../models/value_objects/requests/vendor_managements/VendorManagementCreateRequest'
 import type VendorManagementPatchRequest

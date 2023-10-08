@@ -1,4 +1,4 @@
-import { type Gender, type NotificationHistory, type TopUpHistory, type TransactionHistory, type UserSubscription } from '@prisma/client'
+import { type Gender } from '@prisma/client'
 
 export default class UserManagementPatchResponse {
   id: string

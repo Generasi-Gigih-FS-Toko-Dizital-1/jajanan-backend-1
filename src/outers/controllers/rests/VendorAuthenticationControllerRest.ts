@@ -21,7 +21,8 @@ import type VendorRefreshAccessTokenRequest
 
 import type VendorRefreshAuthentication
   from '../../../inners/use_cases/authentications/vendors/VendorRefreshAuthentication'
-import type VendorLogoutAuthentication from '../../../inners/use_cases/authentications/vendors/VendorLogoutAuthentication'
+import type VendorLogoutAuthentication
+  from '../../../inners/use_cases/authentications/vendors/VendorLogoutAuthentication'
 
 import VendorRefreshAccessTokenResponse
   from '../../../inners/models/value_objects/responses/authentications/vendors/VendorRefreshAccessTokenResponse'

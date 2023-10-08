@@ -1,8 +1,7 @@
 import type OneDatastore from '../datastores/OneDatastore'
-import { JajanItem, type TransactionHistory } from '@prisma/client'
+import { type TransactionHistory } from '@prisma/client'
 import type TransactionHistoryAggregate from '../../inners/models/aggregates/TransactionHistoryAggregate'
 import type Pagination from '../../inners/models/value_objects/Pagination'
-import JajanItemAggregate from '../../inners/models/aggregates/JajanItemAggregate'
 
 export default class TransactionHistoryRepository {
   oneDatastore: OneDatastore
