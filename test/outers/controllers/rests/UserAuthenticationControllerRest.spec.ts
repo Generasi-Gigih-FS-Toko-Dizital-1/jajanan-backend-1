@@ -2,56 +2,46 @@ import chai, { assert } from 'chai'
 import chaiHttp from 'chai-http'
 import { beforeEach, describe, it } from 'mocha'
 import OneDatastore from '../../../../src/outers/datastores/OneDatastore'
-import UserMock from '../../../mocks/UserMock'
 import { server } from '../../../../src/App'
 import waitUntil from 'async-wait-until'
 import UserRegisterByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/users/UserRegisterByEmailAndPasswordRequest'
-import { type Prisma, type User } from '@prisma/client'
+import { type Prisma } from '@prisma/client'
 import UserLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/users/UserLoginByEmailAndPasswordRequest'
 import UserRefreshAccessTokenRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/users/UserRefreshAccessTokenRequest'
 import { randomUUID } from 'crypto'
+import OneSeeder from '../../../../src/outers/seeders/OneSeeder'
 
 chai.use(chaiHttp)
 chai.should()
 
 describe('UserAuthenticationControllerRest', () => {
-  const userMock: UserMock = new UserMock()
-  const oneDatastore = new OneDatastore()
+  const oneDatastore: OneDatastore = new OneDatastore()
+  let oneSeeder: OneSeeder
+
+  before(async () => {
+    await waitUntil(() => server !== undefined)
+    await oneDatastore.connect()
+    oneSeeder = new OneSeeder(oneDatastore)
+  })
 
   beforeEach(async () => {
-    await waitUntil(() => server !== undefined)
-
-    await oneDatastore.connect()
-    if (oneDatastore.client === undefined) {
-      throw new Error('Client is undefined.')
-    }
-    await oneDatastore.client.user.createMany({
-      data: userMock.data
-    })
+    await oneSeeder.up()
   })
 
   afterEach(async () => {
-    if (oneDatastore.client === undefined) {
-      throw new Error('Client is undefined.')
-    }
-    await oneDatastore.client.user.deleteMany(
-      {
-        where: {
-          id: {
-            in: userMock.data.map((user: User) => user.id)
-          }
-        }
-      }
-    )
+    await oneSeeder.down()
+  })
+
+  after(async () => {
     await oneDatastore.disconnect()
   })
 
   describe('POST /api/v1/authentications/users/login?method=email_and_password', () => {
     it('should return 200 OK', async () => {
-      const requestUser = userMock.data[0]
+      const requestUser = oneSeeder.userMock.data[0]
       const requestBodyLogin: UserLoginByEmailAndPasswordRequest = new UserLoginByEmailAndPasswordRequest(
         requestUser.email,
         requestUser.password
@@ -75,7 +65,7 @@ describe('UserAuthenticationControllerRest', () => {
     })
 
     it('should return 404 NOT FOUND: Unknown email', async () => {
-      const requestUser = userMock.data[0]
+      const requestUser = oneSeeder.userMock.data[0]
       const requestBodyLogin: UserLoginByEmailAndPasswordRequest = new UserLoginByEmailAndPasswordRequest(
         'unknown_email',
         requestUser.password
@@ -92,7 +82,7 @@ describe('UserAuthenticationControllerRest', () => {
     })
 
     it('should return 404 NOT FOUND: Unknown email or password', async () => {
-      const requestUser = userMock.data[0]
+      const requestUser = oneSeeder.userMock.data[0]
       const requestBodyLogin: UserLoginByEmailAndPasswordRequest = new UserLoginByEmailAndPasswordRequest(
         requestUser.email,
         'unknown_password'
@@ -170,7 +160,7 @@ describe('UserAuthenticationControllerRest', () => {
         'fullName2',
         'MALE',
         'username2',
-        userMock.data[0].email,
+        oneSeeder.userMock.data[0].email,
         'password2',
         'address2',
         2,
@@ -193,7 +183,7 @@ describe('UserAuthenticationControllerRest', () => {
       const requestBody: UserRegisterByEmailAndPasswordRequest = new UserRegisterByEmailAndPasswordRequest(
         'fullName2',
         'MALE',
-        userMock.data[0].username,
+        oneSeeder.userMock.data[0].username,
         'email2',
         'password2',
         'address2',
@@ -216,7 +206,7 @@ describe('UserAuthenticationControllerRest', () => {
 
   describe('POST /api/v1/authentications/users/refreshes/access-token', () => {
     it('should return 200 OK', async () => {
-      const requestUser = userMock.data[0]
+      const requestUser = oneSeeder.userMock.data[0]
       const requestBodyLogin: UserLoginByEmailAndPasswordRequest = new UserLoginByEmailAndPasswordRequest(
         requestUser.email,
         requestUser.password
@@ -262,7 +252,7 @@ describe('UserAuthenticationControllerRest', () => {
 
   describe('POST /api/v1/authentications/users/logout', () => {
     it('should return 200 OK', async () => {
-      const requestUser = userMock.data[0]
+      const requestUser = oneSeeder.userMock.data[0]
       const requestBodyLogin: UserLoginByEmailAndPasswordRequest = new UserLoginByEmailAndPasswordRequest(
         requestUser.email,
         requestUser.password

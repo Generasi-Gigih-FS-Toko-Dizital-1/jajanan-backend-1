@@ -19,8 +19,8 @@ export default class JajanItemManagement {
     this.objectUtility = objectUtility
   }
 
-  readMany = async (pagination: Pagination): Promise<Result<JajanItem[]>> => {
-    const foundJajanItems: JajanItem[] = await this.jajanItemRepository.readMany(pagination)
+  readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Result<JajanItem[]>> => {
+    const foundJajanItems: JajanItem[] = await this.jajanItemRepository.readMany(pagination, whereInput, includeInput)
     return new Result<JajanItem[]>(
       200,
       'Jajan Items read many succeed.',
@@ -131,8 +131,8 @@ export default class JajanItemManagement {
       deletedJajanItem = await this.jajanItemRepository.deleteOneById(id)
     } catch (error) {
       return new Result<null>(
-        404,
-        'JajanItem delete one by id failed, jajanItem is not found.',
+        500,
+        'JajanItem delete one by id failed',
         null
       )
     }

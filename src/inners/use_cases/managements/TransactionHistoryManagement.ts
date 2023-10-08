@@ -25,8 +25,8 @@ export default class TransactionHistoryManagement {
     this.objectUtility = objectUtility
   }
 
-  readMany = async (pagination: Pagination): Promise<Result<TransactionHistory[]>> => {
-    const foundTransactionHistories: TransactionHistory[] = await this.transactionHistoryRepository.readMany(pagination)
+  readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Result<TransactionHistory[]>> => {
+    const foundTransactionHistories: TransactionHistory[] = await this.transactionHistoryRepository.readMany(pagination, whereInput, includeInput)
     return new Result<TransactionHistory[]>(
       200,
       'TransactionHistory read many succeed.',

@@ -19,8 +19,8 @@ export default class AdminManagement {
     this.objectUtility = objectUtility
   }
 
-  readMany = async (pagination: Pagination): Promise<Result<Admin[]>> => {
-    const foundAdmins: Admin[] = await this.adminRepository.readMany(pagination)
+  readMany = async (pagination: Pagination, whereInput: any): Promise<Result<Admin[]>> => {
+    const foundAdmins: Admin[] = await this.adminRepository.readMany(pagination, whereInput)
     return new Result<Admin[]>(
       200,
       'Admin read many succeed.',
