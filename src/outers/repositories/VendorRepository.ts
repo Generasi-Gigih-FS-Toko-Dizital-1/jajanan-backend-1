@@ -1,7 +1,8 @@
 import type OneDatastore from '../datastores/OneDatastore'
-import { type Vendor } from '@prisma/client'
+import { User, type Vendor } from '@prisma/client'
 import type VendorAggregate from '../../inners/models/aggregates/VendorAggregate'
 import type Pagination from '../../inners/models/value_objects/Pagination'
+import UserAggregate from '../../inners/models/aggregates/UserAggregate'
 
 export default class VendorRepository {
   oneDatastore: OneDatastore
@@ -17,14 +18,13 @@ export default class VendorRepository {
     }
   }
 
-  readMany = async (pagination: Pagination, isAggregated?: boolean): Promise<Vendor[] | VendorAggregate[]> => {
+  readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Vendor[] | VendorAggregate[]> => {
     const offset: number = (pagination.pageNumber - 1) * pagination.pageSize
     const args: any = {
       take: pagination.pageSize,
-      skip: offset
-    }
-    if (isAggregated === true) {
-      args.include = this.aggregatedArgs.include
+      skip: offset,
+      where: whereInput,
+      include: includeInput
     }
 
     if (this.oneDatastore.client === undefined) {

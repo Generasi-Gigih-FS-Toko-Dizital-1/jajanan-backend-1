@@ -15,6 +15,7 @@ import TransactionHistoryManagementCreateResponse
   from '../../../inners/models/value_objects/responses/transaction_history_management/TransactionHistoryManagementCreateResponse'
 import TransactionHistoryManagementPatchResponse
   from '../../../inners/models/value_objects/responses/transaction_history_management/TransactionHistoryManagementPatchResponse'
+import type TransactionHistoryAggregate from '../../../inners/models/aggregates/TransactionHistoryAggregate'
 
 export default class TransactionHistoryControllerRest {
   router: Router
@@ -37,17 +38,24 @@ export default class TransactionHistoryControllerRest {
   }
 
   readMany = (request: Request, response: Response): void => {
-    const { pageNumber, pageSize } = request.query
+    const {
+      pageNumber,
+      pageSize,
+      where,
+      include
+    } = request.query
     const pagination: Pagination = new Pagination(
       pageNumber === undefined ? 1 : Number(pageNumber),
       pageSize === undefined ? 10 : Number(pageSize)
     )
+    const whereInput: any = where === undefined ? {} : JSON.parse(decodeURIComponent(where as string))
+    const includeInput: any = include === undefined ? {} : JSON.parse(decodeURIComponent(include as string))
     this.transactionHistoryManagement
-      .readMany(pagination)
-      .then((result: Result<TransactionHistory[]>) => {
+      .readMany(pagination, whereInput, includeInput)
+      .then((result: Result<TransactionHistory[] | TransactionHistoryAggregate[]>) => {
         const data: TransactionHistoryManagementReadManyResponse = new TransactionHistoryManagementReadManyResponse(
           result.data.length,
-          result.data.map((transactionHistory: TransactionHistory) =>
+          result.data.map((transactionHistory: TransactionHistory | TransactionHistoryAggregate) =>
             new TransactionHistoryManagementReadOneResponse(
               transactionHistory.id,
               transactionHistory.userId,
@@ -57,7 +65,9 @@ export default class TransactionHistoryControllerRest {
               transactionHistory.lastLatitude,
               transactionHistory.lastLongitude,
               transactionHistory.updatedAt,
-              transactionHistory.createdAt
+              transactionHistory.createdAt,
+              (transactionHistory as TransactionHistoryAggregate).user,
+              (transactionHistory as TransactionHistoryAggregate).jajanItem
             )
           )
         )

@@ -15,6 +15,7 @@ import UserManagementReadOneResponse
 import ResponseBody from '../../../inners/models/value_objects/responses/ResponseBody'
 import type AuthenticationValidation from '../../../inners/use_cases/authentications/AuthenticationValidation'
 import validateAuthenticationMiddleware from '../../middlewares/ValidateAuthenticationMiddleware'
+import type UserAggregate from '../../../inners/models/aggregates/UserAggregate'
 
 export default class UserControllerRest {
   router: Router
@@ -37,17 +38,24 @@ export default class UserControllerRest {
   }
 
   readMany = (request: Request, response: Response): void => {
-    const { pageNumber, pageSize } = request.query
+    const {
+      pageNumber,
+      pageSize,
+      where,
+      include
+    } = request.query
     const pagination: Pagination = new Pagination(
       pageNumber === undefined ? 1 : Number(pageNumber),
       pageSize === undefined ? 10 : Number(pageSize)
     )
+    const whereInput: any = where === undefined ? {} : JSON.parse(decodeURIComponent(where as string))
+    const includeInput: any = include === undefined ? {} : JSON.parse(decodeURIComponent(include as string))
     this.userManagement
-      .readMany(pagination)
-      .then((result: Result<User[]>) => {
+      .readMany(pagination, whereInput, includeInput)
+      .then((result: Result<User[] | UserAggregate[]>) => {
         const data: UserManagementReadManyResponse = new UserManagementReadManyResponse(
           result.data.length,
-          result.data.map((user: User) =>
+          result.data.map((user: User | UserAggregate) =>
             new UserManagementReadOneResponse(
               user.id,
               user.fullName,
@@ -60,7 +68,11 @@ export default class UserControllerRest {
               user.lastLatitude,
               user.lastLongitude,
               user.createdAt,
-              user.updatedAt
+              user.updatedAt,
+              (user as UserAggregate).notificationHistories,
+              (user as UserAggregate).topUpHistories,
+              (user as UserAggregate).transactionHistories,
+              (user as UserAggregate).userSubscriptions
             )
           )
         )

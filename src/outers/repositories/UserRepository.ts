@@ -1,7 +1,8 @@
 import type OneDatastore from '../datastores/OneDatastore'
-import { type User } from '@prisma/client'
+import { TransactionHistory, type User } from '@prisma/client'
 import type UserAggregate from '../../inners/models/aggregates/UserAggregate'
 import type Pagination from '../../inners/models/value_objects/Pagination'
+import TransactionHistoryAggregate from '../../inners/models/aggregates/TransactionHistoryAggregate'
 
 export default class UserRepository {
   oneDatastore: OneDatastore
@@ -19,14 +20,13 @@ export default class UserRepository {
     }
   }
 
-  readMany = async (pagination: Pagination, isAggregated?: boolean): Promise<User[] | UserAggregate[]> => {
+  readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<User[] | UserAggregate[]> => {
     const offset: number = (pagination.pageNumber - 1) * pagination.pageSize
     const args: any = {
       take: pagination.pageSize,
-      skip: offset
-    }
-    if (isAggregated === true) {
-      args.include = this.aggregatedArgs.include
+      skip: offset,
+      where: whereInput,
+      include: includeInput
     }
 
     if (this.oneDatastore.client === undefined) {

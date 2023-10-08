@@ -37,13 +37,18 @@ export default class AdminControllerRest {
   }
 
   readMany = (request: Request, response: Response): void => {
-    const { pageNumber, pageSize } = request.query
+    const {
+      pageNumber,
+      pageSize,
+      where
+    } = request.query
     const pagination: Pagination = new Pagination(
       pageNumber === undefined ? 1 : Number(pageNumber),
       pageSize === undefined ? 10 : Number(pageSize)
     )
+    const whereInput: any = where === undefined ? {} : JSON.parse(decodeURIComponent(where as string))
     this.adminManagement
-      .readMany(pagination)
+      .readMany(pagination, whereInput)
       .then((result: Result<Admin[]>) => {
         const data: AdminManagementReadManyResponse = new AdminManagementReadManyResponse(
           result.data.length,
