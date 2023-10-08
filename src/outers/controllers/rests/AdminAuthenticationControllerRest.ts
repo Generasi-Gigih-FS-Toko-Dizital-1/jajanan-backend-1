@@ -14,7 +14,8 @@ import type AdminRefreshAuthentication
 import type AdminRefreshAccessTokenRequest
   from '../../../inners/models/value_objects/requests/authentications/admins/AdminRefreshAccessTokenRequest'
 import type AdminLogoutAuthentication from '../../../inners/use_cases/authentications/admins/AdminLogoutAuthentication'
-import type AdminLogoutRequest from '../../../inners/models/value_objects/requests/authentications/admins/AdminLogoutRequest'
+import type AdminLogoutRequest
+  from '../../../inners/models/value_objects/requests/authentications/admins/AdminLogoutRequest'
 import AdminRefreshAccessTokenResponse
   from '../../../inners/models/value_objects/responses/authentications/admins/AdminRefreshAccessTokenResponse'
 

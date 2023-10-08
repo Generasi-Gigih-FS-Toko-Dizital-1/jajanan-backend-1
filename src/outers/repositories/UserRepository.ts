@@ -1,8 +1,7 @@
 import type OneDatastore from '../datastores/OneDatastore'
-import { TransactionHistory, type User } from '@prisma/client'
+import { type User } from '@prisma/client'
 import type UserAggregate from '../../inners/models/aggregates/UserAggregate'
 import type Pagination from '../../inners/models/value_objects/Pagination'
-import TransactionHistoryAggregate from '../../inners/models/aggregates/TransactionHistoryAggregate'
 
 export default class UserRepository {
   oneDatastore: OneDatastore

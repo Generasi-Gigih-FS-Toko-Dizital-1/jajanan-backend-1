@@ -1,7 +1,7 @@
 import type VendorManagement from '../../managements/VendorManagement'
 
 import Result from '../../../models/value_objects/Result'
-import { type User, type Vendor } from '@prisma/client'
+import { type Vendor } from '@prisma/client'
 import type VendorRegisterByEmailAndPasswordRequest
   from '../../../models/value_objects/requests/authentications/vendors/VendorRegisterByEmailAndPasswordRequest'
 import { randomUUID } from 'crypto'

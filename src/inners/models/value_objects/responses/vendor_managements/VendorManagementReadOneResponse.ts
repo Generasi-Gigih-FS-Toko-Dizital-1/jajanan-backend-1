@@ -1,5 +1,4 @@
 import { type Gender, type JajanItem, type NotificationHistory, type Status } from '@prisma/client'
-import { Vendor$jajanItemsArgs, Vendor$notificationHistoriesArgs } from '.prisma/client'
 
 export default class VendorManagementReadOneResponse {
   id: string

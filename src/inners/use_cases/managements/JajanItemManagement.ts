@@ -8,7 +8,6 @@ import { randomUUID } from 'crypto'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
 import type JajanItemManagementPatchRequest
   from '../../models/value_objects/requests/jajan_item_management/JajanItemManagementPatchRequest'
-import VendorManagement from './VendorManagement'
 
 export default class JajanItemManagement {
   jajanItemRepository: JajanItemRepository

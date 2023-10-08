@@ -1,8 +1,7 @@
 import type OneDatastore from '../datastores/OneDatastore'
-import { User, type Vendor } from '@prisma/client'
+import { type Vendor } from '@prisma/client'
 import type VendorAggregate from '../../inners/models/aggregates/VendorAggregate'
 import type Pagination from '../../inners/models/value_objects/Pagination'
-import UserAggregate from '../../inners/models/aggregates/UserAggregate'
 
 export default class VendorRepository {
   oneDatastore: OneDatastore
