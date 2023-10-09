@@ -151,7 +151,7 @@ export default class RootRoute {
     adminAuthenticationControllerRest.registerRoutes()
     routerVersionOne.use('/authentications/admins', adminAuthenticationControllerRest.router)
 
-    const topUpControllerRest: TopUpControllerRest = new TopUpControllerRest(Router(), topUpUseCase)
+    const topUpControllerRest: TopUpControllerRest = new TopUpControllerRest(Router(), topUpUseCase, authenticationValidation)
     topUpControllerRest.registerRoutes()
     routerVersionOne.use('/topup', topUpControllerRest.router)
 

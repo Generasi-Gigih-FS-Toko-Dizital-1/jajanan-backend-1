@@ -22,11 +22,9 @@ export default class TopUpRepository {
       }
 
     }
-
     const response: any = await this.paymentGateway.client?.Invoice.createInvoice({
       data
     })
-
     return response.invoiceUrl
   }
 }
