@@ -34,8 +34,6 @@ import TransactionHistoryManagement from '../../inners/use_cases/managements/Tra
 import TransactionHistoryRepository from '../repositories/TransactionHistoryRepository'
 import type PaymentGateway from '../payment_gateway/PaymentGateway'
 import TopUpRepository from '../repositories/TopUpRepository'
-import Midtrans from '../payment_gateway/midtrans'
-import { randomUUID } from 'crypto'
 import TopUp from '../../inners/use_cases/top_up/TopUp'
 import TopUpControllerRest from '../controllers/rests/TopUpControllerRest'
 
@@ -65,6 +63,7 @@ export default class RootRoute {
     const adminRepository: AdminRepository = new AdminRepository(this.datastoreOne)
     const jajanItemRepository: JajanItemRepository = new JajanItemRepository(this.datastoreOne)
     const transactionHistoryRepository: TransactionHistoryRepository = new TransactionHistoryRepository(this.datastoreOne)
+    const topUpRepository = new TopUpRepository(this.paymentGateway)
 
     const sessionManagement: SessionManagement = new SessionManagement(sessionRepository, objectUtility)
     const authenticationValidation: AuthenticationValidation = new AuthenticationValidation(sessionManagement)
@@ -83,6 +82,8 @@ export default class RootRoute {
     const userRefreshAuthentication: UserRefreshAuthentication = new UserRefreshAuthentication(userManagement, sessionManagement)
     const vendorRefreshAuthentication: VendorRefreshAuthentication = new VendorRefreshAuthentication(vendorManagement, sessionManagement)
     const adminRefreshAuthentication: AdminRefreshAuthentication = new AdminRefreshAuthentication(adminManagement, sessionManagement)
+
+    const topUpUseCase = new TopUp(topUpRepository, userRepository)
 
     const userControllerRest: UserControllerRest = new UserControllerRest(
       Router(),
@@ -150,10 +151,7 @@ export default class RootRoute {
     adminAuthenticationControllerRest.registerRoutes()
     routerVersionOne.use('/authentications/admins', adminAuthenticationControllerRest.router)
 
-    const paymentGateway = new Midtrans()
-    const topUpRepository = new TopUpRepository(paymentGateway, randomUUID)
-    const topUpUseCase = new TopUp(topUpRepository, userRepository)
-    const topUpControllerRest = new TopUpControllerRest(Router(), topUpUseCase)
+    const topUpControllerRest: TopUpControllerRest = new TopUpControllerRest(Router(), topUpUseCase)
     topUpControllerRest.registerRoutes()
     routerVersionOne.use('/topup', topUpControllerRest.router)
 

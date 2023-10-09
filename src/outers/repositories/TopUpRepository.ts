@@ -1,28 +1,32 @@
 import type TopUpCreateRequest from '../../inners/models/value_objects/requests/top_up/TopUpCreateRequest'
 import { type User } from '@prisma/client'
+import type PaymentGateway from '../payment_gateway/PaymentGateway'
+import { type CreateInvoiceRequest } from 'xendit-node/invoice/models'
 
 export default class TopUpRepository {
   paymentGateway
-  idGenerator
-  constructor (paymentGateway: any, idGenerator: () => string) {
+  constructor (paymentGateway: PaymentGateway) {
     this.paymentGateway = paymentGateway
-    this.idGenerator = idGenerator
   }
 
   generateTopUpUrl = async (topUpData: TopUpCreateRequest, user: User): Promise<string> => {
-    const parameter = {
-      transaction_details: {
-        order_id: `topup-${this.idGenerator()}`,
-        gross_amount: topUpData.amount
-      },
-      user_id: user.id
+    const data: CreateInvoiceRequest = {
+      amount: topUpData.amount,
+      externalId: user.id,
+      currency: 'IDR',
+      reminderTime: 1,
+      payerEmail: user.email,
+      customer: {
+        givenNames: user.fullName,
+        email: user.email
+      }
+
     }
 
-    const generatedTopUpUrl = await this.paymentGateway.snap.createTransaction(parameter)
-      .then((transaction: any) => {
-        // transaction redirect_url
-        return transaction.redirect_url
-      })
-    return generatedTopUpUrl
+    const response: any = await this.paymentGateway.client?.Invoice.createInvoice({
+      data
+    })
+
+    return response.invoiceUrl
   }
 }
