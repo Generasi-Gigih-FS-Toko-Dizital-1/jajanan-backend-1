@@ -32,21 +32,28 @@ import UserRefreshAuthentication from '../../inners/use_cases/authentications/us
 import TransactionHistoryControllerRest from '../controllers/rests/TransactionHistoryControllerRest'
 import TransactionHistoryManagement from '../../inners/use_cases/managements/TransactionHistoryManagement'
 import TransactionHistoryRepository from '../repositories/TransactionHistoryRepository'
+import type PaymentGateway from '../payment_gateway/PaymentGateway'
+import TopUpRepository from '../repositories/TopUpRepository'
+import TopUp from '../../inners/use_cases/top_up/TopUp'
+import TopUpControllerRest from '../controllers/rests/TopUpControllerRest'
 import UserLogoutAuthentication from '../../inners/use_cases/authentications/users/UserLogoutAuthentication'
 import VendorLogoutAuthentication from '../../inners/use_cases/authentications/vendors/VendorLogoutAuthentication'
 import AdminLogoutAuthentication from '../../inners/use_cases/authentications/admins/AdminLogoutAuthentication'
+
 
 export default class RootRoute {
   app: Application
   io: Server
   datastoreOne: OneDatastore
   twoDatastore: TwoDatastore
+  paymentGateway: PaymentGateway
 
-  constructor (app: Application, io: Server, datastoreOne: OneDatastore, twoDatastore: TwoDatastore) {
+  constructor (app: Application, io: Server, datastoreOne: OneDatastore, twoDatastore: TwoDatastore, paymentGateway: PaymentGateway) {
     this.app = app
     this.io = io
     this.datastoreOne = datastoreOne
     this.twoDatastore = twoDatastore
+    this.paymentGateway = paymentGateway
   }
 
   registerRoutes = async (): Promise<void> => {
@@ -60,6 +67,7 @@ export default class RootRoute {
     const adminRepository: AdminRepository = new AdminRepository(this.datastoreOne)
     const jajanItemRepository: JajanItemRepository = new JajanItemRepository(this.datastoreOne)
     const transactionHistoryRepository: TransactionHistoryRepository = new TransactionHistoryRepository(this.datastoreOne)
+    const topUpRepository = new TopUpRepository(this.paymentGateway)
 
     const sessionManagement: SessionManagement = new SessionManagement(sessionRepository, objectUtility)
     const authenticationValidation: AuthenticationValidation = new AuthenticationValidation(sessionManagement)
@@ -80,9 +88,13 @@ export default class RootRoute {
     const vendorRefreshAuthentication: VendorRefreshAuthentication = new VendorRefreshAuthentication(vendorManagement, sessionManagement)
     const adminRefreshAuthentication: AdminRefreshAuthentication = new AdminRefreshAuthentication(adminManagement, sessionManagement)
 
+
+    const topUpUseCase = new TopUp(topUpRepository, userRepository)
+    
     const userLogoutAuthentication: UserLogoutAuthentication = new UserLogoutAuthentication(userManagement, sessionManagement)
     const vendorLogoutAuthentication: VendorLogoutAuthentication = new VendorLogoutAuthentication(vendorManagement, sessionManagement)
     const adminLogoutAuthentication: AdminLogoutAuthentication = new AdminLogoutAuthentication(adminManagement, sessionManagement)
+
 
     const userControllerRest: UserControllerRest = new UserControllerRest(
       Router(),
@@ -152,6 +164,10 @@ export default class RootRoute {
     )
     adminAuthenticationControllerRest.registerRoutes()
     routerVersionOne.use('/authentications/admins', adminAuthenticationControllerRest.router)
+
+    const topUpControllerRest: TopUpControllerRest = new TopUpControllerRest(Router(), topUpUseCase, authenticationValidation)
+    topUpControllerRest.registerRoutes()
+    routerVersionOne.use('/topup', topUpControllerRest.router)
 
     this.app.use('/api/v1', routerVersionOne)
   }

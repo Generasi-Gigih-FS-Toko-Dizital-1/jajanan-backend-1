@@ -10,6 +10,7 @@ import cors from 'cors'
 import OneSeeder from './outers/seeders/OneSeeder'
 import TwoDatastore from './outers/datastores/TwoDatastore'
 import cookieParser from 'cookie-parser'
+import PaymentGateway from './outers/payment_gateway/PaymentGateway'
 
 let app: Application | undefined
 let io: socketIo.Server | undefined
@@ -34,6 +35,7 @@ const main = async (): Promise<void> => {
 
   const oneDatastore: OneDatastore = new OneDatastore()
   const twoDatastore: TwoDatastore = new TwoDatastore()
+  const paymentGateway: PaymentGateway = new PaymentGateway()
 
   try {
     await oneDatastore.connect()
@@ -49,6 +51,13 @@ const main = async (): Promise<void> => {
     console.log('Error connecting to two datastore: ', error)
   }
 
+  try {
+    await paymentGateway.connect()
+    console.log('Payment gateway connected')
+  } catch (error) {
+    console.log('Error connecting to payment gateway')
+  }
+
   const oneSeeder = new OneSeeder(oneDatastore)
   if (process.env.NODE_ENV === undefined) {
     throw new Error('NODE_ENV is undefined.')
@@ -61,7 +70,7 @@ const main = async (): Promise<void> => {
     throw new Error('Unknown NODE_ENV.')
   }
 
-  const rootRoute = new RootRoute(app, io, oneDatastore, twoDatastore)
+  const rootRoute = new RootRoute(app, io, oneDatastore, twoDatastore, paymentGateway)
   await rootRoute.registerRoutes()
   await rootRoute.registerSockets()
 
