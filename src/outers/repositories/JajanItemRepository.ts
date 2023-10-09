@@ -20,14 +20,13 @@ export default class JajanItemRepository {
     }
   }
 
-  readMany = async (pagination: Pagination, isAggregated?: boolean): Promise<JajanItem[] | JajanItemAggregate[]> => {
+  readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<JajanItem[] | JajanItemAggregate[]> => {
     const offset: number = (pagination.pageNumber - 1) * pagination.pageSize
     const args: any = {
       take: pagination.pageSize,
-      skip: offset
-    }
-    if (isAggregated === true) {
-      args.include = this.aggregatedArgs.include
+      skip: offset,
+      where: whereInput,
+      include: includeInput
     }
 
     if (this.oneDatastore.client === undefined) {
@@ -54,9 +53,7 @@ export default class JajanItemRepository {
     }
 
     const createdItem: JajanItem | JajanItemAggregate = await this.oneDatastore.client.jajanItem.create(args)
-    if (createdItem === undefined) {
-      throw new Error('Created jajan item is undefined.')
-    }
+
     return createdItem
   }
 
@@ -108,6 +105,7 @@ export default class JajanItemRepository {
       where: {
         id
       }
+
     }
     if (isAggregated === true) {
       args.include = this.aggregatedArgs.include

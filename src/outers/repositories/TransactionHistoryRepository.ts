@@ -17,14 +17,13 @@ export default class TransactionHistoryRepository {
     }
   }
 
-  readMany = async (pagination: Pagination, isAggregated?: boolean): Promise<TransactionHistory[] | TransactionHistoryAggregate[]> => {
+  readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<TransactionHistory[] | TransactionHistoryAggregate[]> => {
     const offset: number = (pagination.pageNumber - 1) * pagination.pageSize
     const args: any = {
       take: pagination.pageSize,
-      skip: offset
-    }
-    if (isAggregated === true) {
-      args.include = this.aggregatedArgs.include
+      skip: offset,
+      where: whereInput,
+      include: includeInput
     }
 
     if (this.oneDatastore.client === undefined) {
@@ -93,9 +92,7 @@ export default class TransactionHistoryRepository {
     }
 
     const createdTransactionHistory: TransactionHistory | TransactionHistoryAggregate = await this.oneDatastore.client.transactionHistory.create(args)
-    if (createdTransactionHistory === undefined) {
-      throw new Error('Created transactionHistory is undefined.')
-    }
+
     return createdTransactionHistory
   }
 

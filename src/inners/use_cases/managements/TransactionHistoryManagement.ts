@@ -2,28 +2,33 @@ import type TransactionHistoryRepository from '../../../outers/repositories/Tran
 import type Pagination from '../../models/value_objects/Pagination'
 import Result from '../../models/value_objects/Result'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
-import { PaymentMethod, type TransactionHistory } from '@prisma/client'
+import { type TransactionHistory } from '@prisma/client'
 import type TransactionHistoryManagementCreateRequest
   from '../../models/value_objects/requests/transaction_history_management/TransactionHistoryManagementCreateRequest'
 import { randomUUID } from 'crypto'
-import { $Enums } from '.prisma/client'
 import type TransactionHistoryManagementPatchRequest
   from '../../models/value_objects/requests/transaction_history_management/TransactionHistoryManagementPatchRequest'
+import type UserManagement from './UserManagement'
+import type JajanItemManagement from './JajanItemManagement'
 
 export default class TransactionHistoryManagement {
+  userManagement: UserManagement
+  jajanItemManagement: JajanItemManagement
   transactionHistoryRepository: TransactionHistoryRepository
   objectUtility: ObjectUtility
 
-  constructor (transactionHistoryRepository: TransactionHistoryRepository, objectUtility: ObjectUtility) {
+  constructor (userManagement: UserManagement, jajanItemManagement: JajanItemManagement, transactionHistoryRepository: TransactionHistoryRepository, objectUtility: ObjectUtility) {
+    this.userManagement = userManagement
+    this.jajanItemManagement = jajanItemManagement
     this.transactionHistoryRepository = transactionHistoryRepository
     this.objectUtility = objectUtility
   }
 
-  readMany = async (pagination: Pagination): Promise<Result<TransactionHistory[]>> => {
-    const foundTransactionHistories: TransactionHistory[] = await this.transactionHistoryRepository.readMany(pagination)
+  readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Result<TransactionHistory[]>> => {
+    const foundTransactionHistories: TransactionHistory[] = await this.transactionHistoryRepository.readMany(pagination, whereInput, includeInput)
     return new Result<TransactionHistory[]>(
       200,
-      'TransactionHistory read all succeed.',
+      'TransactionHistory read many succeed.',
       foundTransactionHistories
     )
   }
@@ -64,12 +69,7 @@ export default class TransactionHistoryManagement {
     )
   }
 
-  createOne = async (request: TransactionHistoryManagementCreateRequest): Promise<Result<TransactionHistory>> => {
-    const salt: string | undefined = process.env.BCRYPT_SALT
-    if (salt === undefined) {
-      throw new Error('Salt is undefined.')
-    }
-
+  createOne = async (request: TransactionHistoryManagementCreateRequest): Promise<Result<TransactionHistory | null>> => {
     const transactionHistory: TransactionHistory = {
       id: randomUUID(),
       userId: request.userId,
@@ -83,18 +83,39 @@ export default class TransactionHistoryManagement {
       deletedAt: null
     }
 
-    const createdTransactionHistory: any = await this.transactionHistoryRepository.createOne(transactionHistory)
+    const createdTransactionHistory: Result<TransactionHistory | null> = await this.createOneRaw(transactionHistory)
+    if (createdTransactionHistory.status !== 201 || createdTransactionHistory.data === null) {
+      return new Result<null>(
+        createdTransactionHistory.status,
+        `TransactionHistory create one failed, ${createdTransactionHistory.message}`,
+        null
+      )
+    }
+
     return new Result<TransactionHistory>(
       201,
       'TransactionHistory create one succeed.',
-      createdTransactionHistory
+      createdTransactionHistory.data
     )
   }
 
-  createOneRaw = async (transactionHistory: TransactionHistory): Promise<Result<TransactionHistory>> => {
-    const salt: string | undefined = process.env.BCRYPT_SALT
-    if (salt === undefined) {
-      throw new Error('Salt is undefined.')
+  createOneRaw = async (transactionHistory: TransactionHistory): Promise<Result<TransactionHistory | null>> => {
+    const foundUser: Result<any> = await this.userManagement.readOneById(transactionHistory.userId)
+    if (foundUser.status !== 200 || foundUser.data === null) {
+      return new Result<null>(
+        404,
+        'TransactionHistory create one failed, user is not found.',
+        null
+      )
+    }
+
+    const foundJajanItem: Result<any> = await this.jajanItemManagement.readOneById(transactionHistory.jajanItemId)
+    if (foundJajanItem.status !== 200 || foundJajanItem.data === null) {
+      return new Result<null>(
+        404,
+        'TransactionHistory create one failed, jajan item is not found.',
+        null
+      )
     }
 
     const createdTransactionHistory: any = await this.transactionHistoryRepository.createOne(transactionHistory)
@@ -106,6 +127,22 @@ export default class TransactionHistoryManagement {
   }
 
   patchOneById = async (id: string, request: TransactionHistoryManagementPatchRequest): Promise<Result<TransactionHistory | null>> => {
+    const patchedTransactionHistory: Result<TransactionHistory | null> = await this.patchOneRawById(id, request)
+    if (patchedTransactionHistory.status !== 200 || patchedTransactionHistory.data === null) {
+      return new Result<null>(
+        patchedTransactionHistory.status,
+          `TransactionHistory patch one failed, ${patchedTransactionHistory.message}`,
+          null
+      )
+    }
+    return new Result<TransactionHistory>(
+      200,
+      'TransactionHistory patch one succeed.',
+      patchedTransactionHistory.data
+    )
+  }
+
+  patchOneRawById = async (id: string, request: TransactionHistoryManagementPatchRequest): Promise<Result<TransactionHistory | null>> => {
     const foundTransactionHistory: Result<TransactionHistory | null> = await this.readOneById(id)
     if (foundTransactionHistory.status !== 200 || foundTransactionHistory.data === null) {
       return new Result<null>(

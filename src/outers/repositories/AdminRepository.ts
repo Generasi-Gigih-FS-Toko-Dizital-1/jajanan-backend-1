@@ -10,11 +10,12 @@ export default class AdminRepository {
     this.oneDatastore = oneDatastore
   }
 
-  readMany = async (pagination: Pagination): Promise<Admin[] > => {
+  readMany = async (pagination: Pagination, whereInput: any): Promise<Admin[] > => {
     const offset: number = (pagination.pageNumber - 1) * pagination.pageSize
     const args: any = {
       take: pagination.pageSize,
-      skip: offset
+      skip: offset,
+      where: whereInput
     }
 
     if (this.oneDatastore.client === undefined) {
@@ -112,9 +113,7 @@ export default class AdminRepository {
     }
 
     const createdAdmin: Admin = await this.oneDatastore.client.admin.create(args)
-    if (createdAdmin === undefined) {
-      throw new Error('Created admins is undefined.')
-    }
+
     return createdAdmin
   }
 

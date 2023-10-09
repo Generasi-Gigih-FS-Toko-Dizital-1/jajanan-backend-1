@@ -1,7 +1,7 @@
 import { type Request, type Response, type Router } from 'express'
 
 import type Result from '../../../inners/models/value_objects/Result'
-import { PaymentMethod, type TransactionHistory } from '@prisma/client'
+import { type TransactionHistory } from '@prisma/client'
 import Pagination from '../../../inners/models/value_objects/Pagination'
 import ResponseBody from '../../../inners/models/value_objects/responses/ResponseBody'
 import type TransactionHistoryManagement from '../../../inners/use_cases/managements/TransactionHistoryManagement'
@@ -15,6 +15,7 @@ import TransactionHistoryManagementCreateResponse
   from '../../../inners/models/value_objects/responses/transaction_history_management/TransactionHistoryManagementCreateResponse'
 import TransactionHistoryManagementPatchResponse
   from '../../../inners/models/value_objects/responses/transaction_history_management/TransactionHistoryManagementPatchResponse'
+import type TransactionHistoryAggregate from '../../../inners/models/aggregates/TransactionHistoryAggregate'
 
 export default class TransactionHistoryControllerRest {
   router: Router
@@ -37,17 +38,24 @@ export default class TransactionHistoryControllerRest {
   }
 
   readMany = (request: Request, response: Response): void => {
-    const { pageNumber, pageSize } = request.query
+    const {
+      pageNumber,
+      pageSize,
+      where,
+      include
+    } = request.query
     const pagination: Pagination = new Pagination(
       pageNumber === undefined ? 1 : Number(pageNumber),
       pageSize === undefined ? 10 : Number(pageSize)
     )
+    const whereInput: any = where === undefined ? {} : JSON.parse(decodeURIComponent(where as string))
+    const includeInput: any = include === undefined ? {} : JSON.parse(decodeURIComponent(include as string))
     this.transactionHistoryManagement
-      .readMany(pagination)
-      .then((result: Result<TransactionHistory[]>) => {
+      .readMany(pagination, whereInput, includeInput)
+      .then((result: Result<TransactionHistory[] | TransactionHistoryAggregate[]>) => {
         const data: TransactionHistoryManagementReadManyResponse = new TransactionHistoryManagementReadManyResponse(
           result.data.length,
-          result.data.map((transactionHistory: TransactionHistory) =>
+          result.data.map((transactionHistory: TransactionHistory | TransactionHistoryAggregate) =>
             new TransactionHistoryManagementReadOneResponse(
               transactionHistory.id,
               transactionHistory.userId,
@@ -57,7 +65,9 @@ export default class TransactionHistoryControllerRest {
               transactionHistory.lastLatitude,
               transactionHistory.lastLongitude,
               transactionHistory.updatedAt,
-              transactionHistory.createdAt
+              transactionHistory.createdAt,
+              (transactionHistory as TransactionHistoryAggregate).user,
+              (transactionHistory as TransactionHistoryAggregate).jajanItem
             )
           )
         )
@@ -107,19 +117,24 @@ export default class TransactionHistoryControllerRest {
   createOne = (request: Request, response: Response): void => {
     this.transactionHistoryManagement
       .createOne(request.body)
-      .then((result: Result<TransactionHistory>) => {
-        const data: TransactionHistoryManagementCreateResponse = new TransactionHistoryManagementCreateResponse(
-          result.data.id,
-          result.data.userId,
-          result.data.jajanItemId,
-          result.data.amount,
-          result.data.paymentMethod,
-          result.data.lastLatitude,
-          result.data.lastLongitude,
-          result.data.updatedAt,
-          result.data.createdAt
-        )
-        const responseBody: ResponseBody<TransactionHistoryManagementCreateResponse> = new ResponseBody<TransactionHistoryManagementCreateResponse>(
+      .then((result: Result<TransactionHistory | null>) => {
+        let data: TransactionHistoryManagementCreateResponse | null
+        if (result.status === 201 && result.data !== null) {
+          data = new TransactionHistoryManagementCreateResponse(
+            result.data.id,
+            result.data.userId,
+            result.data.jajanItemId,
+            result.data.amount,
+            result.data.paymentMethod,
+            result.data.lastLatitude,
+            result.data.lastLongitude,
+            result.data.updatedAt,
+            result.data.createdAt
+          )
+        } else {
+          data = null
+        }
+        const responseBody: ResponseBody<TransactionHistoryManagementCreateResponse | null> = new ResponseBody<TransactionHistoryManagementCreateResponse | null>(
           result.message,
           data
         )

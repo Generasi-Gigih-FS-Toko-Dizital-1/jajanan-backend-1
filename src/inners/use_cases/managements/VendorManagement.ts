@@ -9,6 +9,7 @@ import type VendorManagementCreateRequest
 import type VendorManagementPatchRequest
   from '../../models/value_objects/requests/vendor_managements/VendorManagementPatchRequest'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
+import type VendorAggregate from '../../models/aggregates/VendorAggregate'
 
 export default class VendorManagement {
   vendorRepository: VendorRepository
@@ -19,11 +20,11 @@ export default class VendorManagement {
     this.objectUtility = objectUtility
   }
 
-  readMany = async (pagination: Pagination): Promise<Result<Vendor[]>> => {
-    const foundVendors: Vendor[] = await this.vendorRepository.readMany(pagination)
+  readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Result<Vendor[] | VendorAggregate[]>> => {
+    const foundVendors: Vendor[] = await this.vendorRepository.readMany(pagination, whereInput, includeInput)
     return new Result<Vendor[]>(
       200,
-      'Vendor read all succeed.',
+      'Vendor read many succeed.',
       foundVendors
     )
   }
@@ -118,7 +119,7 @@ export default class VendorManagement {
     )
   }
 
-  createOne = async (request: VendorManagementCreateRequest): Promise<Result<Vendor>> => {
+  createOne = async (request: VendorManagementCreateRequest): Promise<Result<Vendor | null>> => {
     const salt: string | undefined = process.env.BCRYPT_SALT
     if (salt === undefined) {
       throw new Error('Salt is undefined.')
@@ -144,24 +145,36 @@ export default class VendorManagement {
       createdAt: new Date(),
       deletedAt: null
     }
-    const createdVendor: any = await this.vendorRepository.createOne(vendorToCreate)
+
+    const createdVendor: Result<Vendor | null> = await this.createOneRaw(vendorToCreate)
+    if (createdVendor.status !== 201 || createdVendor.data === null) {
+      return new Result<null>(
+        createdVendor.status,
+            `Vendor create one failed, ${createdVendor.message}`,
+            null
+      )
+    }
     return new Result<Vendor>(
       201,
       'Vendor create one succeed.',
-      createdVendor
+      createdVendor.data
     )
   }
 
-  createOneRaw = async (vendor: Vendor): Promise<Result<Vendor>> => {
-    const salt: string | undefined = process.env.BCRYPT_SALT
-    if (salt === undefined) {
-      throw new Error('Salt is undefined.')
+  createOneRaw = async (vendor: Vendor): Promise<Result<Vendor | null>> => {
+    let createdVendor: Vendor
+    try {
+      createdVendor = await this.vendorRepository.createOne(vendor)
+    } catch (error) {
+      return new Result<null>(
+        500,
+            `Vendor create one failed, ${(error as Error).message}`,
+            null
+      )
     }
-
-    const createdVendor: any = await this.vendorRepository.createOne(vendor)
     return new Result<Vendor>(
       201,
-      'Vendor create one raw succeed.',
+      'Vendor create one succeed.',
       createdVendor
     )
   }
@@ -174,6 +187,23 @@ export default class VendorManagement {
 
     request.password = bcrypt.hashSync(request.password, salt)
 
+    const patchedVendor: Result<Vendor | null> = await this.patchOneRawById(id, request)
+    if (patchedVendor.status !== 200 || patchedVendor.data === null) {
+      return new Result<null>(
+        patchedVendor.status,
+          `Vendor patch one by id failed, ${patchedVendor.message}}`,
+          null
+      )
+    }
+
+    return new Result<Vendor>(
+      200,
+      'Vendor patch one by id succeed.',
+      patchedVendor.data
+    )
+  }
+
+  patchOneRawById = async (id: string, request: VendorManagementPatchRequest): Promise<Result<Vendor | null>> => {
     const foundVendor: Result<Vendor | null> = await this.readOneById(id)
     if (foundVendor.status !== 200 || foundVendor.data === null) {
       return new Result<null>(
@@ -183,7 +213,16 @@ export default class VendorManagement {
       )
     }
     this.objectUtility.patch(foundVendor.data, request)
-    const patchedVendor: Vendor = await this.vendorRepository.patchOneById(id, foundVendor.data)
+    let patchedVendor: Vendor
+    try {
+      patchedVendor = await this.vendorRepository.patchOneById(id, foundVendor.data)
+    } catch (error) {
+      return new Result<null>(
+        500,
+            `Vendor patch one by id failed, ${(error as Error).message}`,
+            null
+      )
+    }
     return new Result<Vendor>(
       200,
       'Vendor patch one by id succeed.',
@@ -191,8 +230,17 @@ export default class VendorManagement {
     )
   }
 
-  deleteOneById = async (id: string): Promise<Result<Vendor>> => {
-    const deletedVendor: any = await this.vendorRepository.deleteOneById(id)
+  deleteOneById = async (id: string): Promise<Result<Vendor | null>> => {
+    let deletedVendor: Vendor
+    try {
+      deletedVendor = await this.vendorRepository.deleteOneById(id)
+    } catch (error) {
+      return new Result<null>(
+        500,
+        'Vendor delete one by id failed.',
+        null
+      )
+    }
     return new Result<Vendor>(
       200,
       'Vendor delete one by id succeed.',

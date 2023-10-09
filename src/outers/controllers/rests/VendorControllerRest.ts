@@ -15,6 +15,7 @@ import VendorManagementReadOneResponse
 import ResponseBody from '../../../inners/models/value_objects/responses/ResponseBody'
 import type AuthenticationValidation from '../../../inners/use_cases/authentications/AuthenticationValidation'
 import validateAuthenticationMiddleware from '../../middlewares/ValidateAuthenticationMiddleware'
+import type VendorAggregate from '../../../inners/models/aggregates/VendorAggregate'
 
 export default class VendorControllerRest {
   router: Router
@@ -37,17 +38,24 @@ export default class VendorControllerRest {
   }
 
   readMany = (request: Request, response: Response): void => {
-    const { pageNumber, pageSize } = request.query
+    const {
+      pageNumber,
+      pageSize,
+      where,
+      include
+    } = request.query
     const pagination: Pagination = new Pagination(
       pageNumber === undefined ? 1 : Number(pageNumber),
       pageSize === undefined ? 10 : Number(pageSize)
     )
+    const whereInput: any = where === undefined ? {} : JSON.parse(decodeURIComponent(where as string))
+    const includeInput: any = include === undefined ? {} : JSON.parse(decodeURIComponent(include as string))
     this.vendorManagement
-      .readMany(pagination)
-      .then((result: Result<Vendor[]>) => {
+      .readMany(pagination, whereInput, includeInput)
+      .then((result: Result<Vendor[] | VendorAggregate[]>) => {
         const data: VendorManagementReadManyResponse = new VendorManagementReadManyResponse(
           result.data.length,
-          result.data.map((vendor: Vendor) =>
+          result.data.map((vendor: Vendor | VendorAggregate) =>
             new VendorManagementReadOneResponse(
               vendor.id,
               vendor.fullName,
@@ -64,7 +72,9 @@ export default class VendorControllerRest {
               vendor.lastLatitude,
               vendor.lastLongitude,
               vendor.createdAt,
-              vendor.updatedAt
+              vendor.updatedAt,
+              (vendor as VendorAggregate).notificationHistories,
+              (vendor as VendorAggregate).jajanItems
             )
           )
         )
@@ -125,26 +135,31 @@ export default class VendorControllerRest {
   createOne = (request: Request, response: Response): void => {
     this.vendorManagement
       .createOne(request.body)
-      .then((result: Result<Vendor>) => {
-        const data: VendorManagementCreateResponse = new VendorManagementCreateResponse(
-          result.data.id,
-          result.data.fullName,
-          result.data.gender,
-          result.data.address,
-          result.data.username,
-          result.data.email,
-          result.data.balance,
-          result.data.experience,
-          result.data.jajanImageUrl,
-          result.data.jajanName,
-          result.data.jajanDescription,
-          result.data.status,
-          result.data.lastLatitude,
-          result.data.lastLongitude,
-          result.data.createdAt,
-          result.data.updatedAt
-        )
-        const responseBody: ResponseBody<VendorManagementCreateResponse> = new ResponseBody<VendorManagementCreateResponse>(
+      .then((result: Result<Vendor | null>) => {
+        let data: VendorManagementCreateResponse | null
+        if (result.status === 201 && result.data !== null) {
+          data = new VendorManagementCreateResponse(
+            result.data.id,
+            result.data.fullName,
+            result.data.gender,
+            result.data.address,
+            result.data.username,
+            result.data.email,
+            result.data.balance,
+            result.data.experience,
+            result.data.jajanImageUrl,
+            result.data.jajanName,
+            result.data.jajanDescription,
+            result.data.status,
+            result.data.lastLatitude,
+            result.data.lastLongitude,
+            result.data.createdAt,
+            result.data.updatedAt
+          )
+        } else {
+          data = null
+        }
+        const responseBody: ResponseBody<VendorManagementCreateResponse | null> = new ResponseBody<VendorManagementCreateResponse | null>(
           result.message,
           data
         )
@@ -202,7 +217,7 @@ export default class VendorControllerRest {
     const { id } = request.params
     this.vendorManagement
       .deleteOneById(id)
-      .then((result: Result<Vendor>) => {
+      .then((result: Result<Vendor | null>) => {
         const responseBody: ResponseBody<null> = new ResponseBody<null>(
           result.message,
           null

@@ -1,7 +1,7 @@
 import type VendorManagement from '../../managements/VendorManagement'
 
 import Result from '../../../models/value_objects/Result'
-import { type User, type Vendor } from '@prisma/client'
+import { type Vendor } from '@prisma/client'
 import type VendorRegisterByEmailAndPasswordRequest
   from '../../../models/value_objects/requests/authentications/vendors/VendorRegisterByEmailAndPasswordRequest'
 import { randomUUID } from 'crypto'
@@ -53,7 +53,14 @@ export default class VendorRegisterAuthentication {
       deletedAt: null
     }
 
-    const createdVendor: Result<Vendor> = await this.vendorManagement.createOneRaw(vendorToCreate)
+    const createdVendor: Result<Vendor | null> = await this.vendorManagement.createOneRaw(vendorToCreate)
+    if (createdVendor.status !== 201 || createdVendor.data === null) {
+      return new Result<null>(
+        createdVendor.status,
+            `Vendor register by email and password failed, ${createdVendor.message}`,
+            null
+      )
+    }
 
     return new Result<Vendor>(
       201,

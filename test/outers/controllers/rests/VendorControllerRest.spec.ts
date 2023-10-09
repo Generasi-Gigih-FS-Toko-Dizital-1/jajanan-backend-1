@@ -2,32 +2,41 @@ import chai, { assert } from 'chai'
 import chaiHttp from 'chai-http'
 import { beforeEach, describe, it } from 'mocha'
 import OneDatastore from '../../../../src/outers/datastores/OneDatastore'
-import VendorMock from '../../../mocks/VendorMock'
 import { server } from '../../../../src/App'
 import waitUntil from 'async-wait-until'
 import VendorManagementCreateRequest
   from '../../../../src/inners/models/value_objects/requests/vendor_managements/VendorManagementCreateRequest'
-import { type Admin, type Prisma, type Vendor } from '@prisma/client'
+import {
+  type Admin,
+  type JajanItem,
+  type NotificationHistory,
+  type Prisma,
+  type TransactionHistory,
+  type Vendor
+} from '@prisma/client'
 import VendorManagementPatchRequest
   from '../../../../src/inners/models/value_objects/requests/vendor_managements/VendorManagementPatchRequest'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
 import AdminMock from '../../../mocks/AdminMock'
 import AdminLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
+import OneSeeder from '../../../../src/outers/seeders/OneSeeder'
+import humps from 'humps'
 
 chai.use(chaiHttp)
 chai.should()
 
 describe('VendorControllerRest', () => {
-  const authAdminMock: AdminMock = new AdminMock()
-  const vendorMock: VendorMock = new VendorMock()
   const oneDatastore: OneDatastore = new OneDatastore()
+  const authAdminMock: AdminMock = new AdminMock()
+  let oneSeeder: OneSeeder
   let agent: ChaiHttp.Agent
   let authorization: Authorization
 
   before(async () => {
     await waitUntil(() => server !== undefined)
     await oneDatastore.connect()
+    oneSeeder = new OneSeeder(oneDatastore)
 
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
@@ -68,24 +77,14 @@ describe('VendorControllerRest', () => {
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-    await oneDatastore.client.vendor.createMany({
-      data: vendorMock.data
-    })
+    await oneSeeder.up()
   })
 
   afterEach(async () => {
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-    await oneDatastore.client.vendor.deleteMany(
-      {
-        where: {
-          id: {
-            in: vendorMock.data.map((vendor: Vendor) => vendor.id)
-          }
-        }
-      }
-    )
+    await oneSeeder.down()
   })
 
   after(async () => {
@@ -107,7 +106,7 @@ describe('VendorControllerRest', () => {
   describe('GET /api/v1/vendors?page_number={}&page_size={}', () => {
     it('should return 200 OK', async () => {
       const pageNumber: number = 1
-      const pageSize: number = vendorMock.data.length
+      const pageSize: number = oneSeeder.vendorMock.data.length
       const response = await agent
         .get(`/api/v1/vendors?page_number=${pageNumber}&page_size=${pageSize}`)
         .set('Authorization', authorization.convertToString())
@@ -142,16 +141,66 @@ describe('VendorControllerRest', () => {
       })
     })
   })
-
-  describe('GET /api/v1/vendors?search=encoded', () => {
+  describe('GET /api/v1/vendors?page_number={}&page_size={}&where={}&include={}', () => {
     it('should return 200 OK', async () => {
+      const requestVendor: Vendor = oneSeeder.vendorMock.data[0]
+      const requestNotificationHistories: NotificationHistory[] = oneSeeder.notificationHistoryMock.data.filter(notificationHistory => notificationHistory.vendorId === requestVendor.id)
+      const requestJajanItems: JajanItem[] = oneSeeder.jajanItemMock.data.filter(jajanItem => jajanItem.vendorId === requestVendor.id)
+      const pageNumber: number = 1
+      const pageSize: number = oneSeeder.vendorMock.data.length
+      const whereInput: any = {
+        id: requestVendor.id
+      }
+      const where: string = encodeURIComponent(JSON.stringify(whereInput))
+      const includeInput: any = {
+        notificationHistories: true,
+        jajanItems: true
+      }
+      const include: string = encodeURIComponent(JSON.stringify(includeInput))
+      const response = await agent
+        .get(`/api/v1/vendors?page_number=${pageNumber}&page_size=${pageSize}&where=${where}&include=${include}`)
+        .set('Authorization', authorization.convertToString())
+        .send()
 
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      response.body.data.should.be.an('object')
+      response.body.data.should.has.property('total_vendors')
+      response.body.data.should.has.property('vendors')
+      response.body.data.vendors.should.be.a('array')
+      response.body.data.vendors.length.should.be.equal(1)
+      response.body.data.vendors.forEach((vendor: Vendor) => {
+        vendor.should.has.property('id').equal(requestVendor.id)
+        vendor.should.has.property('username').equal(requestVendor.username)
+        vendor.should.has.property('full_name').equal(requestVendor.fullName)
+        vendor.should.has.property('address').equal(requestVendor.address)
+        vendor.should.has.property('email').equal(requestVendor.email)
+        vendor.should.has.property('gender').equal(requestVendor.gender)
+        vendor.should.has.property('balance').equal(requestVendor.balance)
+        vendor.should.has.property('experience').equal(requestVendor.experience)
+        vendor.should.has.property('jajan_image_url').equal(requestVendor.jajanImageUrl)
+        vendor.should.has.property('jajan_name').equal(requestVendor.jajanName)
+        vendor.should.has.property('jajan_description').equal(requestVendor.jajanDescription)
+        vendor.should.has.property('status').equal(requestVendor.status)
+        vendor.should.has.property('last_latitude').equal(requestVendor.lastLatitude)
+        vendor.should.has.property('last_longitude').equal(requestVendor.lastLongitude)
+        vendor.should.has.property('created_at').equal(requestVendor.createdAt.toISOString())
+        vendor.should.has.property('updated_at').equal(requestVendor.updatedAt.toISOString())
+        vendor.should.has.property('notification_histories').deep.members(
+          requestNotificationHistories.map((notificationHistory: NotificationHistory) => humps.decamelizeKeys(JSON.parse(JSON.stringify(notificationHistory))))
+        )
+        vendor.should.has.property('jajan_items').deep.members(
+          requestJajanItems.map((jajanItem: JajanItem) => humps.decamelizeKeys(JSON.parse(JSON.stringify(jajanItem))))
+        )
+      })
     })
   })
 
   describe('GET /api/v1/vendors/:id', () => {
     it('should return 200 OK', async () => {
-      const requestVendor: Vendor = vendorMock.data[0]
+      const requestVendor: Vendor = oneSeeder.vendorMock.data[0]
       const response = await agent
         .get(`/api/v1/vendors/${requestVendor.id}`)
         .set('Authorization', authorization.convertToString())
@@ -184,18 +233,18 @@ describe('VendorControllerRest', () => {
   describe('POST /api/v1/vendors', () => {
     it('should return 201 CREATED', async () => {
       const requestBody: VendorManagementCreateRequest = new VendorManagementCreateRequest(
-        vendorMock.data[0].fullName,
-        vendorMock.data[0].gender,
-        vendorMock.data[0].address,
-        vendorMock.data[0].username,
-        vendorMock.data[0].email,
-        vendorMock.data[0].password,
-        vendorMock.data[0].jajanImageUrl,
-        vendorMock.data[0].jajanName,
-        vendorMock.data[0].jajanDescription,
-        vendorMock.data[0].status,
-        vendorMock.data[0].lastLatitude,
-        vendorMock.data[0].lastLongitude
+        oneSeeder.vendorMock.data[0].fullName,
+        oneSeeder.vendorMock.data[0].gender,
+        oneSeeder.vendorMock.data[0].address,
+        oneSeeder.vendorMock.data[0].username,
+        oneSeeder.vendorMock.data[0].email,
+        oneSeeder.vendorMock.data[0].password,
+        oneSeeder.vendorMock.data[0].jajanImageUrl,
+        oneSeeder.vendorMock.data[0].jajanName,
+        oneSeeder.vendorMock.data[0].jajanDescription,
+        oneSeeder.vendorMock.data[0].status,
+        oneSeeder.vendorMock.data[0].lastLatitude,
+        oneSeeder.vendorMock.data[0].lastLongitude
       )
 
       const response = await agent
@@ -239,7 +288,7 @@ describe('VendorControllerRest', () => {
 
   describe('PATCH /api/v1/vendors/:id', () => {
     it('should return 200 OK', async () => {
-      const requestVendor: Vendor = vendorMock.data[0]
+      const requestVendor: Vendor = oneSeeder.vendorMock.data[0]
       const requestBody: VendorManagementPatchRequest = new VendorManagementPatchRequest(
         `patched${requestVendor.fullName}`,
         'FEMALE',
@@ -285,7 +334,35 @@ describe('VendorControllerRest', () => {
 
   describe('DELETE /api/v1/vendors/:id', () => {
     it('should return 200 OK', async () => {
-      const requestVendor: Vendor = vendorMock.data[0]
+      const requestVendor: Vendor = oneSeeder.vendorMock.data[0]
+      const requestNotificationHistories: NotificationHistory[] = oneSeeder.notificationHistoryMock.data.filter((notificationHistory: NotificationHistory) => notificationHistory.vendorId === requestVendor.id)
+      const requestJajanItems: JajanItem[] = oneSeeder.jajanItemMock.data.filter((jajanItem: JajanItem) => jajanItem.vendorId === requestVendor.id)
+      const requestTransactionHistories: TransactionHistory[] = oneSeeder.transactionHistoryMock.data.filter((transactionHistory: TransactionHistory) => requestJajanItems.map((jajanItem: JajanItem) => jajanItem.id).includes(transactionHistory.jajanItemId))
+
+      if (oneDatastore.client === undefined) {
+        throw new Error('oneDatastore client is undefined')
+      }
+      await oneDatastore.client.transactionHistory.deleteMany({
+        where: {
+          id: {
+            in: requestTransactionHistories.map((transactionHistory: TransactionHistory) => transactionHistory.id)
+          }
+        }
+      })
+      await oneDatastore.client.jajanItem.deleteMany({
+        where: {
+          id: {
+            in: requestJajanItems.map((jajanItem: JajanItem) => jajanItem.id)
+          }
+        }
+      })
+      await oneDatastore.client.notificationHistory.deleteMany({
+        where: {
+          id: {
+            in: requestNotificationHistories.map((notificationHistory: NotificationHistory) => notificationHistory.id)
+          }
+        }
+      })
 
       const response = await agent
         .delete(`/api/v1/vendors/${requestVendor.id}`)
@@ -298,9 +375,6 @@ describe('VendorControllerRest', () => {
       response.body.should.has.property('data')
       assert.isNull(response.body.data)
 
-      if (oneDatastore.client === undefined) {
-        throw new Error('oneDatastore client is undefined')
-      }
       const result: Vendor | null = await oneDatastore.client.vendor.findFirst({
         where: {
           id: requestVendor.id

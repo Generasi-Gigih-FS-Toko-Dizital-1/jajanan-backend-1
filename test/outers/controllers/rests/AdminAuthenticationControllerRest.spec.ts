@@ -1,58 +1,48 @@
-import chai from 'chai'
+import chai, { assert } from 'chai'
 import chaiHttp from 'chai-http'
 import { beforeEach, describe, it } from 'mocha'
 import OneDatastore from '../../../../src/outers/datastores/OneDatastore'
-import AdminMock from '../../../mocks/AdminMock'
 import { server } from '../../../../src/App'
 import waitUntil from 'async-wait-until'
-import { type Admin } from '@prisma/client'
 import AdminLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
 import AdminRefreshAccessTokenRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminRefreshAccessTokenRequest'
+import OneSeeder from '../../../../src/outers/seeders/OneSeeder'
 
 chai.use(chaiHttp)
 chai.should()
 
 describe('AdminAuthenticationControllerRest', () => {
-  const adminMock: AdminMock = new AdminMock()
-  const oneDatastore = new OneDatastore()
+  const oneDatastore: OneDatastore = new OneDatastore()
+  let oneSeeder: OneSeeder
+
+  before(async () => {
+    await waitUntil(() => server !== undefined)
+    await oneDatastore.connect()
+    oneSeeder = new OneSeeder(oneDatastore)
+  })
 
   beforeEach(async () => {
-    await waitUntil(() => server !== undefined)
-
-    await oneDatastore.connect()
-    if (oneDatastore.client === undefined) {
-      throw new Error('Client is undefined.')
-    }
-    await oneDatastore.client.admin.createMany({
-      data: adminMock.data
-    })
+    await oneSeeder.up()
   })
 
   afterEach(async () => {
-    if (oneDatastore.client === undefined) {
-      throw new Error('Client is undefined.')
-    }
-    await oneDatastore.client.admin.deleteMany(
-      {
-        where: {
-          id: {
-            in: adminMock.data.map((admin: Admin) => admin.id)
-          }
-        }
-      }
-    )
+    await oneSeeder.down()
+  })
+
+  after(async () => {
     await oneDatastore.disconnect()
   })
 
   describe('POST /api/v1/authentications/admins/login?method=email_and_password', () => {
     it('should return 200 OK', async () => {
-      const requestAdmin = adminMock.data[0]
+      const requestAdmin = oneSeeder.adminMock.data[0]
       const requestBodyLogin: AdminLoginByEmailAndPasswordRequest = new AdminLoginByEmailAndPasswordRequest(
         requestAdmin.email,
         requestAdmin.password
       )
+
       const response = await chai
         .request(server)
         .post('/api/v1/authentications/admins/login?method=email_and_password')
@@ -72,7 +62,7 @@ describe('AdminAuthenticationControllerRest', () => {
     })
 
     it('should return 404 NOT FOUND: Unknown email', async () => {
-      const requestAdmin = adminMock.data[0]
+      const requestAdmin = oneSeeder.adminMock.data[0]
       const requestBodyLogin: AdminLoginByEmailAndPasswordRequest = new AdminLoginByEmailAndPasswordRequest(
         'unknown_email',
         requestAdmin.password
@@ -89,7 +79,7 @@ describe('AdminAuthenticationControllerRest', () => {
     })
 
     it('should return 404 NOT FOUND: Unknown email or password', async () => {
-      const requestAdmin = adminMock.data[0]
+      const requestAdmin = oneSeeder.adminMock.data[0]
       const requestBodyLogin: AdminLoginByEmailAndPasswordRequest = new AdminLoginByEmailAndPasswordRequest(
         requestAdmin.email,
         'unknown_password'
@@ -108,7 +98,7 @@ describe('AdminAuthenticationControllerRest', () => {
 
   describe('POST /api/v1/authentications/admins/refreshes/access-token', () => {
     it('should return 200 OK', async () => {
-      const requestAdmin = adminMock.data[0]
+      const requestAdmin = oneSeeder.adminMock.data[0]
       const requestBodyLogin: AdminLoginByEmailAndPasswordRequest = new AdminLoginByEmailAndPasswordRequest(
         requestAdmin.email,
         requestAdmin.password
@@ -133,6 +123,7 @@ describe('AdminAuthenticationControllerRest', () => {
       const requestBodyRefreshAccessToken: AdminRefreshAccessTokenRequest = new AdminRefreshAccessTokenRequest(
         responseLogin.body.data.session
       )
+
       const response = await chai
         .request(server)
         .post('/api/v1/authentications/admins/refreshes/access-token')
@@ -149,6 +140,47 @@ describe('AdminAuthenticationControllerRest', () => {
       response.body.data.session.should.has.property('access_token')
       response.body.data.session.should.has.property('refresh_token').equal(responseLogin.body.data.session.refresh_token)
       response.body.data.session.should.has.property('expired_at')
+    })
+  })
+
+  describe('POST /api/v1/authentications/admins/logout', () => {
+    it('should return 200 OK', async () => {
+      const requestAdmin = oneSeeder.adminMock.data[0]
+      const requestBodyLogin: AdminLoginByEmailAndPasswordRequest = new AdminLoginByEmailAndPasswordRequest(
+        requestAdmin.email,
+        requestAdmin.password
+      )
+      const responseLogin = await chai
+        .request(server)
+        .post('/api/v1/authentications/admins/login?method=email_and_password')
+        .send(requestBodyLogin)
+
+      responseLogin.should.has.status(200)
+      responseLogin.body.should.be.an('object')
+      responseLogin.body.should.has.property('message')
+      responseLogin.body.should.has.property('data')
+      responseLogin.body.data.should.has.property('session')
+      responseLogin.body.data.session.should.be.an('object')
+      responseLogin.body.data.session.should.has.property('account_id').equal(requestAdmin.id)
+      responseLogin.body.data.session.should.has.property('account_type').equal('ADMIN')
+      responseLogin.body.data.session.should.has.property('access_token')
+      responseLogin.body.data.session.should.has.property('refresh_token')
+      responseLogin.body.data.session.should.has.property('expired_at')
+
+      const requestBodyRefreshAccessToken: AdminRefreshAccessTokenRequest = new AdminRefreshAccessTokenRequest(
+        responseLogin.body.data.session
+      )
+
+      const response = await chai
+        .request(server)
+        .post('/api/v1/authentications/admins/logout')
+        .send(requestBodyRefreshAccessToken)
+
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      assert.isNull(response.body.data)
     })
   })
 })

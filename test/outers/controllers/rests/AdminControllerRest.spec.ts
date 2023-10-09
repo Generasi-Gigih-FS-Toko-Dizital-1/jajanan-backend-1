@@ -13,20 +13,22 @@ import AdminManagementPatchRequest
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
 import AdminLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
+import OneSeeder from '../../../../src/outers/seeders/OneSeeder'
 
 chai.use(chaiHttp)
 chai.should()
 
 describe('AdminControllerRest', () => {
-  const authAdminMock: AdminMock = new AdminMock()
-  const adminMock: AdminMock = new AdminMock()
   const oneDatastore: OneDatastore = new OneDatastore()
+  const authAdminMock: AdminMock = new AdminMock()
+  let oneSeeder: OneSeeder
   let agent: ChaiHttp.Agent
   let authorization: Authorization
 
   before(async () => {
     await waitUntil(() => server !== undefined)
     await oneDatastore.connect()
+    oneSeeder = new OneSeeder(oneDatastore)
 
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
@@ -67,24 +69,14 @@ describe('AdminControllerRest', () => {
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-    await oneDatastore.client.admin.createMany({
-      data: adminMock.data
-    })
+    await oneSeeder.up()
   })
 
   afterEach(async () => {
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-    await oneDatastore.client.admin.deleteMany(
-      {
-        where: {
-          id: {
-            in: adminMock.data.map((admin: Admin) => admin.id)
-          }
-        }
-      }
-    )
+    await oneSeeder.down()
   })
 
   after(async () => {
@@ -106,7 +98,7 @@ describe('AdminControllerRest', () => {
   describe('GET /api/v1/admins?page_number={}&page_size={}', () => {
     it('should return 200 OK', async () => {
       const pageNumber: number = 1
-      const pageSize: number = adminMock.data.length
+      const pageSize: number = oneSeeder.adminMock.data.length
 
       const response = await agent
         .get(`/api/v1/admins?page_number=${pageNumber}&page_size=${pageSize}`)
@@ -122,7 +114,7 @@ describe('AdminControllerRest', () => {
       response.body.data.should.has.property('admins')
       response.body.data.admins.should.be.a('array')
       response.body.data.admins.length.should.be.equal(pageSize)
-      response.body.data.admins.forEach((admin: Admin) => {
+      response.body.data.admins.forEach((admin: any) => {
         admin.should.has.property('id')
         admin.should.has.property('full_name')
         admin.should.has.property('email')
@@ -133,15 +125,44 @@ describe('AdminControllerRest', () => {
     })
   })
 
-  describe('GET /api/v1/admins?search=encoded', () => {
+  describe('GET /api/v1/admins?page_number={}&page_size={}&where={}', () => {
     it('should return 200 OK', async () => {
+      const requestAdmin: Admin = oneSeeder.adminMock.data[0]
+      const pageNumber: number = 1
+      const pageSize: number = oneSeeder.adminMock.data.length
+      const whereInput: any = {
+        id: requestAdmin.id
+      }
+      const where = encodeURIComponent(JSON.stringify(whereInput))
 
+      const response = await agent
+        .get(`/api/v1/admins?page_number=${pageNumber}&page_size=${pageSize}&where=${where}`)
+        .set('Authorization', authorization.convertToString())
+        .send()
+
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      response.body.data.should.be.an('object')
+      response.body.data.should.has.property('total_admins')
+      response.body.data.should.has.property('admins')
+      response.body.data.admins.should.be.a('array')
+      response.body.data.admins.length.should.be.equal(1)
+      response.body.data.admins.forEach((admin: any) => {
+        admin.should.has.property('id').equal(requestAdmin.id)
+        admin.should.has.property('full_name').equal(requestAdmin.fullName)
+        admin.should.has.property('email').equal(requestAdmin.email)
+        admin.should.has.property('gender').equal(requestAdmin.gender)
+        admin.should.has.property('created_at').equal(requestAdmin.createdAt.toISOString())
+        admin.should.has.property('updated_at').equal(requestAdmin.updatedAt.toISOString())
+      })
     })
   })
 
   describe('GET /api/v1/admins/:id', () => {
     it('should return 200 OK', async () => {
-      const requestAdmin: Admin = adminMock.data[0]
+      const requestAdmin: Admin = oneSeeder.adminMock.data[0]
 
       const response = await agent
         .get(`/api/v1/admins/${requestAdmin.id}`)
@@ -165,10 +186,10 @@ describe('AdminControllerRest', () => {
   describe('POST /api/v1/admins', () => {
     it('should return 201 CREATED', async () => {
       const requestBody: AdminManagementCreateRequest = new AdminManagementCreateRequest(
-        adminMock.data[0].fullName,
-        adminMock.data[0].gender,
-        adminMock.data[0].email,
-        adminMock.data[0].password
+        oneSeeder.adminMock.data[0].fullName,
+        oneSeeder.adminMock.data[0].gender,
+        oneSeeder.adminMock.data[0].email,
+        oneSeeder.adminMock.data[0].password
       )
 
       const response = await agent
@@ -202,7 +223,7 @@ describe('AdminControllerRest', () => {
 
   describe('PATCH /api/v1/admins/:id', () => {
     it('should return 200 OK', async () => {
-      const requestAdmin: Admin = adminMock.data[0]
+      const requestAdmin: Admin = oneSeeder.adminMock.data[0]
       const requestBody: AdminManagementPatchRequest = new AdminManagementPatchRequest(
         `patched${requestAdmin.fullName}`,
         'FEMALE',
@@ -231,7 +252,7 @@ describe('AdminControllerRest', () => {
 
   describe('DELETE /api/v1/admins/:id', () => {
     it('should return 200 OK', async () => {
-      const requestAdmin: Admin = adminMock.data[0]
+      const requestAdmin: Admin = oneSeeder.adminMock.data[0]
 
       const response = await agent
         .delete(`/api/v1/admins/${requestAdmin.id}`)
