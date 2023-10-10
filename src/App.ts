@@ -10,7 +10,7 @@ import cors from 'cors'
 import OneSeeder from './outers/seeders/OneSeeder'
 import TwoDatastore from './outers/datastores/TwoDatastore'
 import cookieParser from 'cookie-parser'
-import PaymentGateway from './outers/payment_gateway/PaymentGateway'
+import PaymentGateway from './outers/gateways/PaymentGateway'
 
 let app: Application | undefined
 let io: socketIo.Server | undefined
@@ -49,13 +49,6 @@ const main = async (): Promise<void> => {
     console.log('Two datastore connected.')
   } catch (error) {
     console.log('Error connecting to two datastore: ', error)
-  }
-
-  try {
-    await paymentGateway.connect()
-    console.log('Payment gateway connected')
-  } catch (error) {
-    console.log('Error connecting to payment gateway')
   }
 
   const oneSeeder = new OneSeeder(oneDatastore)

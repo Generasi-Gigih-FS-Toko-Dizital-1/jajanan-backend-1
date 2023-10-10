@@ -5,9 +5,9 @@ import type Pagination from '../../models/value_objects/Pagination'
 import Result from '../../models/value_objects/Result'
 import { type User } from '@prisma/client'
 import type UserManagementCreateRequest
-  from '../../models/value_objects/requests/user_managements/UserManagementCreateRequest'
+  from '../../models/value_objects/requests/managements/user_managements/UserManagementCreateRequest'
 import type UserManagementPatchRequest
-  from '../../models/value_objects/requests/user_managements/UserManagementPatchRequest'
+  from '../../models/value_objects/requests/managements/user_managements/UserManagementPatchRequest'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
 import type UserAggregate from '../../models/aggregates/UserAggregate'
 

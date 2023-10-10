@@ -5,7 +5,7 @@ import OneDatastore from '../../../../src/outers/datastores/OneDatastore'
 import { server } from '../../../../src/App'
 import waitUntil from 'async-wait-until'
 import VendorManagementCreateRequest
-  from '../../../../src/inners/models/value_objects/requests/vendor_managements/VendorManagementCreateRequest'
+  from '../../../../src/inners/models/value_objects/requests/managements/vendor_managements/VendorManagementCreateRequest'
 import {
   type Admin,
   type JajanItem,
@@ -15,7 +15,7 @@ import {
   type Vendor
 } from '@prisma/client'
 import VendorManagementPatchRequest
-  from '../../../../src/inners/models/value_objects/requests/vendor_managements/VendorManagementPatchRequest'
+  from '../../../../src/inners/models/value_objects/requests/managements/vendor_managements/VendorManagementPatchRequest'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
 import AdminMock from '../../../mocks/AdminMock'
 import AdminLoginByEmailAndPasswordRequest

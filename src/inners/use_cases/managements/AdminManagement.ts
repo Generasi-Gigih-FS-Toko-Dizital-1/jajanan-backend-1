@@ -5,9 +5,9 @@ import type Pagination from '../../models/value_objects/Pagination'
 import Result from '../../models/value_objects/Result'
 import { type Admin } from '@prisma/client'
 import type AdminManagementCreateRequest
-  from '../../models/value_objects/requests/admin_managements/AdminManagementCreateRequest'
+  from '../../models/value_objects/requests/managements/admin_managements/AdminManagementCreateRequest'
 import type AdminManagementPatchRequest
-  from '../../models/value_objects/requests/admin_managements/AdminManagementPatchRequest'
+  from '../../models/value_objects/requests/managements/admin_managements/AdminManagementPatchRequest'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
 
 export default class AdminManagement {

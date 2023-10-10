@@ -6,10 +6,10 @@ import AdminMock from '../../../mocks/AdminMock'
 import { server } from '../../../../src/App'
 import waitUntil from 'async-wait-until'
 import AdminManagementCreateRequest
-  from '../../../../src/inners/models/value_objects/requests/admin_managements/AdminManagementCreateRequest'
+  from '../../../../src/inners/models/value_objects/requests/managements/admin_managements/AdminManagementCreateRequest'
 import { type Admin, type Prisma } from '@prisma/client'
 import AdminManagementPatchRequest
-  from '../../../../src/inners/models/value_objects/requests/admin_managements/AdminManagementPatchRequest'
+  from '../../../../src/inners/models/value_objects/requests/managements/admin_managements/AdminManagementPatchRequest'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
 import AdminLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'

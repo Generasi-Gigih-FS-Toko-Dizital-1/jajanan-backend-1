@@ -5,7 +5,7 @@ import OneDatastore from '../../../../src/outers/datastores/OneDatastore'
 import { server } from '../../../../src/App'
 import waitUntil from 'async-wait-until'
 import UserManagementCreateRequest
-  from '../../../../src/inners/models/value_objects/requests/user_managements/UserManagementCreateRequest'
+  from '../../../../src/inners/models/value_objects/requests/managements/user_managements/UserManagementCreateRequest'
 import {
   type Admin,
   type NotificationHistory,
@@ -16,7 +16,7 @@ import {
   type UserSubscription
 } from '@prisma/client'
 import UserManagementPatchRequest
-  from '../../../../src/inners/models/value_objects/requests/user_managements/UserManagementPatchRequest'
+  from '../../../../src/inners/models/value_objects/requests/managements/user_managements/UserManagementPatchRequest'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
 import AdminLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'

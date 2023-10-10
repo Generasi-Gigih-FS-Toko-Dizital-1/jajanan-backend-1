@@ -10,7 +10,7 @@ import fetchMock from 'fetch-mock'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
 import TopUpResponseMock from '../../../mocks/TopUpResponseMock'
 import UserLoginByEmailAndPasswordRequest from '../../../../src/inners/models/value_objects/requests/authentications/users/UserLoginByEmailAndPasswordRequest'
-import TopUpCreateRequest from '../../../../src/inners/models/value_objects/requests/top_up/TopUpCreateRequest'
+import TopUpCreateRequest from '../../../../src/inners/models/value_objects/requests/top_ups/TopUpCreateRequest'
 
 chai.use(chaiHttp)
 chai.should()
@@ -72,11 +72,14 @@ describe('TopUpControllerRest', () => {
       userMock.data[0].id,
       20000
     )
-    const res = await agent.post('/api/v1/topup')
+    const response = await agent.post('/api/v1/top-ups')
       .set('Authorization', authorization.convertToString())
       .send(requestBody)
-    res.should.have.status(201)
-    res.body.data.should.be.an('object')
-    res.body.data.should.have.property('redirect_url')
+    response.should.have.status(201)
+    response.body.should.be.an('object')
+    response.body.should.have.property('message')
+    response.body.should.have.property('data')
+    response.body.data.should.be.an('object')
+    response.body.data.should.have.property('redirect_url')
   })
 })
