@@ -1,8 +1,7 @@
 import Result from '../../models/value_objects/Result'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
 import { type TransactionHistory } from '@prisma/client'
-import type TransactionCreateRequest
-  from '../../models/value_objects/requests/transactions/TransactionCreateRequest'
+import type TransactionCreateRequest from '../../models/value_objects/requests/transactions/TransactionCreateRequest'
 import type TransactionHistoryManagement from './TransactionHistoryManagement'
 import { randomUUID } from 'crypto'
 
