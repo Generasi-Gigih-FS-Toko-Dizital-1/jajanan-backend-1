@@ -4,10 +4,10 @@ import Result from '../../models/value_objects/Result'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
 import { type TransactionHistory } from '@prisma/client'
 import type TransactionHistoryManagementCreateRequest
-  from '../../models/value_objects/requests/transaction_history_management/TransactionHistoryManagementCreateRequest'
+  from '../../models/value_objects/requests/managements/transaction_history_management/TransactionHistoryManagementCreateRequest'
 import { randomUUID } from 'crypto'
 import type TransactionHistoryManagementPatchRequest
-  from '../../models/value_objects/requests/transaction_history_management/TransactionHistoryManagementPatchRequest'
+  from '../../models/value_objects/requests/managements/transaction_history_management/TransactionHistoryManagementPatchRequest'
 import type UserManagement from './UserManagement'
 import type JajanItemManagement from './JajanItemManagement'
 

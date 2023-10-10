@@ -1,8 +1,7 @@
 import Result from '../../models/value_objects/Result'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
 import { type TransactionHistory } from '@prisma/client'
-import type TransactionManagementCreateRequest
-  from '../../models/value_objects/requests/transaction_management/TransactionManagementCreateRequest'
+import type TransactionCreateRequest from '../../models/value_objects/requests/transactions/TransactionCreateRequest'
 import type TransactionHistoryManagement from './TransactionHistoryManagement'
 import { randomUUID } from 'crypto'
 
@@ -15,7 +14,7 @@ export default class TransactionManagement {
     this.objectUtility = objectUtility
   }
 
-  createOne = async (request: TransactionManagementCreateRequest): Promise<Result<TransactionHistory>> => {
+  createOne = async (request: TransactionCreateRequest): Promise<Result<TransactionHistory>> => {
     const transactionHistoryToCreate: TransactionHistory = {
       id: randomUUID(),
       userId: request.userId,

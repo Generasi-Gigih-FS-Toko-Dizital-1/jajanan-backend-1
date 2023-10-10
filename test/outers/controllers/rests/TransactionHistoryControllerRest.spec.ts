@@ -10,9 +10,9 @@ import AdminMock from '../../../mocks/AdminMock'
 import AdminLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
 import TransactionHistoryManagementCreateRequest
-  from '../../../../src/inners/models/value_objects/requests/transaction_history_management/TransactionHistoryManagementCreateRequest'
+  from '../../../../src/inners/models/value_objects/requests/managements/transaction_history_management/TransactionHistoryManagementCreateRequest'
 import TransactionHistoryManagementPatchRequest
-  from '../../../../src/inners/models/value_objects/requests/transaction_history_management/TransactionHistoryManagementPatchRequest'
+  from '../../../../src/inners/models/value_objects/requests/managements/transaction_history_management/TransactionHistoryManagementPatchRequest'
 import humps from 'humps'
 import OneSeeder from '../../../../src/outers/seeders/OneSeeder'
 

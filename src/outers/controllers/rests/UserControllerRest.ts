@@ -5,13 +5,13 @@ import type UserManagement from '../../../inners/use_cases/managements/UserManag
 import { type User } from '@prisma/client'
 import Pagination from '../../../inners/models/value_objects/Pagination'
 import UserManagementReadManyResponse
-  from '../../../inners/models/value_objects/responses/user_managements/UserManagementReadManyResponse'
+  from '../../../inners/models/value_objects/responses/managements/user_managements/UserManagementReadManyResponse'
 import UserManagementCreateResponse
-  from '../../../inners/models/value_objects/responses/user_managements/UserManagementCreateResponse'
+  from '../../../inners/models/value_objects/responses/managements/user_managements/UserManagementCreateResponse'
 import UserManagementPatchResponse
-  from '../../../inners/models/value_objects/responses/user_managements/UserManagementPatchResponse'
+  from '../../../inners/models/value_objects/responses/managements/user_managements/UserManagementPatchResponse'
 import UserManagementReadOneResponse
-  from '../../../inners/models/value_objects/responses/user_managements/UserManagementReadOneResponse'
+  from '../../../inners/models/value_objects/responses/managements/user_managements/UserManagementReadOneResponse'
 import ResponseBody from '../../../inners/models/value_objects/responses/ResponseBody'
 import type AuthenticationValidation from '../../../inners/use_cases/authentications/AuthenticationValidation'
 import validateAuthenticationMiddleware from '../../middlewares/ValidateAuthenticationMiddleware'

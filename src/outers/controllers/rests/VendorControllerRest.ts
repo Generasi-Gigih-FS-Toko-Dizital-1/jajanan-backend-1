@@ -5,13 +5,13 @@ import type VendorManagement from '../../../inners/use_cases/managements/VendorM
 import { type Vendor } from '@prisma/client'
 import Pagination from '../../../inners/models/value_objects/Pagination'
 import VendorManagementReadManyResponse
-  from '../../../inners/models/value_objects/responses/vendor_managements/VendorManagementReadManyResponse'
+  from '../../../inners/models/value_objects/responses/managements/vendor_managements/VendorManagementReadManyResponse'
 import VendorManagementCreateResponse
-  from '../../../inners/models/value_objects/responses/vendor_managements/VendorManagementCreateResponse'
+  from '../../../inners/models/value_objects/responses/managements/vendor_managements/VendorManagementCreateResponse'
 import VendorManagementPatchResponse
-  from '../../../inners/models/value_objects/responses/vendor_managements/VendorManagementPatchResponse'
+  from '../../../inners/models/value_objects/responses/managements/vendor_managements/VendorManagementPatchResponse'
 import VendorManagementReadOneResponse
-  from '../../../inners/models/value_objects/responses/vendor_managements/VendorManagementReadOneResponse'
+  from '../../../inners/models/value_objects/responses/managements/vendor_managements/VendorManagementReadOneResponse'
 import ResponseBody from '../../../inners/models/value_objects/responses/ResponseBody'
 import type AuthenticationValidation from '../../../inners/use_cases/authentications/AuthenticationValidation'
 import validateAuthenticationMiddleware from '../../middlewares/ValidateAuthenticationMiddleware'
