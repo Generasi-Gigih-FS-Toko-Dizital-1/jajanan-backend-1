@@ -6,8 +6,8 @@ import ResponseBody from '../../../inners/models/value_objects/responses/Respons
 import type AuthenticationValidation from '../../../inners/use_cases/authentications/AuthenticationValidation'
 import validateAuthenticationMiddleware from '../../middlewares/ValidateAuthenticationMiddleware'
 import type TransactionManagement from '../../../inners/use_cases/managements/TransactionManagement'
-import TransactionManagementCreateResponse
-  from '../../../inners/models/value_objects/responses/transaction_management/TransactionManagementCreateResponse'
+import TransactionCreateResponse
+  from '../../../inners/models/value_objects/responses/transactions/TransactionCreateResponse'
 
 export default class TransactionHistoryControllerRest {
   router: Router
@@ -29,7 +29,7 @@ export default class TransactionHistoryControllerRest {
     this.transactionManagement
       .createOne(request.body)
       .then((result: Result<TransactionHistory>) => {
-        const data: TransactionManagementCreateResponse = new TransactionManagementCreateResponse(
+        const data: TransactionCreateResponse = new TransactionCreateResponse(
           result.data.id,
           result.data.userId,
           result.data.jajanItemId,
@@ -40,7 +40,7 @@ export default class TransactionHistoryControllerRest {
           result.data.updatedAt,
           result.data.createdAt
         )
-        const responseBody: ResponseBody<TransactionManagementCreateResponse> = new ResponseBody<TransactionManagementCreateResponse>(
+        const responseBody: ResponseBody<TransactionCreateResponse> = new ResponseBody<TransactionCreateResponse>(
           result.message,
           data
         )
