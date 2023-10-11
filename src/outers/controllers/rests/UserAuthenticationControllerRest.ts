@@ -19,29 +19,39 @@ import type UserRefreshAccessTokenRequest
   from '../../../inners/models/value_objects/requests/authentications/users/UserRefreshAccessTokenRequest'
 
 import type UserRefreshAuthentication from '../../../inners/use_cases/authentications/users/UserRefreshAuthentication'
+import type UserLogoutAuthentication from '../../../inners/use_cases/authentications/users/UserLogoutAuthentication'
+
+import UserRefreshAccessTokenResponse
+  from '../../../inners/models/value_objects/responses/authentications/users/UserRefreshAccessTokenResponse'
+import type UserLogoutRequest
+  from '../../../inners/models/value_objects/requests/authentications/users/UserLogoutRequest'
 
 export default class UserAuthenticationControllerRest {
   router: Router
   userLoginAuthentication: UserLoginAuthentication
   userRegisterAuthentication: UserRegisterAuthentication
   userRefreshAuthentication: UserRefreshAuthentication
+  userLogoutAuthentication: UserLogoutAuthentication
 
   constructor (
     router: Router,
     loginAuthentication: UserLoginAuthentication,
     registerAuthentication: UserRegisterAuthentication,
-    userAuthenticationRefresh: UserRefreshAuthentication
+    userAuthenticationRefresh: UserRefreshAuthentication,
+    userLogoutAuthentication: UserLogoutAuthentication
   ) {
     this.router = router
     this.userLoginAuthentication = loginAuthentication
     this.userRegisterAuthentication = registerAuthentication
     this.userRefreshAuthentication = userAuthenticationRefresh
+    this.userLogoutAuthentication = userLogoutAuthentication
   }
 
   registerRoutes = (): void => {
     this.router.post('/login', this.login)
     this.router.post('/register', this.register)
     this.router.post('/refreshes/access-token', this.refreshAccessToken)
+    this.router.post('/logout', this.logout)
   }
 
   login = (request: Request, response: Response): void => {
@@ -139,13 +149,13 @@ export default class UserAuthenticationControllerRest {
     const requestToRefreshAccessToken: UserRefreshAccessTokenRequest = request.body
     this.userRefreshAuthentication.refreshAccessToken(requestToRefreshAccessToken)
       .then((result: Result<Session | null>) => {
-        let data: UserLoginByEmailAndPasswordResponse | null = null
+        let data: UserRefreshAccessTokenResponse | null = null
         if (result.data !== null) {
-          data = new UserLoginByEmailAndPasswordResponse(
+          data = new UserRefreshAccessTokenResponse(
             result.data
           )
         }
-        const responseBody: ResponseBody<UserLoginByEmailAndPasswordResponse | null> = new ResponseBody<UserLoginByEmailAndPasswordResponse | null>(
+        const responseBody: ResponseBody<UserRefreshAccessTokenResponse | null> = new ResponseBody<UserRefreshAccessTokenResponse | null>(
           result.message,
           data
         )
@@ -157,8 +167,31 @@ export default class UserAuthenticationControllerRest {
         response.status(500).send(
           new Result<null>(
             500,
-                  `Refresh access token failed: ${error.message}`,
-                  null
+                        `User refresh access token failed: ${error.message}`,
+                        null
+          )
+        )
+      })
+  }
+
+  logout = (request: Request, response: Response): void => {
+    const requestToRefreshAccessToken: UserLogoutRequest = request.body
+    this.userLogoutAuthentication.logout(requestToRefreshAccessToken)
+      .then((result: Result<Session | null>) => {
+        const responseBody: ResponseBody<null> = new ResponseBody<null>(
+          result.message,
+          null
+        )
+        response
+          .status(result.status)
+          .send(responseBody)
+      })
+      .catch((error: Error) => {
+        response.status(500).send(
+          new Result<null>(
+            500,
+                        `User logout failed: ${error.message}`,
+                        null
           )
         )
       })

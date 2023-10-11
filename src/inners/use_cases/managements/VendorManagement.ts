@@ -5,10 +5,11 @@ import type Pagination from '../../models/value_objects/Pagination'
 import Result from '../../models/value_objects/Result'
 import { type Vendor } from '@prisma/client'
 import type VendorManagementCreateRequest
-  from '../../models/value_objects/requests/vendor_managements/VendorManagementCreateRequest'
+  from '../../models/value_objects/requests/managements/vendor_managements/VendorManagementCreateRequest'
 import type VendorManagementPatchRequest
-  from '../../models/value_objects/requests/vendor_managements/VendorManagementPatchRequest'
+  from '../../models/value_objects/requests/managements/vendor_managements/VendorManagementPatchRequest'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
+import type VendorAggregate from '../../models/aggregates/VendorAggregate'
 
 export default class VendorManagement {
   vendorRepository: VendorRepository
@@ -19,11 +20,11 @@ export default class VendorManagement {
     this.objectUtility = objectUtility
   }
 
-  readMany = async (pagination: Pagination): Promise<Result<Vendor[]>> => {
-    const foundVendors: Vendor[] = await this.vendorRepository.readMany(pagination)
+  readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Result<Vendor[] | VendorAggregate[]>> => {
+    const foundVendors: Vendor[] = await this.vendorRepository.readMany(pagination, whereInput, includeInput)
     return new Result<Vendor[]>(
       200,
-      'Vendor read all succeed.',
+      'Vendor read many succeed.',
       foundVendors
     )
   }
@@ -229,8 +230,17 @@ export default class VendorManagement {
     )
   }
 
-  deleteOneById = async (id: string): Promise<Result<Vendor>> => {
-    const deletedVendor: any = await this.vendorRepository.deleteOneById(id)
+  deleteOneById = async (id: string): Promise<Result<Vendor | null>> => {
+    let deletedVendor: Vendor
+    try {
+      deletedVendor = await this.vendorRepository.deleteOneById(id)
+    } catch (error) {
+      return new Result<null>(
+        500,
+        'Vendor delete one by id failed.',
+        null
+      )
+    }
     return new Result<Vendor>(
       200,
       'Vendor delete one by id succeed.',

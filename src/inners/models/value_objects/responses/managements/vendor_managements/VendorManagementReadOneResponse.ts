@@ -1,4 +1,4 @@
-import { type Gender, type Status } from '@prisma/client'
+import { type Gender, type JajanItem, type NotificationHistory, type Status } from '@prisma/client'
 
 export default class VendorManagementReadOneResponse {
   id: string
@@ -17,8 +17,10 @@ export default class VendorManagementReadOneResponse {
   lastLongitude: number
   createdAt: Date
   updatedAt: Date
+  notificationHistories?: NotificationHistory[]
+  jajanItems?: JajanItem[]
 
-  constructor (id: string, fullName: string, gender: Gender, address: string, username: string, email: string, balance: number, experience: number, jajanImageUrl: string, jajanName: string, jajanDescription: string, status: Status, lastLatitude: number, lastLongitude: number, createdAt: Date, updatedAt: Date) {
+  constructor (id: string, fullName: string, gender: Gender, address: string, username: string, email: string, balance: number, experience: number, jajanImageUrl: string, jajanName: string, jajanDescription: string, status: Status, lastLatitude: number, lastLongitude: number, createdAt: Date, updatedAt: Date, notificationHistories?: NotificationHistory[], jajanItems?: JajanItem[]) {
     this.id = id
     this.fullName = fullName
     this.gender = gender
@@ -35,5 +37,7 @@ export default class VendorManagementReadOneResponse {
     this.lastLongitude = lastLongitude
     this.createdAt = createdAt
     this.updatedAt = updatedAt
+    this.notificationHistories = notificationHistories
+    this.jajanItems = jajanItems
   }
 }

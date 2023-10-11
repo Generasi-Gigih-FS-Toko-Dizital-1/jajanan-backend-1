@@ -19,14 +19,13 @@ export default class UserRepository {
     }
   }
 
-  readMany = async (pagination: Pagination, isAggregated?: boolean): Promise<User[] | UserAggregate[]> => {
+  readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<User[] | UserAggregate[]> => {
     const offset: number = (pagination.pageNumber - 1) * pagination.pageSize
     const args: any = {
       take: pagination.pageSize,
-      skip: offset
-    }
-    if (isAggregated === true) {
-      args.include = this.aggregatedArgs.include
+      skip: offset,
+      where: whereInput,
+      include: includeInput
     }
 
     if (this.oneDatastore.client === undefined) {

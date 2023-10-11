@@ -21,29 +21,40 @@ import type VendorRefreshAccessTokenRequest
 
 import type VendorRefreshAuthentication
   from '../../../inners/use_cases/authentications/vendors/VendorRefreshAuthentication'
+import type VendorLogoutAuthentication
+  from '../../../inners/use_cases/authentications/vendors/VendorLogoutAuthentication'
+
+import VendorRefreshAccessTokenResponse
+  from '../../../inners/models/value_objects/responses/authentications/vendors/VendorRefreshAccessTokenResponse'
+import type VendorLogoutRequest
+  from '../../../inners/models/value_objects/requests/authentications/vendors/VendorLogoutRequest'
 
 export default class VendorAuthenticationControllerRest {
   router: Router
   vendorLoginAuthentication: VendorLoginAuthentication
   vendorRegisterAuthentication: VendorRegisterAuthentication
   vendorRefreshAuthentication: VendorRefreshAuthentication
+  vendorLogoutAuthentication: VendorLogoutAuthentication
 
   constructor (
     router: Router,
     loginAuthentication: VendorLoginAuthentication,
     registerAuthentication: VendorRegisterAuthentication,
-    vendorAuthenticationRefresh: VendorRefreshAuthentication
+    vendorAuthenticationRefresh: VendorRefreshAuthentication,
+    vendorAuthenticationLogout: VendorLogoutAuthentication
   ) {
     this.router = router
     this.vendorLoginAuthentication = loginAuthentication
     this.vendorRegisterAuthentication = registerAuthentication
     this.vendorRefreshAuthentication = vendorAuthenticationRefresh
+    this.vendorLogoutAuthentication = vendorAuthenticationLogout
   }
 
   registerRoutes = (): void => {
     this.router.post('/login', this.login)
     this.router.post('/register', this.register)
     this.router.post('/refreshes/access-token', this.refreshAccessToken)
+    this.router.post('/logout', this.logout)
   }
 
   login = (request: Request, response: Response): void => {
@@ -145,13 +156,13 @@ export default class VendorAuthenticationControllerRest {
     const requestToRefreshAccessToken: VendorRefreshAccessTokenRequest = request.body
     this.vendorRefreshAuthentication.refreshAccessToken(requestToRefreshAccessToken)
       .then((result: Result<Session | null>) => {
-        let data: VendorLoginByEmailAndPasswordResponse | null = null
+        let data: VendorRefreshAccessTokenResponse | null = null
         if (result.data !== null) {
-          data = new VendorLoginByEmailAndPasswordResponse(
+          data = new VendorRefreshAccessTokenResponse(
             result.data
           )
         }
-        const responseBody: ResponseBody<VendorLoginByEmailAndPasswordResponse | null> = new ResponseBody<VendorLoginByEmailAndPasswordResponse | null>(
+        const responseBody: ResponseBody<VendorRefreshAccessTokenResponse | null> = new ResponseBody<VendorRefreshAccessTokenResponse | null>(
           result.message,
           data
         )
@@ -163,8 +174,31 @@ export default class VendorAuthenticationControllerRest {
         response.status(500).send(
           new Result<null>(
             500,
-                  `Refresh access token failed: ${error.message}`,
-                  null
+                        `Vendor refresh access token failed: ${error.message}`,
+                        null
+          )
+        )
+      })
+  }
+
+  logout = (request: Request, response: Response): void => {
+    const requestToRefreshAccessToken: VendorLogoutRequest = request.body
+    this.vendorLogoutAuthentication.logout(requestToRefreshAccessToken)
+      .then((result: Result<Session | null>) => {
+        const responseBody: ResponseBody<null> = new ResponseBody<null>(
+          result.message,
+          null
+        )
+        response
+          .status(result.status)
+          .send(responseBody)
+      })
+      .catch((error: Error) => {
+        response.status(500).send(
+          new Result<null>(
+            500,
+                        `Vendor logout failed: ${error.message}`,
+                        null
           )
         )
       })

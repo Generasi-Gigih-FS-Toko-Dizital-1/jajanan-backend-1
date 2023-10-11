@@ -1,23 +1,13 @@
 import { type Request, type Response, type Router } from 'express'
 
 import type Result from '../../../inners/models/value_objects/Result'
-import { PaymentMethod, type TransactionHistory } from '@prisma/client'
-import Pagination from '../../../inners/models/value_objects/Pagination'
+import { type TransactionHistory } from '@prisma/client'
 import ResponseBody from '../../../inners/models/value_objects/responses/ResponseBody'
-import type TransactionHistoryManagement from '../../../inners/use_cases/managements/TransactionHistoryManagement'
 import type AuthenticationValidation from '../../../inners/use_cases/authentications/AuthenticationValidation'
 import validateAuthenticationMiddleware from '../../middlewares/ValidateAuthenticationMiddleware'
-import TransactionHistoryManagementReadOneResponse
-  from '../../../inners/models/value_objects/responses/transaction_history_management/TransactionHistoryManagementReadOneResponse'
-import TransactionHistoryManagementReadManyResponse
-  from '../../../inners/models/value_objects/responses/transaction_history_management/TransactionHistoryManagementReadManyResponse'
-import TransactionHistoryManagementCreateResponse
-  from '../../../inners/models/value_objects/responses/transaction_history_management/TransactionHistoryManagementCreateResponse'
-import TransactionHistoryManagementPatchResponse
-  from '../../../inners/models/value_objects/responses/transaction_history_management/TransactionHistoryManagementPatchResponse'
 import type TransactionManagement from '../../../inners/use_cases/managements/TransactionManagement'
-import TransactionManagementCreateResponse
-  from '../../../inners/models/value_objects/responses/transaction_management/TransactionManagementCreateResponse'
+import TransactionCreateResponse
+  from '../../../inners/models/value_objects/responses/transactions/TransactionCreateResponse'
 
 export default class TransactionHistoryControllerRest {
   router: Router
@@ -39,7 +29,7 @@ export default class TransactionHistoryControllerRest {
     this.transactionManagement
       .createOne(request.body)
       .then((result: Result<TransactionHistory>) => {
-        const data: TransactionManagementCreateResponse = new TransactionManagementCreateResponse(
+        const data: TransactionCreateResponse = new TransactionCreateResponse(
           result.data.id,
           result.data.userId,
           result.data.jajanItemId,
@@ -50,7 +40,7 @@ export default class TransactionHistoryControllerRest {
           result.data.updatedAt,
           result.data.createdAt
         )
-        const responseBody: ResponseBody<TransactionManagementCreateResponse> = new ResponseBody<TransactionManagementCreateResponse>(
+        const responseBody: ResponseBody<TransactionCreateResponse> = new ResponseBody<TransactionCreateResponse>(
           result.message,
           data
         )

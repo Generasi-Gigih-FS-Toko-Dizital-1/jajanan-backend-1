@@ -17,14 +17,13 @@ export default class VendorRepository {
     }
   }
 
-  readMany = async (pagination: Pagination, isAggregated?: boolean): Promise<Vendor[] | VendorAggregate[]> => {
+  readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Vendor[] | VendorAggregate[]> => {
     const offset: number = (pagination.pageNumber - 1) * pagination.pageSize
     const args: any = {
       take: pagination.pageSize,
-      skip: offset
-    }
-    if (isAggregated === true) {
-      args.include = this.aggregatedArgs.include
+      skip: offset,
+      where: whereInput,
+      include: includeInput
     }
 
     if (this.oneDatastore.client === undefined) {

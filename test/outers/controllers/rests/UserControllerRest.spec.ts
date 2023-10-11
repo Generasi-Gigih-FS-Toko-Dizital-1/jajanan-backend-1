@@ -2,32 +2,42 @@ import chai, { assert } from 'chai'
 import chaiHttp from 'chai-http'
 import { beforeEach, describe, it } from 'mocha'
 import OneDatastore from '../../../../src/outers/datastores/OneDatastore'
-import UserMock from '../../../mocks/UserMock'
 import { server } from '../../../../src/App'
 import waitUntil from 'async-wait-until'
 import UserManagementCreateRequest
-  from '../../../../src/inners/models/value_objects/requests/user_managements/UserManagementCreateRequest'
-import { type Admin, type Prisma, type User } from '@prisma/client'
+  from '../../../../src/inners/models/value_objects/requests/managements/user_managements/UserManagementCreateRequest'
+import {
+  type Admin,
+  type NotificationHistory,
+  type Prisma,
+  type TopUpHistory,
+  type TransactionHistory,
+  type User,
+  type UserSubscription
+} from '@prisma/client'
 import UserManagementPatchRequest
-  from '../../../../src/inners/models/value_objects/requests/user_managements/UserManagementPatchRequest'
+  from '../../../../src/inners/models/value_objects/requests/managements/user_managements/UserManagementPatchRequest'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
 import AdminLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
 import AdminMock from '../../../mocks/AdminMock'
+import humps from 'humps'
+import OneSeeder from '../../../../src/outers/seeders/OneSeeder'
 
 chai.use(chaiHttp)
 chai.should()
 
 describe('UserControllerRest', () => {
+  const oneDatastore: OneDatastore = new OneDatastore()
   const authAdminMock: AdminMock = new AdminMock()
-  const userMock: UserMock = new UserMock()
-  const oneDatastore = new OneDatastore()
+  let oneSeeder: OneSeeder
   let agent: ChaiHttp.Agent
   let authorization: Authorization
 
   before(async () => {
     await waitUntil(() => server !== undefined)
     await oneDatastore.connect()
+    oneSeeder = new OneSeeder(oneDatastore)
 
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
@@ -68,31 +78,21 @@ describe('UserControllerRest', () => {
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-    await oneDatastore.client.user.createMany({
-      data: userMock.data
-    })
+    await oneSeeder.up()
   })
 
   afterEach(async () => {
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-    await oneDatastore.client.user.deleteMany(
-      {
-        where: {
-          id: {
-            in: userMock.data.map((user: User) => user.id)
-          }
-        }
-      }
-    )
+    await oneSeeder.down()
   })
 
   after(async () => {
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-    await oneDatastore.client.user.deleteMany(
+    await oneDatastore.client.admin.deleteMany(
       {
         where: {
           id: {
@@ -107,7 +107,7 @@ describe('UserControllerRest', () => {
   describe('GET /api/v1/users?page_number={}&page_size={}', () => {
     it('should return 200 OK', async () => {
       const pageNumber: number = 1
-      const pageSize: number = userMock.data.length
+      const pageSize: number = oneSeeder.userMock.data.length
       const response = await agent
         .get(`/api/v1/users?page_number=${pageNumber}&page_size=${pageSize}`)
         .set('Authorization', authorization.convertToString())
@@ -122,7 +122,7 @@ describe('UserControllerRest', () => {
       response.body.data.should.has.property('users')
       response.body.data.users.should.be.a('array')
       response.body.data.users.length.should.be.equal(pageSize)
-      response.body.data.users.forEach((user: User) => {
+      response.body.data.users.forEach((user: any) => {
         user.should.has.property('id')
         user.should.has.property('username')
         user.should.has.property('full_name')
@@ -139,15 +139,73 @@ describe('UserControllerRest', () => {
     })
   })
 
-  describe('GET /api/v1/users?search=encoded', () => {
+  describe('GET /api/v1/users?page_number={}&page_size={}&where={}&include={}', () => {
     it('should return 200 OK', async () => {
+      const requestUser: User = oneSeeder.userMock.data[0]
+      const requestNotificationHistories: NotificationHistory[] = oneSeeder.notificationHistoryMock.data.filter((notificationHistory: NotificationHistory) => notificationHistory.userId === requestUser.id)
+      const requestTopUpHistories: TopUpHistory[] = oneSeeder.topUpHistoryMock.data.filter((topUpHistory: TopUpHistory) => topUpHistory.userId === requestUser.id)
+      const requestTransactionHistories: TransactionHistory[] = oneSeeder.transactionHistoryMock.data.filter((transactionHistory: TransactionHistory) => transactionHistory.userId === requestUser.id)
+      const requestUserSubscriptions: UserSubscription[] = oneSeeder.userSubscriptionMock.data.filter((userSubscription: UserSubscription) => userSubscription.userId === requestUser.id)
 
+      const pageNumber: number = 1
+      const pageSize: number = oneSeeder.userMock.data.length
+      const whereInput: any = {
+        id: requestUser.id
+      }
+      const where: string = encodeURIComponent(JSON.stringify(whereInput))
+      const includeInput: any = {
+        notificationHistories: true,
+        topUpHistories: true,
+        transactionHistories: true,
+        userSubscriptions: true
+      }
+      const include: string = encodeURIComponent(JSON.stringify(includeInput))
+      const response = await agent
+        .get(`/api/v1/users?page_number=${pageNumber}&page_size=${pageSize}&where=${where}&include=${include}`)
+        .set('Authorization', authorization.convertToString())
+        .send()
+
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      response.body.data.should.be.an('object')
+      response.body.data.should.has.property('total_users')
+      response.body.data.should.has.property('users')
+      response.body.data.users.should.be.a('array')
+      response.body.data.users.length.should.be.equal(1)
+      response.body.data.users.forEach((user: any) => {
+        user.should.has.property('id').equal(requestUser.id)
+        user.should.has.property('username').equal(requestUser.username)
+        user.should.has.property('full_name').equal(requestUser.fullName)
+        user.should.has.property('email').equal(requestUser.email)
+        user.should.has.property('gender').equal(requestUser.gender)
+        user.should.has.property('address').equal(requestUser.address)
+        user.should.has.property('balance').equal(requestUser.balance)
+        user.should.has.property('experience').equal(requestUser.experience)
+        user.should.has.property('last_latitude').equal(requestUser.lastLatitude)
+        user.should.has.property('last_longitude').equal(requestUser.lastLongitude)
+        user.should.has.property('created_at').equal(requestUser.createdAt.toISOString())
+        user.should.has.property('updated_at').equal(requestUser.updatedAt.toISOString())
+        user.should.has.property('notification_histories').deep.members(
+          requestNotificationHistories.map((notificationHistory: NotificationHistory) => humps.decamelizeKeys(JSON.parse(JSON.stringify(notificationHistory))))
+        )
+        user.should.has.property('top_up_histories').deep.members(
+          requestTopUpHistories.map((topUpHistory: TopUpHistory) => humps.decamelizeKeys(JSON.parse(JSON.stringify(topUpHistory))))
+        )
+        user.should.has.property('transaction_histories').deep.members(
+          requestTransactionHistories.map((transactionHistory: TransactionHistory) => humps.decamelizeKeys(JSON.parse(JSON.stringify(transactionHistory))))
+        )
+        user.should.has.property('user_subscriptions').deep.members(
+          requestUserSubscriptions.map((userSubscription: UserSubscription) => humps.decamelizeKeys(JSON.parse(JSON.stringify(userSubscription))))
+        )
+      })
     })
   })
 
   describe('GET /api/v1/users/:id', () => {
     it('should return 200 OK', async () => {
-      const requestUser: User = userMock.data[0]
+      const requestUser: User = oneSeeder.userMock.data[0]
       const response = await agent
         .get(`/api/v1/users/${requestUser.id}`)
         .set('Authorization', authorization.convertToString())
@@ -176,14 +234,14 @@ describe('UserControllerRest', () => {
   describe('POST /api/v1/users', () => {
     it('should return 201 CREATED', async () => {
       const requestBody: UserManagementCreateRequest = new UserManagementCreateRequest(
-        userMock.data[0].fullName,
-        userMock.data[0].gender,
-        userMock.data[0].address,
-        userMock.data[0].username,
-        userMock.data[0].email,
-        userMock.data[0].password,
-        userMock.data[0].lastLatitude,
-        userMock.data[0].lastLongitude
+        oneSeeder.userMock.data[0].fullName,
+        oneSeeder.userMock.data[0].gender,
+        oneSeeder.userMock.data[0].address,
+        oneSeeder.userMock.data[0].username,
+        oneSeeder.userMock.data[0].email,
+        oneSeeder.userMock.data[0].password,
+        oneSeeder.userMock.data[0].lastLatitude,
+        oneSeeder.userMock.data[0].lastLongitude
       )
 
       const response = await agent
@@ -223,7 +281,7 @@ describe('UserControllerRest', () => {
 
   describe('PATCH /api/v1/users/:id', () => {
     it('should return 200 OK', async () => {
-      const requestUser: User = userMock.data[0]
+      const requestUser: User = oneSeeder.userMock.data[0]
       const requestBody: UserManagementPatchRequest = new UserManagementPatchRequest(
         `patched${requestUser.fullName}`,
         'FEMALE',
@@ -261,7 +319,43 @@ describe('UserControllerRest', () => {
 
   describe('DELETE /api/v1/users/:id', () => {
     it('should return 200 OK', async () => {
-      const requestUser: User = userMock.data[0]
+      const requestUser: User = oneSeeder.userMock.data[0]
+      const requestNotificationHistories: NotificationHistory[] = oneSeeder.notificationHistoryMock.data.filter((notificationHistory: NotificationHistory) => notificationHistory.userId === requestUser.id)
+      const requestTopUpHistories: TopUpHistory[] = oneSeeder.topUpHistoryMock.data.filter((topUpHistory: TopUpHistory) => topUpHistory.userId === requestUser.id)
+      const requestTransactionHistories: TransactionHistory[] = oneSeeder.transactionHistoryMock.data.filter((transactionHistory: TransactionHistory) => transactionHistory.userId === requestUser.id)
+      const requestUserSubscriptions: UserSubscription[] = oneSeeder.userSubscriptionMock.data.filter((userSubscription: UserSubscription) => userSubscription.userId === requestUser.id)
+
+      if (oneDatastore.client === undefined) {
+        throw new Error('oneDatastore client is undefined')
+      }
+      await oneDatastore.client.notificationHistory.deleteMany({
+        where: {
+          id: {
+            in: requestNotificationHistories.map((notificationHistory: NotificationHistory) => notificationHistory.id)
+          }
+        }
+      })
+      await oneDatastore.client.topUpHistory.deleteMany({
+        where: {
+          id: {
+            in: requestTopUpHistories.map((topUpHistory: TopUpHistory) => topUpHistory.id)
+          }
+        }
+      })
+      await oneDatastore.client.transactionHistory.deleteMany({
+        where: {
+          id: {
+            in: requestTransactionHistories.map((transactionHistory: TransactionHistory) => transactionHistory.id)
+          }
+        }
+      })
+      await oneDatastore.client.userSubscription.deleteMany({
+        where: {
+          id: {
+            in: requestUserSubscriptions.map((userSubscription: UserSubscription) => userSubscription.id)
+          }
+        }
+      })
 
       const response = await agent
         .delete(`/api/v1/users/${requestUser.id}`)
@@ -274,9 +368,6 @@ describe('UserControllerRest', () => {
       response.body.should.has.property('data')
       assert.isNull(response.body.data)
 
-      if (oneDatastore.client === undefined) {
-        throw new Error('oneDatastore client is undefined')
-      }
       const result: User | null = await oneDatastore.client.user.findFirst({
         where: {
           id: requestUser.id

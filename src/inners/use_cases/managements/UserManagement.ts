@@ -5,10 +5,11 @@ import type Pagination from '../../models/value_objects/Pagination'
 import Result from '../../models/value_objects/Result'
 import { type User } from '@prisma/client'
 import type UserManagementCreateRequest
-  from '../../models/value_objects/requests/user_managements/UserManagementCreateRequest'
+  from '../../models/value_objects/requests/managements/user_managements/UserManagementCreateRequest'
 import type UserManagementPatchRequest
-  from '../../models/value_objects/requests/user_managements/UserManagementPatchRequest'
+  from '../../models/value_objects/requests/managements/user_managements/UserManagementPatchRequest'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
+import type UserAggregate from '../../models/aggregates/UserAggregate'
 
 export default class UserManagement {
   userRepository: UserRepository
@@ -19,11 +20,11 @@ export default class UserManagement {
     this.objectUtility = objectUtility
   }
 
-  readMany = async (pagination: Pagination): Promise<Result<User[]>> => {
-    const foundUsers: User[] = await this.userRepository.readMany(pagination)
+  readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Result<User[] | UserAggregate[]>> => {
+    const foundUsers: User[] = await this.userRepository.readMany(pagination, whereInput, includeInput)
     return new Result<User[]>(
       200,
-      'User read all succeed.',
+      'User read many succeed.',
       foundUsers
     )
   }
@@ -216,8 +217,8 @@ export default class UserManagement {
       deletedUser = await this.userRepository.deleteOneById(id)
     } catch (error) {
       return new Result<null>(
-        404,
-        'User delete one by id failed, user is not found.',
+        500,
+        'User delete one by id failed.',
         null
       )
     }
