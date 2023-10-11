@@ -67,16 +67,18 @@ describe('TopUpControllerRest', () => {
     await oneDatastore.disconnect()
   })
 
-  it('should return 201', async () => {
-    const requestBody = new TopUpCreateRequest(
-      userMock.data[0].id,
-      20000
-    )
-    const res = await agent.post('/api/v1/topup')
-      .set('Authorization', authorization.convertToString())
-      .send(requestBody)
-    res.should.have.status(201)
-    res.body.data.should.be.an('object')
-    res.body.data.should.have.property('redirect_url')
+  describe('POST /api/v1/topup', () => {
+    it('should return 201', async () => {
+      const requestBody = new TopUpCreateRequest(
+        userMock.data[0].id,
+        20000
+      )
+      const res = await agent.post('/api/v1/topup')
+        .set('Authorization', authorization.convertToString())
+        .send(requestBody)
+      res.should.have.status(201)
+      res.body.data.should.be.an('object')
+      res.body.data.should.have.property('redirect_url')
+    })
   })
 })
