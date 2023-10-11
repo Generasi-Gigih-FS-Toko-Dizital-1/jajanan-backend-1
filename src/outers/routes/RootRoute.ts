@@ -32,8 +32,6 @@ import UserRefreshAuthentication from '../../inners/use_cases/authentications/us
 import TransactionHistoryControllerRest from '../controllers/rests/TransactionHistoryControllerRest'
 import TransactionHistoryManagement from '../../inners/use_cases/managements/TransactionHistoryManagement'
 import TransactionHistoryRepository from '../repositories/TransactionHistoryRepository'
-import CategoryControllerRest from '../controllers/rests/CategoryControllerRest'
-import CategoryRepository from '../repositories/CategoryRepository'
 import CategoryManagement from '../../inners/use_cases/managements/CategoryManagement'
 import PaymentGateway from '../gateways/PaymentGateway'
 import TopUp from '../../inners/use_cases/top_ups/TopUp'
@@ -41,15 +39,17 @@ import TopUpControllerRest from '../controllers/rests/TopUpControllerRest'
 import UserLogoutAuthentication from '../../inners/use_cases/authentications/users/UserLogoutAuthentication'
 import VendorLogoutAuthentication from '../../inners/use_cases/authentications/vendors/VendorLogoutAuthentication'
 import AdminLogoutAuthentication from '../../inners/use_cases/authentications/admins/AdminLogoutAuthentication'
-import UserLevelControllerRest from '../controllers/rests/UserLevelControllerRest'
-import UserLevelRepository from '../repositories/UserLevelRepository'
-import UserLevelManagement from '../../inners/use_cases/managements/UserLevelManagement'
 import TopUpHistoryRepository from '../repositories/TopUpHistoryRepository'
 import TopUpWebhook from '../../inners/use_cases/top_up/TopUpWebhook'
 import WebhookControllerRest from '../controllers/rests/WebhookControllerRest'
 import VendorLevelRepository from '../repositories/VendorLevelRepository'
 import VendorLevelManagement from '../../inners/use_cases/managements/VendorLevelManagement'
 import VendorLevelControllerRest from '../controllers/rests/VendorLevelControllerRest'
+import UserLevelRepository from '../repositories/UserLevelRepository'
+import CategoryRepository from '../repositories/CategoryRepository'
+import UserLevelManagement from '../../inners/use_cases/managements/UserLevelManagement'
+import UserLevelControllerRest from '../controllers/rests/UserLevelControllerRest'
+import CategoryControllerRest from '../controllers/rests/CategoryControllerRest'
 
 export default class RootRoute {
   app: Application
@@ -80,8 +80,8 @@ export default class RootRoute {
     const jajanItemRepository: JajanItemRepository = new JajanItemRepository(this.datastoreOne)
     const transactionHistoryRepository: TransactionHistoryRepository = new TransactionHistoryRepository(this.datastoreOne)
     const userLevelRepository: UserLevelRepository = new UserLevelRepository(this.datastoreOne)
-    const categoryRepository: CategoryRepository = new CategoryRepository(this.datastoreOne)
     const vendorLevelRepository: VendorLevelRepository = new VendorLevelRepository(this.datastoreOne)
+    const categoryRepository: CategoryRepository = new CategoryRepository(this.datastoreOne)
 
     const topUpHistoryRepository = new TopUpHistoryRepository(this.datastoreOne)
 
@@ -93,6 +93,8 @@ export default class RootRoute {
     const jajanItemManagement: JajanItemManagement = new JajanItemManagement(jajanItemRepository, objectUtility)
     const transactionHistoryManagement: TransactionHistoryManagement = new TransactionHistoryManagement(userManagement, jajanItemManagement, transactionHistoryRepository, objectUtility)
     const vendorLevelManagement: VendorLevelManagement = new VendorLevelManagement(vendorLevelRepository, objectUtility)
+    const userLevelManagement: UserLevelManagement = new UserLevelManagement(userLevelRepository, objectUtility)
+    const categoryManagement: CategoryManagement = new CategoryManagement(categoryRepository, objectUtility)
 
     const userRegisterAuthentication: UserRegisterAuthentication = new UserRegisterAuthentication(userManagement)
     const vendorRegisterAuthentication: VendorRegisterAuthentication = new VendorRegisterAuthentication(vendorManagement)
@@ -142,7 +144,22 @@ export default class RootRoute {
       authenticationValidation
     )
     userLevelControllerRest.registerRoutes()
-    routerVersionOne.use('/levels/users', userLevelControllerRest.router)
+    routerVersionOne.use('/user-levels', userLevelControllerRest.router)
+    const vendorLevelControllerRest: VendorLevelControllerRest = new VendorLevelControllerRest(
+      Router(),
+      vendorLevelManagement,
+      authenticationValidation
+    )
+    vendorLevelControllerRest.registerRoutes()
+    routerVersionOne.use('/vendor-levels', vendorLevelControllerRest.router)
+
+    const categoryControllerRest: CategoryControllerRest = new CategoryControllerRest(
+      Router(),
+      categoryManagement,
+      authenticationValidation
+    )
+    categoryControllerRest.registerRoutes()
+    routerVersionOne.use('/categories', categoryControllerRest.router)
 
     const transactionHistoryControllerRest: TransactionHistoryControllerRest = new TransactionHistoryControllerRest(
       Router(),
