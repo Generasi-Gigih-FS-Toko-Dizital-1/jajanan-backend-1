@@ -41,6 +41,9 @@ import AdminLogoutAuthentication from '../../inners/use_cases/authentications/ad
 import TopUpHistoryRepository from '../repositories/TopUpHistoryRepository'
 import TopUpWebhook from '../../inners/use_cases/top_up/TopUpWebhook'
 import WebhookControllerRest from '../controllers/rests/WebhookControllerRest'
+import VendorLevelRepository from '../repositories/VendorLevelRepository'
+import VendorLevelManagement from '../../inners/use_cases/managements/VendorLevelManagement'
+import VendorLevelControllerRest from '../controllers/rests/VendorLevelControllerRest'
 
 export default class RootRoute {
   app: Application
@@ -70,6 +73,7 @@ export default class RootRoute {
     const adminRepository: AdminRepository = new AdminRepository(this.datastoreOne)
     const jajanItemRepository: JajanItemRepository = new JajanItemRepository(this.datastoreOne)
     const transactionHistoryRepository: TransactionHistoryRepository = new TransactionHistoryRepository(this.datastoreOne)
+    const vendorLevelRepository: VendorLevelRepository = new VendorLevelRepository(this.datastoreOne)
 
     const topUpHistoryRepository = new TopUpHistoryRepository(this.datastoreOne)
 
@@ -80,6 +84,7 @@ export default class RootRoute {
     const adminManagement: AdminManagement = new AdminManagement(adminRepository, objectUtility)
     const jajanItemManagement: JajanItemManagement = new JajanItemManagement(jajanItemRepository, objectUtility)
     const transactionHistoryManagement: TransactionHistoryManagement = new TransactionHistoryManagement(userManagement, jajanItemManagement, transactionHistoryRepository, objectUtility)
+    const vendorLevelManagement: VendorLevelManagement = new VendorLevelManagement(vendorLevelRepository, objectUtility)
 
     const userRegisterAuthentication: UserRegisterAuthentication = new UserRegisterAuthentication(userManagement)
     const vendorRegisterAuthentication: VendorRegisterAuthentication = new VendorRegisterAuthentication(vendorManagement)
@@ -130,6 +135,14 @@ export default class RootRoute {
     )
     transactionHistoryControllerRest.registerRoutes()
     routerVersionOne.use('/transaction-histories', transactionHistoryControllerRest.router)
+
+    const vendorLevelControllerRest: VendorLevelControllerRest = new VendorLevelControllerRest(
+      Router(),
+      vendorLevelManagement,
+      authenticationValidation
+    )
+    vendorLevelControllerRest.registerRoutes()
+    routerVersionOne.use('/levels/vendors', vendorLevelControllerRest.router)
 
     const adminControllerRest: AdminControllerRest = new AdminControllerRest(
       Router(),
