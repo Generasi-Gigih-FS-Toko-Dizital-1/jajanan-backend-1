@@ -32,12 +32,18 @@ import UserRefreshAuthentication from '../../inners/use_cases/authentications/us
 import TransactionHistoryControllerRest from '../controllers/rests/TransactionHistoryControllerRest'
 import TransactionHistoryManagement from '../../inners/use_cases/managements/TransactionHistoryManagement'
 import TransactionHistoryRepository from '../repositories/TransactionHistoryRepository'
+import CategoryControllerRest from '../controllers/rests/CategoryControllerRest'
+import CategoryRepository from '../repositories/CategoryRepository'
+import CategoryManagement from '../../inners/use_cases/managements/CategoryManagement'
 import PaymentGateway from '../gateways/PaymentGateway'
 import TopUp from '../../inners/use_cases/top_ups/TopUp'
 import TopUpControllerRest from '../controllers/rests/TopUpControllerRest'
 import UserLogoutAuthentication from '../../inners/use_cases/authentications/users/UserLogoutAuthentication'
 import VendorLogoutAuthentication from '../../inners/use_cases/authentications/vendors/VendorLogoutAuthentication'
 import AdminLogoutAuthentication from '../../inners/use_cases/authentications/admins/AdminLogoutAuthentication'
+import UserLevelControllerRest from '../controllers/rests/UserLevelControllerRest'
+import UserLevelRepository from '../repositories/UserLevelRepository'
+import UserLevelManagement from '../../inners/use_cases/managements/UserLevelManagement'
 import TopUpHistoryRepository from '../repositories/TopUpHistoryRepository'
 import TopUpWebhook from '../../inners/use_cases/top_up/TopUpWebhook'
 import WebhookControllerRest from '../controllers/rests/WebhookControllerRest'
@@ -73,6 +79,8 @@ export default class RootRoute {
     const adminRepository: AdminRepository = new AdminRepository(this.datastoreOne)
     const jajanItemRepository: JajanItemRepository = new JajanItemRepository(this.datastoreOne)
     const transactionHistoryRepository: TransactionHistoryRepository = new TransactionHistoryRepository(this.datastoreOne)
+    const userLevelRepository: UserLevelRepository = new UserLevelRepository(this.datastoreOne)
+    const categoryRepository: CategoryRepository = new CategoryRepository(this.datastoreOne)
     const vendorLevelRepository: VendorLevelRepository = new VendorLevelRepository(this.datastoreOne)
 
     const topUpHistoryRepository = new TopUpHistoryRepository(this.datastoreOne)
@@ -128,6 +136,14 @@ export default class RootRoute {
     jajanItemControllerRest.registerRoutes()
     routerVersionOne.use('/jajan-items', jajanItemControllerRest.router)
 
+    const userLevelControllerRest: UserLevelControllerRest = new UserLevelControllerRest(
+      Router(),
+      userLevelManagement,
+      authenticationValidation
+    )
+    userLevelControllerRest.registerRoutes()
+    routerVersionOne.use('/levels/users', userLevelControllerRest.router)
+
     const transactionHistoryControllerRest: TransactionHistoryControllerRest = new TransactionHistoryControllerRest(
       Router(),
       transactionHistoryManagement,
@@ -135,14 +151,6 @@ export default class RootRoute {
     )
     transactionHistoryControllerRest.registerRoutes()
     routerVersionOne.use('/transaction-histories', transactionHistoryControllerRest.router)
-
-    const vendorLevelControllerRest: VendorLevelControllerRest = new VendorLevelControllerRest(
-      Router(),
-      vendorLevelManagement,
-      authenticationValidation
-    )
-    vendorLevelControllerRest.registerRoutes()
-    routerVersionOne.use('/levels/vendors', vendorLevelControllerRest.router)
 
     const adminControllerRest: AdminControllerRest = new AdminControllerRest(
       Router(),
