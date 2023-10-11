@@ -42,7 +42,6 @@ import TopUpHistoryRepository from '../repositories/TopUpHistoryRepository'
 import TopUpWebhook from '../../inners/use_cases/top_up/TopUpWebhook'
 import WebhookControllerRest from '../controllers/rests/WebhookControllerRest'
 
-
 export default class RootRoute {
   app: Application
   io: Server
@@ -71,7 +70,7 @@ export default class RootRoute {
     const adminRepository: AdminRepository = new AdminRepository(this.datastoreOne)
     const jajanItemRepository: JajanItemRepository = new JajanItemRepository(this.datastoreOne)
     const transactionHistoryRepository: TransactionHistoryRepository = new TransactionHistoryRepository(this.datastoreOne)
-   
+
     const topUpHistoryRepository = new TopUpHistoryRepository(this.datastoreOne)
 
     const sessionManagement: SessionManagement = new SessionManagement(sessionRepository, objectUtility)
@@ -91,8 +90,8 @@ export default class RootRoute {
 
     const userRefreshAuthentication: UserRefreshAuthentication = new UserRefreshAuthentication(userManagement, sessionManagement)
     const vendorRefreshAuthentication: VendorRefreshAuthentication = new VendorRefreshAuthentication(vendorManagement, sessionManagement)
-    const adminRefreshAuthentication: AdminRefreshAuthentication = new AdminRefreshAuthentication(adminManagement, sessionManagement)r
-    
+    const adminRefreshAuthentication: AdminRefreshAuthentication = new AdminRefreshAuthentication(adminManagement, sessionManagement)
+
     const topUpWebhookUseCase = new TopUpWebhook(topUpHistoryRepository, userRepository)
     const topUp = new TopUp(paymentGateway, userManagement)
 

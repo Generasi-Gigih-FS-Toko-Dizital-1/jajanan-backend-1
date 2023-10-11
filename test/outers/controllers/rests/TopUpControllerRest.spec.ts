@@ -69,18 +69,19 @@ describe('TopUpControllerRest', () => {
 
   describe('POST /api/v1/topup', () => {
     it('should return 201', async () => {
-    const requestBody = new TopUpCreateRequest(
-      userMock.data[0].id,
-      20000
-    )
-    const response = await agent.post('/api/v1/top-ups')
-      .set('Authorization', authorization.convertToString())
-      .send(requestBody)
-    response.should.have.status(201)
-    response.body.should.be.an('object')
-    response.body.should.have.property('message')
-    response.body.should.have.property('data')
-    response.body.data.should.be.an('object')
-    response.body.data.should.have.property('redirect_url')
+      const requestBody = new TopUpCreateRequest(
+        userMock.data[0].id,
+        20000
+      )
+      const response = await agent.post('/api/v1/top-ups')
+        .set('Authorization', authorization.convertToString())
+        .send(requestBody)
+      response.should.have.status(201)
+      response.body.should.be.an('object')
+      response.body.should.have.property('message')
+      response.body.should.have.property('data')
+      response.body.data.should.be.an('object')
+      response.body.data.should.have.property('redirect_url')
+    })
   })
 })
