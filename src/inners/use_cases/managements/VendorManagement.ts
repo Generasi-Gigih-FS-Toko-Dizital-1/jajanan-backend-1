@@ -5,9 +5,9 @@ import type Pagination from '../../models/value_objects/Pagination'
 import Result from '../../models/value_objects/Result'
 import { type Vendor } from '@prisma/client'
 import type VendorManagementCreateRequest
-  from '../../models/value_objects/requests/vendor_managements/VendorManagementCreateRequest'
+  from '../../models/value_objects/requests/managements/vendor_managements/VendorManagementCreateRequest'
 import type VendorManagementPatchRequest
-  from '../../models/value_objects/requests/vendor_managements/VendorManagementPatchRequest'
+  from '../../models/value_objects/requests/managements/vendor_managements/VendorManagementPatchRequest'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
 import type VendorAggregate from '../../models/aggregates/VendorAggregate'
 

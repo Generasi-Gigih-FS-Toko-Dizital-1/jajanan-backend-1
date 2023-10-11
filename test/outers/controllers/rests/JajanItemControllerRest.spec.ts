@@ -13,9 +13,9 @@ import {
   type Vendor
 } from '@prisma/client'
 import JajanItemManagementCreateRequest
-  from '../../../../src/inners/models/value_objects/requests/jajan_item_management/JajanItemManagementCreateRequest'
+  from '../../../../src/inners/models/value_objects/requests/managements/jajan_item_management/JajanItemManagementCreateRequest'
 import JajanItemManagementPatchRequest
-  from '../../../../src/inners/models/value_objects/requests/jajan_item_management/JajanItemManagementPatchRequest'
+  from '../../../../src/inners/models/value_objects/requests/managements/jajan_item_management/JajanItemManagementPatchRequest'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
 import AdminMock from '../../../mocks/AdminMock'
 import AdminLoginByEmailAndPasswordRequest

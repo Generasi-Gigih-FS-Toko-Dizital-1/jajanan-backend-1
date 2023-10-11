@@ -6,13 +6,13 @@ import Pagination from '../../../inners/models/value_objects/Pagination'
 import ResponseBody from '../../../inners/models/value_objects/responses/ResponseBody'
 import type JajanItemManagement from '../../../inners/use_cases/managements/JajanItemManagement'
 import JajanItemManagementReadManyResponse
-  from '../../../inners/models/value_objects/responses/jajan_item_managements/JajanItemManagementReadManyResponse'
+  from '../../../inners/models/value_objects/responses/managements/jajan_item_managements/JajanItemManagementReadManyResponse'
 import JajanItemManagementReadOneResponse
-  from '../../../inners/models/value_objects/responses/jajan_item_managements/JajanItemManagementReadOneResponse'
+  from '../../../inners/models/value_objects/responses/managements/jajan_item_managements/JajanItemManagementReadOneResponse'
 import JajanItemManagementCreateResponse
-  from '../../../inners/models/value_objects/responses/jajan_item_managements/JajanItemManagementCreateResponse'
+  from '../../../inners/models/value_objects/responses/managements/jajan_item_managements/JajanItemManagementCreateResponse'
 import JajanItemManagementPatchResponse
-  from '../../../inners/models/value_objects/responses/jajan_item_managements/JajanItemManagementPatchResponse'
+  from '../../../inners/models/value_objects/responses/managements/jajan_item_managements/JajanItemManagementPatchResponse'
 import type AuthenticationValidation from '../../../inners/use_cases/authentications/AuthenticationValidation'
 import validateAuthenticationMiddleware from '../../middlewares/ValidateAuthenticationMiddleware'
 import type JajanItemAggregate from '../../../inners/models/aggregates/JajanItemAggregate'
