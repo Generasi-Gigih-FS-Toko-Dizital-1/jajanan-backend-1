@@ -97,12 +97,12 @@ describe('UserLevelControllerRest', () => {
     await oneDatastore.disconnect()
   })
 
-  describe('GET /api/v1/levels/users?page_number={}&page_size={}', () => {
+  describe('GET /api/v1/user-levels?page_number={}&page_size={}', () => {
     it('should return 200 OK', async () => {
       const pageNumber: number = 1
       const pageSize: number = oneSeeder.userLevelMock.data.length
       const response = await agent
-        .get(`/api/v1/levels/users?page_number=${pageNumber}&page_size=${pageSize}`)
+        .get(`/api/v1/user-levels?page_number=${pageNumber}&page_size=${pageSize}`)
         .set('Authorization', authorization.convertToString())
         .send()
 
@@ -125,7 +125,7 @@ describe('UserLevelControllerRest', () => {
     })
   })
 
-  describe('GET /api/v1/levels/users?page_number={}&page_size={}&&where={}', () => {
+  describe('GET /api/v1/user-levels?page_number={}&page_size={}&&where={}', () => {
     it('should return 200 OK', async () => {
       const requestUserLevel: UserLevel = oneSeeder.userLevelMock.data[0]
       const pageNumber: number = 1
@@ -135,7 +135,7 @@ describe('UserLevelControllerRest', () => {
       }
       const where: string = encodeURIComponent(JSON.stringify(whereInput))
       const response = await agent
-        .get(`/api/v1/levels/users?page_number=${pageNumber}&page_size=${pageSize}&where=${where}`)
+        .get(`/api/v1/user-levels?page_number=${pageNumber}&page_size=${pageSize}&where=${where}`)
         .set('Authorization', authorization.convertToString())
         .send()
 
@@ -158,11 +158,11 @@ describe('UserLevelControllerRest', () => {
     })
   })
 
-  describe('GET /api/v1/levels/users/:id', () => {
+  describe('GET /api/v1/user-levels/:id', () => {
     it('should return 200 OK', async () => {
       const requestUserLevel: UserLevel = oneSeeder.userLevelMock.data[0]
       const response = await agent
-        .get(`/api/v1/levels/users/${requestUserLevel.id}`)
+        .get(`/api/v1/user-levels/${requestUserLevel.id}`)
         .set('Authorization', authorization.convertToString())
         .send()
 
@@ -180,7 +180,7 @@ describe('UserLevelControllerRest', () => {
     })
   })
 
-  describe('POST /api/v1/levels/users', () => {
+  describe('POST /api/v1/user-levels', () => {
     it('should return 201 CREATED', async () => {
       const requestBody: UserLevelManagementCreateRequest = new UserLevelManagementCreateRequest(
         oneSeeder.userLevelMock.data[0].name,
@@ -189,7 +189,7 @@ describe('UserLevelControllerRest', () => {
       )
 
       const response = await agent
-        .post('/api/v1/levels/users')
+        .post('/api/v1/user-levels')
         .set('Authorization', authorization.convertToString())
         .send(requestBody)
 
@@ -217,7 +217,7 @@ describe('UserLevelControllerRest', () => {
     })
   })
 
-  describe('PATCH /api/v1/levels/users/:id', () => {
+  describe('PATCH /api/v1/user-levels/:id', () => {
     it('should return 200 OK', async () => {
       const requestUserLevel: UserLevel = oneSeeder.userLevelMock.data[0]
       const requestBody: UserLevelManagementPatchRequest = new UserLevelManagementPatchRequest(
@@ -227,7 +227,7 @@ describe('UserLevelControllerRest', () => {
       )
 
       const response = await agent
-        .patch(`/api/v1/levels/users/${requestUserLevel.id}`)
+        .patch(`/api/v1/user-levels/${requestUserLevel.id}`)
         .set('Authorization', authorization.convertToString())
         .send(requestBody)
 
@@ -245,7 +245,7 @@ describe('UserLevelControllerRest', () => {
     })
   })
 
-  describe('DELETE /api/v1/levels/users/:id', () => {
+  describe('DELETE /api/v1/user-levels/:id', () => {
     it('should return 200 OK', async () => {
       const requestUserLevel: UserLevel = oneSeeder.userLevelMock.data[0]
       if (oneDatastore.client === undefined) {
@@ -253,7 +253,7 @@ describe('UserLevelControllerRest', () => {
       }
 
       const response = await agent
-        .delete(`/api/v1/levels/users/${requestUserLevel.id}`)
+        .delete(`/api/v1/user-levels/${requestUserLevel.id}`)
         .set('Authorization', authorization.convertToString())
         .send()
 

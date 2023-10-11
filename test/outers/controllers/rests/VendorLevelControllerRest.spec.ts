@@ -97,12 +97,12 @@ describe('VendorLevelControllerRest', () => {
     await oneDatastore.disconnect()
   })
 
-  describe('GET /api/v1/levels/vendors?page_number={}&page_size={}', () => {
+  describe('GET /api/v1/vendor-levels?page_number={}&page_size={}', () => {
     it('should return 200 OK', async () => {
       const pageNumber: number = 1
       const pageSize: number = oneSeeder.vendorLevelMock.data.length
       const response = await agent
-        .get(`/api/v1/levels/vendors?page_number=${pageNumber}&page_size=${pageSize}`)
+        .get(`/api/v1/vendor-levels?page_number=${pageNumber}&page_size=${pageSize}`)
         .set('Authorization', authorization.convertToString())
         .send()
 
@@ -125,7 +125,7 @@ describe('VendorLevelControllerRest', () => {
     })
   })
 
-  describe('GET /api/v1/levels/vendors?page_number={}&page_size={}&&where={}', () => {
+  describe('GET /api/v1/vendor-levels?page_number={}&page_size={}&&where={}', () => {
     it('should return 200 OK', async () => {
       const requestVendorLevel: VendorLevel = oneSeeder.vendorLevelMock.data[0]
       const pageNumber: number = 1
@@ -135,7 +135,7 @@ describe('VendorLevelControllerRest', () => {
       }
       const where: string = encodeURIComponent(JSON.stringify(whereInput))
       const response = await agent
-        .get(`/api/v1/levels/vendors?page_number=${pageNumber}&page_size=${pageSize}&where=${where}`)
+        .get(`/api/v1/vendor-levels?page_number=${pageNumber}&page_size=${pageSize}&where=${where}`)
         .set('Authorization', authorization.convertToString())
         .send()
 
@@ -158,11 +158,11 @@ describe('VendorLevelControllerRest', () => {
     })
   })
 
-  describe('GET /api/v1/levels/vendors/:id', () => {
+  describe('GET /api/v1/vendor-levels/:id', () => {
     it('should return 200 OK', async () => {
       const requestVendorLevel: VendorLevel = oneSeeder.vendorLevelMock.data[0]
       const response = await agent
-        .get(`/api/v1/levels/vendors/${requestVendorLevel.id}`)
+        .get(`/api/v1/vendor-levels/${requestVendorLevel.id}`)
         .set('Authorization', authorization.convertToString())
         .send()
 
@@ -180,7 +180,7 @@ describe('VendorLevelControllerRest', () => {
     })
   })
 
-  describe('POST /api/v1/levels/vendors', () => {
+  describe('POST /api/v1/vendor-levels', () => {
     it('should return 201 CREATED', async () => {
       const requestBody: VendorLevelManagementCreateRequest = new VendorLevelManagementCreateRequest(
         oneSeeder.vendorLevelMock.data[0].name,
@@ -189,7 +189,7 @@ describe('VendorLevelControllerRest', () => {
       )
 
       const response = await agent
-        .post('/api/v1/levels/vendors')
+        .post('/api/v1/vendor-levels')
         .set('Authorization', authorization.convertToString())
         .send(requestBody)
 
@@ -217,7 +217,7 @@ describe('VendorLevelControllerRest', () => {
     })
   })
 
-  describe('PATCH /api/v1/levels/vendors/:id', () => {
+  describe('PATCH /api/v1/vendor-levels/:id', () => {
     it('should return 200 OK', async () => {
       const requestVendorLevel: VendorLevel = oneSeeder.vendorLevelMock.data[0]
       const requestBody: VendorLevelManagementPatchRequest = new VendorLevelManagementPatchRequest(
@@ -227,7 +227,7 @@ describe('VendorLevelControllerRest', () => {
       )
 
       const response = await agent
-        .patch(`/api/v1/levels/vendors/${requestVendorLevel.id}`)
+        .patch(`/api/v1/vendor-levels/${requestVendorLevel.id}`)
         .set('Authorization', authorization.convertToString())
         .send(requestBody)
 
@@ -245,7 +245,7 @@ describe('VendorLevelControllerRest', () => {
     })
   })
 
-  describe('DELETE /api/v1/levels/vendors/:id', () => {
+  describe('DELETE /api/v1/vendor-levels/:id', () => {
     it('should return 200 OK', async () => {
       const requestVendorLevel: VendorLevel = oneSeeder.vendorLevelMock.data[0]
       if (oneDatastore.client === undefined) {
@@ -253,7 +253,7 @@ describe('VendorLevelControllerRest', () => {
       }
 
       const response = await agent
-        .delete(`/api/v1/levels/vendors/${requestVendorLevel.id}`)
+        .delete(`/api/v1/vendor-levels/${requestVendorLevel.id}`)
         .set('Authorization', authorization.convertToString())
         .send()
 
