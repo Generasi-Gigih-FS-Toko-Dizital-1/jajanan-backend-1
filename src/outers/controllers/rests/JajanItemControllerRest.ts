@@ -6,15 +6,16 @@ import Pagination from '../../../inners/models/value_objects/Pagination'
 import ResponseBody from '../../../inners/models/value_objects/responses/ResponseBody'
 import type JajanItemManagement from '../../../inners/use_cases/managements/JajanItemManagement'
 import JajanItemManagementReadManyResponse
-  from '../../../inners/models/value_objects/responses/jajan_item_managements/JajanItemManagementReadManyResponse'
+  from '../../../inners/models/value_objects/responses/managements/jajan_item_managements/JajanItemManagementReadManyResponse'
 import JajanItemManagementReadOneResponse
-  from '../../../inners/models/value_objects/responses/jajan_item_managements/JajanItemManagementReadOneResponse'
+  from '../../../inners/models/value_objects/responses/managements/jajan_item_managements/JajanItemManagementReadOneResponse'
 import JajanItemManagementCreateResponse
-  from '../../../inners/models/value_objects/responses/jajan_item_managements/JajanItemManagementCreateResponse'
+  from '../../../inners/models/value_objects/responses/managements/jajan_item_managements/JajanItemManagementCreateResponse'
 import JajanItemManagementPatchResponse
-  from '../../../inners/models/value_objects/responses/jajan_item_managements/JajanItemManagementPatchResponse'
+  from '../../../inners/models/value_objects/responses/managements/jajan_item_managements/JajanItemManagementPatchResponse'
 import type AuthenticationValidation from '../../../inners/use_cases/authentications/AuthenticationValidation'
 import validateAuthenticationMiddleware from '../../middlewares/ValidateAuthenticationMiddleware'
+import type JajanItemAggregate from '../../../inners/models/aggregates/JajanItemAggregate'
 
 export default class JajanItemControllerRest {
   router: Router
@@ -37,17 +38,24 @@ export default class JajanItemControllerRest {
   }
 
   readMany = (request: Request, response: Response): void => {
-    const { pageNumber, pageSize } = request.query
+    const {
+      pageNumber,
+      pageSize,
+      where,
+      include
+    } = request.query
     const pagination: Pagination = new Pagination(
       pageNumber === undefined ? 1 : Number(pageNumber),
       pageSize === undefined ? 10 : Number(pageSize)
     )
+    const whereInput: any = where === undefined ? {} : JSON.parse(decodeURIComponent(where as string))
+    const includeInput: any = include === undefined ? {} : JSON.parse(decodeURIComponent(include as string))
     this.jajanItemManagement
-      .readMany(pagination)
-      .then((result: Result<JajanItem[]>) => {
+      .readMany(pagination, whereInput, includeInput)
+      .then((result: Result<JajanItem[] | JajanItemAggregate[]>) => {
         const data: JajanItemManagementReadManyResponse = new JajanItemManagementReadManyResponse(
           result.data.length,
-          result.data.map((jajanItem: JajanItem) =>
+          result.data.map((jajanItem: JajanItem | JajanItemAggregate) =>
             new JajanItemManagementReadOneResponse(
               jajanItem.id,
               jajanItem.vendorId,
@@ -56,7 +64,10 @@ export default class JajanItemControllerRest {
               jajanItem.price,
               jajanItem.imageUrl,
               jajanItem.createdAt,
-              jajanItem.updatedAt
+              jajanItem.updatedAt,
+              (jajanItem as JajanItemAggregate).vendor,
+              (jajanItem as JajanItemAggregate).category,
+              (jajanItem as JajanItemAggregate).transactionHistories
             )
           )
         )

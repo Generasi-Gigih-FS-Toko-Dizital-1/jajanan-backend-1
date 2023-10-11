@@ -5,13 +5,13 @@ import type AdminManagement from '../../../inners/use_cases/managements/AdminMan
 import { type Admin } from '@prisma/client'
 import Pagination from '../../../inners/models/value_objects/Pagination'
 import AdminManagementReadManyResponse
-  from '../../../inners/models/value_objects/responses/admin_managements/AdminManagementReadManyResponse'
+  from '../../../inners/models/value_objects/responses/managements/admin_managements/AdminManagementReadManyResponse'
 import AdminManagementCreateResponse
-  from '../../../inners/models/value_objects/responses/admin_managements/AdminManagementCreateResponse'
+  from '../../../inners/models/value_objects/responses/managements/admin_managements/AdminManagementCreateResponse'
 import AdminManagementPatchResponse
-  from '../../../inners/models/value_objects/responses/admin_managements/AdminManagementPatchResponse'
+  from '../../../inners/models/value_objects/responses/managements/admin_managements/AdminManagementPatchResponse'
 import AdminManagementReadOneResponse
-  from '../../../inners/models/value_objects/responses/admin_managements/AdminManagementReadOneResponse'
+  from '../../../inners/models/value_objects/responses/managements/admin_managements/AdminManagementReadOneResponse'
 import ResponseBody from '../../../inners/models/value_objects/responses/ResponseBody'
 import type AuthenticationValidation from '../../../inners/use_cases/authentications/AuthenticationValidation'
 import validateAuthenticationMiddleware from '../../middlewares/ValidateAuthenticationMiddleware'
@@ -37,13 +37,18 @@ export default class AdminControllerRest {
   }
 
   readMany = (request: Request, response: Response): void => {
-    const { pageNumber, pageSize } = request.query
+    const {
+      pageNumber,
+      pageSize,
+      where
+    } = request.query
     const pagination: Pagination = new Pagination(
       pageNumber === undefined ? 1 : Number(pageNumber),
       pageSize === undefined ? 10 : Number(pageSize)
     )
+    const whereInput: any = where === undefined ? {} : JSON.parse(decodeURIComponent(where as string))
     this.adminManagement
-      .readMany(pagination)
+      .readMany(pagination, whereInput)
       .then((result: Result<Admin[]>) => {
         const data: AdminManagementReadManyResponse = new AdminManagementReadManyResponse(
           result.data.length,

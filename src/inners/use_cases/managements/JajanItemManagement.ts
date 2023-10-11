@@ -3,12 +3,11 @@ import type JajanItemRepository from '../../../outers/repositories/JajanItemRepo
 import type Pagination from '../../models/value_objects/Pagination'
 import Result from '../../models/value_objects/Result'
 import type JajanItemManagementCreateRequest
-  from '../../models/value_objects/requests/jajan_item_management/JajanItemManagementCreateRequest'
+  from '../../models/value_objects/requests/managements/jajan_item_management/JajanItemManagementCreateRequest'
 import { randomUUID } from 'crypto'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
 import type JajanItemManagementPatchRequest
-  from '../../models/value_objects/requests/jajan_item_management/JajanItemManagementPatchRequest'
-import VendorManagement from './VendorManagement'
+  from '../../models/value_objects/requests/managements/jajan_item_management/JajanItemManagementPatchRequest'
 
 export default class JajanItemManagement {
   jajanItemRepository: JajanItemRepository
@@ -19,11 +18,11 @@ export default class JajanItemManagement {
     this.objectUtility = objectUtility
   }
 
-  readMany = async (pagination: Pagination): Promise<Result<JajanItem[]>> => {
-    const foundJajanItems: JajanItem[] = await this.jajanItemRepository.readMany(pagination)
+  readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Result<JajanItem[]>> => {
+    const foundJajanItems: JajanItem[] = await this.jajanItemRepository.readMany(pagination, whereInput, includeInput)
     return new Result<JajanItem[]>(
       200,
-      'Jajan Items read all succeed.',
+      'Jajan Items read many succeed.',
       foundJajanItems
     )
   }
@@ -131,8 +130,8 @@ export default class JajanItemManagement {
       deletedJajanItem = await this.jajanItemRepository.deleteOneById(id)
     } catch (error) {
       return new Result<null>(
-        404,
-        'JajanItem delete one by id failed, jajanItem is not found.',
+        500,
+        'JajanItem delete one by id failed',
         null
       )
     }

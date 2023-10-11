@@ -4,46 +4,32 @@ import { beforeEach, describe, it } from 'mocha'
 import OneDatastore from '../../../../src/outers/datastores/OneDatastore'
 import { server } from '../../../../src/App'
 import waitUntil from 'async-wait-until'
-import TransactionHistoryMock from '../../../mocks/TransactionHistoryMock'
-import UserMock from '../../../mocks/UserMock'
-import JajanItemMock from '../../../mocks/JajanItemMock'
-import {
-  type Admin,
-  type Category,
-  type JajanItem,
-  type Prisma,
-  type TransactionHistory,
-  type User,
-  type Vendor
-} from '@prisma/client'
+import { type Admin, type JajanItem, type Prisma, type TransactionHistory, type User } from '@prisma/client'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
 import AdminMock from '../../../mocks/AdminMock'
 import AdminLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
 import TransactionHistoryManagementCreateRequest
-  from '../../../../src/inners/models/value_objects/requests/transaction_history_management/TransactionHistoryManagementCreateRequest'
+  from '../../../../src/inners/models/value_objects/requests/managements/transaction_history_management/TransactionHistoryManagementCreateRequest'
 import TransactionHistoryManagementPatchRequest
-  from '../../../../src/inners/models/value_objects/requests/transaction_history_management/TransactionHistoryManagementPatchRequest'
-import VendorMock from '../../../mocks/VendorMock'
-import CategoryMock from '../../../mocks/CategoryMock'
+  from '../../../../src/inners/models/value_objects/requests/managements/transaction_history_management/TransactionHistoryManagementPatchRequest'
+import humps from 'humps'
+import OneSeeder from '../../../../src/outers/seeders/OneSeeder'
 
 chai.use(chaiHttp)
 chai.should()
 
 describe('TransactionHistoryControllerRest', () => {
+  const oneDatastore: OneDatastore = new OneDatastore()
   const authAdminMock: AdminMock = new AdminMock()
-  const userMock: UserMock = new UserMock()
-  const vendorMock: VendorMock = new VendorMock()
-  const categoryMock: CategoryMock = new CategoryMock()
-  const jajanItemMock: JajanItemMock = new JajanItemMock(vendorMock, categoryMock)
-  const transactionHistoryMock: TransactionHistoryMock = new TransactionHistoryMock(userMock, jajanItemMock)
-  const oneDatastore = new OneDatastore()
+  let oneSeeder: OneSeeder
   let agent: ChaiHttp.Agent
   let authorization: Authorization
 
   before(async () => {
     await waitUntil(() => server !== undefined)
     await oneDatastore.connect()
+    oneSeeder = new OneSeeder(oneDatastore)
 
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
@@ -81,82 +67,17 @@ describe('TransactionHistoryControllerRest', () => {
   })
 
   beforeEach(async () => {
-    await oneDatastore.connect()
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-
-    await oneDatastore.client.user.createMany({
-      data: userMock.data
-    })
-
-    await oneDatastore.client.vendor.createMany({
-      data: vendorMock.data
-    })
-
-    await oneDatastore.client.category.createMany({
-      data: categoryMock.data
-    })
-
-    await oneDatastore.client.jajanItem.createMany({
-      data: jajanItemMock.data
-    })
-
-    await oneDatastore.client.transactionHistory.createMany({
-      data: transactionHistoryMock.data
-    })
+    await oneSeeder.up()
   })
 
   afterEach(async () => {
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-
-    await oneDatastore.client.transactionHistory.deleteMany({
-      where: {
-        id: {
-          in: transactionHistoryMock.data.map((transactionHistory: TransactionHistory) => transactionHistory.id)
-        }
-      }
-    })
-
-    await oneDatastore.client.jajanItem.deleteMany({
-      where: {
-        id: {
-          in: jajanItemMock.data.map((jajanItem: JajanItem) => jajanItem.id)
-        }
-      }
-    })
-
-    await oneDatastore.client.category.deleteMany({
-      where: {
-        id: {
-          in: categoryMock.data.map((category: Category) => category.id)
-        }
-      }
-    })
-
-    await oneDatastore.client.vendor.deleteMany(
-      {
-        where: {
-          id: {
-            in: vendorMock.data.map((vendor: Vendor) => vendor.id)
-          }
-        }
-      }
-    )
-
-    await oneDatastore.client.user.deleteMany(
-      {
-        where: {
-          id: {
-            in: userMock.data.map((user: User) => user.id)
-          }
-        }
-      }
-    )
-
-    await oneDatastore.disconnect()
+    await oneSeeder.down()
   })
 
   after(async () => {
@@ -178,7 +99,7 @@ describe('TransactionHistoryControllerRest', () => {
   describe('GET /api/v1/transaction-histories?page_number={}&page_size={}', () => {
     it('should return 200 OK', async () => {
       const pageNumber: number = 1
-      const pageSize: number = transactionHistoryMock.data.length
+      const pageSize: number = oneSeeder.transactionHistoryMock.data.length
       const response = await agent
         .get(`/api/v1/transaction-histories?page_number=${pageNumber}&page_size=${pageSize}`)
         .set('Authorization', authorization.convertToString())
@@ -191,7 +112,8 @@ describe('TransactionHistoryControllerRest', () => {
       response.body.data.should.has.property('total_transaction_histories')
       response.body.data.should.has.property('transaction_histories')
       response.body.data.transaction_histories.should.be.an('array')
-      response.body.data.transaction_histories.forEach((transactionHistory: TransactionHistory) => {
+      response.body.data.transaction_histories.length.should.equal(pageSize)
+      response.body.data.transaction_histories.forEach((transactionHistory: any) => {
         transactionHistory.should.has.property('id')
         transactionHistory.should.has.property('user_id')
         transactionHistory.should.has.property('jajan_item_id')
@@ -205,9 +127,54 @@ describe('TransactionHistoryControllerRest', () => {
     })
   })
 
+  describe('GET /api/v1/transaction-histories?page_number={}&page_size={}&where={}&include={}', () => {
+    it('should return 200 OK', async () => {
+      const requestTransactionHistory: TransactionHistory = oneSeeder.transactionHistoryMock.data[0]
+      const requestUser: User = oneSeeder.userMock.data[0]
+      const requestJajanItem: JajanItem = oneSeeder.jajanItemMock.data[0]
+      const pageNumber: number = 1
+      const pageSize: number = oneSeeder.transactionHistoryMock.data.length
+      const whereInput: any = {
+        id: requestTransactionHistory.id
+      }
+      const where: string = encodeURIComponent(JSON.stringify(whereInput))
+      const includeInput: any = {
+        user: true,
+        jajanItem: true
+      }
+      const include: string = encodeURIComponent(JSON.stringify(includeInput))
+      const response = await agent
+        .get(`/api/v1/transaction-histories?page_number=${pageNumber}&page_size=${pageSize}&where=${where}&include=${include}`)
+        .set('Authorization', authorization.convertToString())
+        .send()
+
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      response.body.data.should.has.property('total_transaction_histories')
+      response.body.data.should.has.property('transaction_histories')
+      response.body.data.transaction_histories.should.be.an('array')
+      response.body.data.transaction_histories.length.should.equal(1)
+      response.body.data.transaction_histories.forEach((transactionHistory: any) => {
+        transactionHistory.should.has.property('id').equal(requestTransactionHistory.id)
+        transactionHistory.should.has.property('user_id').equal(requestTransactionHistory.userId)
+        transactionHistory.should.has.property('jajan_item_id').equal(requestTransactionHistory.jajanItemId)
+        transactionHistory.should.has.property('amount').equal(requestTransactionHistory.amount)
+        transactionHistory.should.has.property('payment_method').equal(requestTransactionHistory.paymentMethod)
+        transactionHistory.should.has.property('last_latitude').equal(requestTransactionHistory.lastLatitude)
+        transactionHistory.should.has.property('last_longitude').equal(requestTransactionHistory.lastLongitude)
+        transactionHistory.should.has.property('updated_at').equal(requestTransactionHistory.updatedAt.toISOString())
+        transactionHistory.should.has.property('created_at').equal(requestTransactionHistory.createdAt.toISOString())
+        transactionHistory.should.has.property('user').deep.equal(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestUser))))
+        transactionHistory.should.has.property('jajan_item').deep.equal(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestJajanItem))))
+      })
+    })
+  })
+
   describe('GET /api/v1/transaction-histories/:id', () => {
     it('should return 200 OK', async () => {
-      const requestTransactionHistory: TransactionHistory = transactionHistoryMock.data[0]
+      const requestTransactionHistory: TransactionHistory = oneSeeder.transactionHistoryMock.data[0]
       const response = await agent
         .get(`/api/v1/transaction-histories/${requestTransactionHistory.id}`)
         .set('Authorization', authorization.convertToString())
@@ -233,12 +200,12 @@ describe('TransactionHistoryControllerRest', () => {
   describe('POST /api/v1/transaction-histories', () => {
     it('should return 201 CREATED', async () => {
       const requestBody: TransactionHistoryManagementCreateRequest = new TransactionHistoryManagementCreateRequest(
-        transactionHistoryMock.data[0].userId,
-        transactionHistoryMock.data[0].jajanItemId,
-        transactionHistoryMock.data[0].amount,
-        transactionHistoryMock.data[0].paymentMethod,
-        transactionHistoryMock.data[0].lastLatitude,
-        transactionHistoryMock.data[0].lastLongitude
+        oneSeeder.transactionHistoryMock.data[0].userId,
+        oneSeeder.transactionHistoryMock.data[0].jajanItemId,
+        oneSeeder.transactionHistoryMock.data[0].amount,
+        oneSeeder.transactionHistoryMock.data[0].paymentMethod,
+        oneSeeder.transactionHistoryMock.data[0].lastLatitude,
+        oneSeeder.transactionHistoryMock.data[0].lastLongitude
       )
 
       const response = await agent
@@ -275,14 +242,14 @@ describe('TransactionHistoryControllerRest', () => {
 
   describe('PATCH /api/v1/transaction-histories/:id', () => {
     it('should return 200 OK', async () => {
-      const requestTransactionHistory: TransactionHistory = transactionHistoryMock.data[0]
+      const requestTransactionHistory: TransactionHistory = oneSeeder.transactionHistoryMock.data[0]
       const requestBody: TransactionHistoryManagementPatchRequest = new TransactionHistoryManagementPatchRequest(
-        transactionHistoryMock.data[1].userId,
-        transactionHistoryMock.data[1].jajanItemId,
-        transactionHistoryMock.data[1].amount,
-        transactionHistoryMock.data[1].paymentMethod,
-        transactionHistoryMock.data[1].lastLatitude,
-        transactionHistoryMock.data[1].lastLongitude
+        oneSeeder.transactionHistoryMock.data[1].userId,
+        oneSeeder.transactionHistoryMock.data[1].jajanItemId,
+        oneSeeder.transactionHistoryMock.data[1].amount,
+        oneSeeder.transactionHistoryMock.data[1].paymentMethod,
+        oneSeeder.transactionHistoryMock.data[1].lastLatitude,
+        oneSeeder.transactionHistoryMock.data[1].lastLongitude
       )
 
       const response = await agent
@@ -309,7 +276,7 @@ describe('TransactionHistoryControllerRest', () => {
 
   describe('DELETE /api/v1/transaction-histories/:id', () => {
     it('should return 200 OK', async () => {
-      const requestTransactionHistory: TransactionHistory = transactionHistoryMock.data[0]
+      const requestTransactionHistory: TransactionHistory = oneSeeder.transactionHistoryMock.data[0]
 
       const response = await agent
         .delete(`/api/v1/transaction-histories/${requestTransactionHistory.id}`)

@@ -10,11 +10,12 @@ export default class AdminRepository {
     this.oneDatastore = oneDatastore
   }
 
-  readMany = async (pagination: Pagination): Promise<Admin[] > => {
+  readMany = async (pagination: Pagination, whereInput: any): Promise<Admin[] > => {
     const offset: number = (pagination.pageNumber - 1) * pagination.pageSize
     const args: any = {
       take: pagination.pageSize,
-      skip: offset
+      skip: offset,
+      where: whereInput
     }
 
     if (this.oneDatastore.client === undefined) {
