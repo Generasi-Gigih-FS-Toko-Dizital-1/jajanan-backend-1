@@ -32,6 +32,9 @@ import UserRefreshAuthentication from '../../inners/use_cases/authentications/us
 import TransactionHistoryControllerRest from '../controllers/rests/TransactionHistoryControllerRest'
 import TransactionHistoryManagement from '../../inners/use_cases/managements/TransactionHistoryManagement'
 import TransactionHistoryRepository from '../repositories/TransactionHistoryRepository'
+import CategoryControllerRest from '../controllers/rests/CategoryControllerRest'
+import CategoryRepository from '../repositories/CategoryRepository'
+import CategoryManagement from '../../inners/use_cases/managements/CategoryManagement'
 import PaymentGateway from '../gateways/PaymentGateway'
 import TopUp from '../../inners/use_cases/top_ups/TopUp'
 import TopUpControllerRest from '../controllers/rests/TopUpControllerRest'
@@ -70,6 +73,7 @@ export default class RootRoute {
     const adminRepository: AdminRepository = new AdminRepository(this.datastoreOne)
     const jajanItemRepository: JajanItemRepository = new JajanItemRepository(this.datastoreOne)
     const transactionHistoryRepository: TransactionHistoryRepository = new TransactionHistoryRepository(this.datastoreOne)
+    const categoryRepository: CategoryRepository = new CategoryRepository(this.datastoreOne)
 
     const topUpHistoryRepository = new TopUpHistoryRepository(this.datastoreOne)
 
@@ -80,6 +84,7 @@ export default class RootRoute {
     const adminManagement: AdminManagement = new AdminManagement(adminRepository, objectUtility)
     const jajanItemManagement: JajanItemManagement = new JajanItemManagement(jajanItemRepository, objectUtility)
     const transactionHistoryManagement: TransactionHistoryManagement = new TransactionHistoryManagement(userManagement, jajanItemManagement, transactionHistoryRepository, objectUtility)
+    const categoryManagemenet: CategoryManagement = new CategoryManagement(categoryRepository, objectUtility)
 
     const userRegisterAuthentication: UserRegisterAuthentication = new UserRegisterAuthentication(userManagement)
     const vendorRegisterAuthentication: VendorRegisterAuthentication = new VendorRegisterAuthentication(vendorManagement)
@@ -130,6 +135,14 @@ export default class RootRoute {
     )
     transactionHistoryControllerRest.registerRoutes()
     routerVersionOne.use('/transaction-histories', transactionHistoryControllerRest.router)
+
+    const categoryControllerRest: CategoryControllerRest = new CategoryControllerRest(
+      Router(),
+      categoryManagemenet,
+      authenticationValidation
+    )
+    categoryControllerRest.registerRoutes()
+    routerVersionOne.use('/categories', categoryControllerRest.router)
 
     const adminControllerRest: AdminControllerRest = new AdminControllerRest(
       Router(),
