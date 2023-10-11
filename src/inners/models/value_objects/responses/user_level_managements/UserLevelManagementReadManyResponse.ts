@@ -1,12 +1,12 @@
-import type JajanItemManagementReadOneResponse from './UserLevelManagementReadOneResponse'
+import type UserLevelManagementReadOneResponse from './UserLevelManagementReadOneResponse'
 
 export default class UserLevelManagementReadManyResponse {
   totalUserLevels: number
-  userLevels: JajanItemManagementReadOneResponse[]
+  userLevels: UserLevelManagementReadOneResponse[]
 
   constructor (
     totalUserLevels: number,
-    userLevels: JajanItemManagementReadOneResponse[]
+    userLevels: UserLevelManagementReadOneResponse[]
   ) {
     this.totalUserLevels = totalUserLevels
     this.userLevels = userLevels
