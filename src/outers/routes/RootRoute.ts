@@ -38,6 +38,10 @@ import TopUpControllerRest from '../controllers/rests/TopUpControllerRest'
 import UserLogoutAuthentication from '../../inners/use_cases/authentications/users/UserLogoutAuthentication'
 import VendorLogoutAuthentication from '../../inners/use_cases/authentications/vendors/VendorLogoutAuthentication'
 import AdminLogoutAuthentication from '../../inners/use_cases/authentications/admins/AdminLogoutAuthentication'
+import TopUpHistoryRepository from '../repositories/TopUpHistoryRepository'
+import TopUpWebhook from '../../inners/use_cases/top_up/TopUpWebhook'
+import WebhookControllerRest from '../controllers/rests/WebhookControllerRest'
+
 
 export default class RootRoute {
   app: Application
@@ -67,6 +71,8 @@ export default class RootRoute {
     const adminRepository: AdminRepository = new AdminRepository(this.datastoreOne)
     const jajanItemRepository: JajanItemRepository = new JajanItemRepository(this.datastoreOne)
     const transactionHistoryRepository: TransactionHistoryRepository = new TransactionHistoryRepository(this.datastoreOne)
+   
+    const topUpHistoryRepository = new TopUpHistoryRepository(this.datastoreOne)
 
     const sessionManagement: SessionManagement = new SessionManagement(sessionRepository, objectUtility)
     const authenticationValidation: AuthenticationValidation = new AuthenticationValidation(sessionManagement)
@@ -85,8 +91,9 @@ export default class RootRoute {
 
     const userRefreshAuthentication: UserRefreshAuthentication = new UserRefreshAuthentication(userManagement, sessionManagement)
     const vendorRefreshAuthentication: VendorRefreshAuthentication = new VendorRefreshAuthentication(vendorManagement, sessionManagement)
-    const adminRefreshAuthentication: AdminRefreshAuthentication = new AdminRefreshAuthentication(adminManagement, sessionManagement)
-
+    const adminRefreshAuthentication: AdminRefreshAuthentication = new AdminRefreshAuthentication(adminManagement, sessionManagement)r
+    
+    const topUpWebhookUseCase = new TopUpWebhook(topUpHistoryRepository, userRepository)
     const topUp = new TopUp(paymentGateway, userManagement)
 
     const userLogoutAuthentication: UserLogoutAuthentication = new UserLogoutAuthentication(userManagement, sessionManagement)
@@ -165,6 +172,10 @@ export default class RootRoute {
     const topUpControllerRest: TopUpControllerRest = new TopUpControllerRest(Router(), topUp, authenticationValidation)
     topUpControllerRest.registerRoutes()
     routerVersionOne.use('/top-ups', topUpControllerRest.router)
+
+    const webhookControllerRest: WebhookControllerRest = new WebhookControllerRest(Router(), topUpWebhookUseCase)
+    webhookControllerRest.registerRoutes()
+    routerVersionOne.use('/webhook', webhookControllerRest.router)
 
     this.app.use('/api/v1', routerVersionOne)
   }
