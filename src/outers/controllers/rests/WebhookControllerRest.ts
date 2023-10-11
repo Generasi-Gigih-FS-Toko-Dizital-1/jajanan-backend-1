@@ -18,7 +18,6 @@ export default class WebhookControllerRest {
 
   handleTopUpCallback = (req: Request, res: Response): void => {
     const { status } = req.body
-    console.log(req.body)
     if (status !== 'PAID') {
       res.status(200).send('notification processed')
       return

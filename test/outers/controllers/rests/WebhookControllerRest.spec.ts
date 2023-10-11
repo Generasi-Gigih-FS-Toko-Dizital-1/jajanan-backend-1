@@ -82,28 +82,7 @@ describe('WebhookControllerRest', () => {
         .post('/api/v1/webhook/topup')
         .set('x-callback-token', String(callbackToken))
         .send(paymentData)
-      console.log(res.body)
       res.should.have.status(200)
     })
-
-    // it('should return 400', async () => {
-    //   const res = await agent.post('/api/v1/webhook/topup').send({
-    //     transactionId: 'transactionId',
-    //     amount: 100,
-    //     currency: 'THB',
-    //     status: 'fail'
-    //   })
-    //   res.should.have.status(400)
-    // })
-
-    // it('should return 404', async () => {
-    //   const res = await agent.post('/api/v1/webhook/topup').send({
-    //     transactionId: 'transactionId',
-    //     amount: 100,
-    //     currency: 'THB',
-    //     status: 'success'
-    //   })
-    //   res.should.have.status(404)
-    // })
   })
 })
