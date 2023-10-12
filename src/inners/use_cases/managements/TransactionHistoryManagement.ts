@@ -73,8 +73,6 @@ export default class TransactionHistoryManagement {
     const transactionHistory: TransactionHistory = {
       id: randomUUID(),
       userId: request.userId,
-      jajanItemId: request.jajanItemId,
-      amount: request.amount,
       paymentMethod: request.paymentMethod,
       lastLatitude: request.lastLatitude,
       lastLongitude: request.lastLongitude,

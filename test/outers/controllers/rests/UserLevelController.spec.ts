@@ -14,8 +14,8 @@ import AdminMock from '../../../mocks/AdminMock'
 import AdminLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
 import OneSeeder from '../../../../src/outers/seeders/OneSeeder'
-import UserLevelManagementCreateRequest from '../../../../src/inners/models/value_objects/requests/user_level_managements/UserLevelManagementPatchRequest'
-import UserLevelManagementPatchRequest from '../../../../src/inners/models/value_objects/requests/user_level_managements/UserLevelManagementCreateRequest'
+import UserLevelManagementCreateRequest from '../../../../src/inners/models/value_objects/requests/managements/user_level_managements/UserLevelManagementPatchRequest'
+import UserLevelManagementPatchRequest from '../../../../src/inners/models/value_objects/requests/managements/user_level_managements/UserLevelManagementCreateRequest'
 
 chai.use(chaiHttp)
 chai.should()

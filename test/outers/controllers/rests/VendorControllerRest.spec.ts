@@ -11,7 +11,7 @@ import {
   type JajanItem,
   type NotificationHistory,
   type Prisma,
-  type TransactionHistory,
+  type TransactionHistory, type TransactionItemHistory,
   type Vendor
 } from '@prisma/client'
 import VendorManagementPatchRequest
@@ -337,15 +337,15 @@ describe('VendorControllerRest', () => {
       const requestVendor: Vendor = oneSeeder.vendorMock.data[0]
       const requestNotificationHistories: NotificationHistory[] = oneSeeder.notificationHistoryMock.data.filter((notificationHistory: NotificationHistory) => notificationHistory.vendorId === requestVendor.id)
       const requestJajanItems: JajanItem[] = oneSeeder.jajanItemMock.data.filter((jajanItem: JajanItem) => jajanItem.vendorId === requestVendor.id)
-      const requestTransactionHistories: TransactionHistory[] = oneSeeder.transactionHistoryMock.data.filter((transactionHistory: TransactionHistory) => requestJajanItems.map((jajanItem: JajanItem) => jajanItem.id).includes(transactionHistory.jajanItemId))
+      const requestTransactionItemHistories: TransactionItemHistory[] = oneSeeder.transactionItemHistoryMock.data.filter((transactionItemHistory: TransactionItemHistory) => requestJajanItems.map((jajanItem: JajanItem) => jajanItem.id).includes(transactionItemHistory.jajanItemId))
 
       if (oneDatastore.client === undefined) {
         throw new Error('oneDatastore client is undefined')
       }
-      await oneDatastore.client.transactionHistory.deleteMany({
+      await oneDatastore.client.transactionItemHistory.deleteMany({
         where: {
           id: {
-            in: requestTransactionHistories.map((transactionHistory: TransactionHistory) => transactionHistory.id)
+            in: requestTransactionItemHistories.map((transactionItemHistory: TransactionItemHistory) => transactionItemHistory.id)
           }
         }
       })

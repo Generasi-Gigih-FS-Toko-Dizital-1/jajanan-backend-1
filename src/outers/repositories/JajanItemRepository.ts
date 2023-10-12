@@ -15,7 +15,7 @@ export default class JajanItemRepository {
       include: {
         vendor: true,
         category: true,
-        transactionHistories: true
+        transactionItemHistories: true
       }
     }
   }
@@ -27,6 +27,30 @@ export default class JajanItemRepository {
       skip: offset,
       where: whereInput,
       include: includeInput
+    }
+
+    if (this.oneDatastore.client === undefined) {
+      throw new Error('oneDatastore client is undefined.')
+    }
+
+    const foundJajanItems: JajanItem[] | JajanItemAggregate[] = await this.oneDatastore.client.jajanItem.findMany(args)
+    if (foundJajanItems === null) {
+      throw new Error('Found Jajan Item is undefined.')
+    }
+    return foundJajanItems
+  }
+
+  readManyByIds = async (ids: string[], isAggregated?: boolean): Promise<JajanItem[] | JajanItemAggregate[]> => {
+    const args: any = {
+      data: {
+        id: {
+          in: ids
+        }
+      }
+    }
+
+    if (isAggregated === true) {
+      args.include = this.aggregatedArgs.include
     }
 
     if (this.oneDatastore.client === undefined) {

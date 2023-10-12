@@ -10,8 +10,8 @@ import Authorization from '../../../../src/inners/models/value_objects/Authoriza
 import AdminMock from '../../../mocks/AdminMock'
 import AdminLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
-import CategoryManagementCreateRequest from '../../../../src/inners/models/value_objects/requests/category_managements/CategoryManagementCreateRequest'
-import CategoryManagementPatchRequest from '../../../../src/inners/models/value_objects/requests/category_managements/CategoryManagementPatchRequest'
+import CategoryManagementCreateRequest from '../../../../src/inners/models/value_objects/requests/managements/category_managements/CategoryManagementCreateRequest'
+import CategoryManagementPatchRequest from '../../../../src/inners/models/value_objects/requests/managements/category_managements/CategoryManagementPatchRequest'
 
 chai.use(chaiHttp)
 chai.should()

@@ -67,7 +67,7 @@ describe('TopUpControllerRest', () => {
     await oneDatastore.disconnect()
   })
 
-  describe('POST /api/v1/topup', () => {
+  describe('POST /api/v1/top-ups', () => {
     it('should return 201', async () => {
       const requestBody = new TopUpCreateRequest(
         userMock.data[0].id,

@@ -10,7 +10,7 @@
 		"swagger-generate": "node ./swagger.js"
 	},
 	"dependencies": {
-		"@prisma/client": "^5.3.1",
+		"@prisma/client": "^5.4.2",
 		"async-wait-until": "^2.0.12",
 		"axios": "^1.4.0",
 		"bcrypt": "^5.1.1",

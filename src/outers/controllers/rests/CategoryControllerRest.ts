@@ -7,10 +7,10 @@ import ResponseBody from '../../../inners/models/value_objects/responses/Respons
 import validateAuthenticationMiddleware from '../../middlewares/ValidateAuthenticationMiddleware'
 import type CategoryManagement from '../../../inners/use_cases/managements/CategoryManagement'
 import type AuthenticationValidation from '../../../inners/use_cases/authentications/AuthenticationValidation'
-import CategoryManagementReadManyResponse from '../../../inners/models/value_objects/responses/category_managements/CategoryManagementReadManyResponse'
-import CategoryManagementReadOneResponse from '../../../inners/models/value_objects/responses/category_managements/CategoryManagementReadOneResponse'
-import CategoryManagementCreateResponse from '../../../inners/models/value_objects/responses/category_managements/CategoryManagementCreateResponse'
-import CategoryManagementPatchResponse from '../../../inners/models/value_objects/responses/category_managements/CategoryManagementPatchResponse'
+import CategoryManagementReadManyResponse from '../../../inners/models/value_objects/responses/managements/category_managements/CategoryManagementReadManyResponse'
+import CategoryManagementReadOneResponse from '../../../inners/models/value_objects/responses/managements/category_managements/CategoryManagementReadOneResponse'
+import CategoryManagementCreateResponse from '../../../inners/models/value_objects/responses/managements/category_managements/CategoryManagementCreateResponse'
+import CategoryManagementPatchResponse from '../../../inners/models/value_objects/responses/managements/category_managements/CategoryManagementPatchResponse'
 
 export default class CategoryControllerRest {
   router: Router

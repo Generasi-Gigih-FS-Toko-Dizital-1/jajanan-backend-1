@@ -22,7 +22,7 @@ export default class TopUpHistoryMock {
       },
       {
         id: randomUUID(),
-        userId: this.userMock.data[0].id,
+        userId: this.userMock.data[1].id,
         amount: 1.0,
         media: 'media0',
         updatedAt: new Date(),

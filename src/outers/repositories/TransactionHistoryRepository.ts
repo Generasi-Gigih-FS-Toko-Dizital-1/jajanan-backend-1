@@ -12,7 +12,7 @@ export default class TransactionHistoryRepository {
     this.aggregatedArgs = {
       include: {
         user: true,
-        jajanItem: true
+        transactionItems: true
       }
     }
   }

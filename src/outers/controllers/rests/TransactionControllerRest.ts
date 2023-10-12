@@ -5,42 +5,45 @@ import { type TransactionHistory } from '@prisma/client'
 import ResponseBody from '../../../inners/models/value_objects/responses/ResponseBody'
 import type AuthenticationValidation from '../../../inners/use_cases/authentications/AuthenticationValidation'
 import validateAuthenticationMiddleware from '../../middlewares/ValidateAuthenticationMiddleware'
-import type TransactionManagement from '../../../inners/use_cases/managements/TransactionManagement'
-import TransactionCreateResponse
-  from '../../../inners/models/value_objects/responses/transactions/TransactionCreateResponse'
+import TransactionCheckoutResponse
+  from '../../../inners/models/value_objects/responses/transactions/TransactionCheckoutResponse'
+import type CheckoutTransaction from '../../../inners/use_cases/transactions/CheckoutTransaction'
 
 export default class TransactionHistoryControllerRest {
   router: Router
-  transactionManagement: TransactionManagement
+  checkoutTransaction: CheckoutTransaction
   authenticationValidation: AuthenticationValidation
 
-  constructor (router: Router, transactionManagement: TransactionManagement, authenticationValidation: AuthenticationValidation) {
+  constructor (router: Router, checkoutTransaction: CheckoutTransaction, authenticationValidation: AuthenticationValidation) {
     this.router = router
-    this.transactionManagement = transactionManagement
+    this.checkoutTransaction = checkoutTransaction
     this.authenticationValidation = authenticationValidation
   }
 
   registerRoutes = (): void => {
     this.router.use(validateAuthenticationMiddleware(this.authenticationValidation))
-    this.router.post('', this.createOne)
+    this.router.post('/checkout', this.checkout)
   }
 
-  createOne = (request: Request, response: Response): void => {
-    this.transactionManagement
-      .createOne(request.body)
-      .then((result: Result<TransactionHistory>) => {
-        const data: TransactionCreateResponse = new TransactionCreateResponse(
-          result.data.id,
-          result.data.userId,
-          result.data.jajanItemId,
-          result.data.amount,
-          result.data.paymentMethod,
-          result.data.lastLatitude,
-          result.data.lastLongitude,
-          result.data.updatedAt,
-          result.data.createdAt
-        )
-        const responseBody: ResponseBody<TransactionCreateResponse> = new ResponseBody<TransactionCreateResponse>(
+  checkout = (request: Request, response: Response): void => {
+    this.checkoutTransaction
+      .checkout(request.body)
+      .then((result: Result<TransactionHistory | null>) => {
+        let data: TransactionCheckoutResponse | null
+        if (result.status === 201 && result.data !== null) {
+          data = new TransactionCheckoutResponse(
+            result.data.id,
+            result.data.userId,
+            result.data.paymentMethod,
+            result.data.lastLatitude,
+            result.data.lastLongitude,
+            result.data.updatedAt,
+            result.data.createdAt
+          )
+        } else {
+          data = null
+        }
+        const responseBody: ResponseBody<TransactionCheckoutResponse | null> = new ResponseBody<TransactionCheckoutResponse | null>(
           result.message,
           data
         )

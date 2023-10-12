@@ -1,16 +1,16 @@
 import { type PaymentMethod } from '@prisma/client'
 
-export default class TransactionCreateRequest {
+export default class TransactionCheckoutRequest {
   userId: string
-  jajanItemId: string
+  jajanItemIds: string[]
   amount: number
   paymentMethod: PaymentMethod
   lastLatitude: number
   lastLongitude: number
 
-  constructor (userId: string, jajanItemId: string, amount: number, paymentMethod: PaymentMethod, lastLatitude: number, lastLongitude: number) {
+  constructor (userId: string, jajanItemIds: string[], amount: number, paymentMethod: PaymentMethod, lastLatitude: number, lastLongitude: number) {
     this.userId = userId
-    this.jajanItemId = jajanItemId
+    this.jajanItemIds = jajanItemIds
     this.amount = amount
     this.paymentMethod = paymentMethod
     this.lastLatitude = lastLatitude

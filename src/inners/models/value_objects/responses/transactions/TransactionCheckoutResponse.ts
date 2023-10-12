@@ -1,6 +1,6 @@
 import { type PaymentMethod } from '@prisma/client'
 
-export default class TransactionCreateResponse {
+export default class TransactionCheckoutResponse {
   id: string
   userId: string
   jajanItemId: string
