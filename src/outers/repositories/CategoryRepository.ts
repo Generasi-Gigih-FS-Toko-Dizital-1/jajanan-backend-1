@@ -96,7 +96,7 @@ export default class CategoryRepository {
 
     const patchedUser: Category | CategoryAggregate = await this.oneDatastore.client.category.update(args)
     if (patchedUser === null) {
-      throw new Error('Patched category item is undefined.')
+      throw new Error('Patched category is undefined.')
     }
     return patchedUser
   }

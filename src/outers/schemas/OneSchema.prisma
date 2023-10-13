@@ -7,6 +7,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator erd {
+  provider = "prisma-erd-generator"
+}
+
 enum Gender {
   MALE
   FEMALE
@@ -64,7 +68,8 @@ model Vendor {
   deletedAt             DateTime?             @db.Timestamptz
   notificationHistories NotificationHistory[]
   jajanItems            JajanItem[]
-  PayoutHistory         PayoutHistory[]
+  payoutHistory         PayoutHistory[]
+  jajanItemSnapshot     JajanItemSnapshot[]
 }
 
 model Admin {
@@ -79,6 +84,20 @@ model Admin {
 }
 
 model JajanItem {
+  id         String    @id
+  vendorId   String
+  categoryId String
+  name       String    @db.VarChar(255)
+  price      Int
+  imageUrl   String    @db.VarChar(255)
+  updatedAt  DateTime  @db.Timestamptz
+  createdAt  DateTime  @db.Timestamptz
+  deletedAt  DateTime? @db.Timestamptz
+  vendor     Vendor    @relation(fields: [vendorId], references: [id])
+  category   Category  @relation(fields: [categoryId], references: [id])
+}
+
+model JajanItemSnapshot {
   id                       String                   @id
   vendorId                 String
   categoryId               String
@@ -94,14 +113,15 @@ model JajanItem {
 }
 
 model Category {
-  id                String             @id
-  categoryName      String             @db.VarChar(255)
-  iconUrl           String             @db.VarChar(255)
-  updatedAt         DateTime           @db.Timestamptz
-  createdAt         DateTime           @db.Timestamptz
-  deletedAt         DateTime?          @db.Timestamptz
-  jajanItems        JajanItem[]
-  userSubscriptions UserSubscription[]
+  id                 String              @id
+  categoryName       String              @db.VarChar(255)
+  iconUrl            String              @db.VarChar(255)
+  updatedAt          DateTime            @db.Timestamptz
+  createdAt          DateTime            @db.Timestamptz
+  deletedAt          DateTime?           @db.Timestamptz
+  jajanItems         JajanItem[]
+  userSubscriptions  UserSubscription[]
+  jajanItemSnapshots JajanItemSnapshot[]
 }
 
 model NotificationHistory {
@@ -190,5 +210,5 @@ model TransactionItemHistory {
   createdAt     DateTime           @db.Timestamptz
   deletedAt     DateTime?          @db.Timestamptz
   transaction   TransactionHistory @relation(fields: [transactionId], references: [id])
-  jajanItem     JajanItem          @relation(fields: [jajanItemId], references: [id])
+  jajanItem     JajanItemSnapshot  @relation(fields: [jajanItemId], references: [id])
 }

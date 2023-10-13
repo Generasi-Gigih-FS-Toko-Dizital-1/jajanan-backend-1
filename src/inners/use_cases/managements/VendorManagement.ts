@@ -203,7 +203,7 @@ export default class VendorManagement {
     )
   }
 
-  patchOneRawById = async (id: string, request: VendorManagementPatchRequest): Promise<Result<Vendor | null>> => {
+  patchOneRawById = async (id: string, request: any): Promise<Result<Vendor | null>> => {
     const foundVendor: Result<Vendor | null> = await this.readOneById(id)
     if (foundVendor.status !== 200 || foundVendor.data === null) {
       return new Result<null>(

@@ -115,7 +115,7 @@ export default class JajanItemManagement {
     )
   }
 
-  patchOneRawById = async (id: string, request: JajanItemManagementPatchRequest): Promise<Result<JajanItem | null>> => {
+  patchOneRawById = async (id: string, request: any): Promise<Result<JajanItem | null>> => {
     const foundJajanItem: Result<JajanItem | null> = await this.readOneById(id)
     if (foundJajanItem.status !== 200 || foundJajanItem.data === null) {
       return new Result<null>(

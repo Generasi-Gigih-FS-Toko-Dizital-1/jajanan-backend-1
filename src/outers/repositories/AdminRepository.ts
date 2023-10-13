@@ -131,7 +131,7 @@ export default class AdminRepository {
 
     const patchedAdmin: Admin = await this.oneDatastore.client.admin.update(args)
     if (patchedAdmin === null) {
-      throw new Error('Patched admins is undefined.')
+      throw new Error('Patched admin is undefined.')
     }
     return patchedAdmin
   }

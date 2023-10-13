@@ -14,8 +14,7 @@ export default class JajanItemRepository {
     this.aggregatedArgs = {
       include: {
         vendor: true,
-        category: true,
-        transactionItemHistories: true
+        category: true
       }
     }
   }
@@ -42,7 +41,7 @@ export default class JajanItemRepository {
 
   readManyByIds = async (ids: string[], isAggregated?: boolean): Promise<JajanItem[] | JajanItemAggregate[]> => {
     const args: any = {
-      data: {
+      where: {
         id: {
           in: ids
         }

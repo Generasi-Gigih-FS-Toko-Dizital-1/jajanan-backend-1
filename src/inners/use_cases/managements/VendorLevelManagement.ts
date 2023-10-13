@@ -102,7 +102,7 @@ export default class VendorLevelManagement {
     )
   }
 
-  patchOneRawById = async (id: string, request: VendorLevelManagementPatchRequest): Promise<Result<VendorLevel | null>> => {
+  patchOneRawById = async (id: string, request: any): Promise<Result<VendorLevel | null>> => {
     const foundVendorLevel: Result<VendorLevel | null> = await this.readOneById(id)
     if (foundVendorLevel.status !== 200 || foundVendorLevel.data === null) {
       return new Result<null>(

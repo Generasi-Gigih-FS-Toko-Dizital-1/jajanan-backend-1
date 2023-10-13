@@ -193,7 +193,7 @@ export default class UserManagement {
     )
   }
 
-  patchOneRawById = async (id: string, request: UserManagementPatchRequest): Promise<Result<User | null>> => {
+  patchOneRawById = async (id: string, request: any): Promise<Result<User | null>> => {
     const foundUser: Result<User | null> = await this.readOneById(id)
     if (foundUser.status !== 200 || foundUser.data === null) {
       return new Result<null>(

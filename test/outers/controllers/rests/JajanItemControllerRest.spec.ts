@@ -9,7 +9,7 @@ import {
   type Category,
   type JajanItem,
   type Prisma,
-  type TransactionItemHistory, type TransactionItemHistory,
+  type TransactionItemHistory,
   type Vendor
 } from '@prisma/client'
 import JajanItemManagementCreateRequest
@@ -138,7 +138,6 @@ describe('JajanItemControllerRest', () => {
       const requestJajanItem: JajanItem = oneSeeder.jajanItemMock.data[0]
       const requestVendor: Vendor = oneSeeder.jajanItemMock.vendorMock.data.filter((vendor: Vendor) => vendor.id === requestJajanItem.vendorId)[0]
       const requestCategory: Category = oneSeeder.jajanItemMock.categoryMock.data.filter((category: Category) => category.id === requestJajanItem.categoryId)[0]
-      const requestTransactionItemHistories: TransactionItemHistory[] = oneSeeder.transactionItemHistoryMock.data.filter((transactionItemHistory: TransactionItemHistory) => transactionItemHistory.jajanItemId === requestJajanItem.id)
       const pageNumber: number = 1
       const pageSize: number = oneSeeder.jajanItemMock.data.length
       const whereInput: any = {
@@ -147,8 +146,7 @@ describe('JajanItemControllerRest', () => {
       const where: string = encodeURIComponent(JSON.stringify(whereInput))
       const includeInput: any = {
         vendor: true,
-        category: true,
-        transactionItemHistories: true
+        category: true
       }
       const include: string = encodeURIComponent(JSON.stringify(includeInput))
       const response = await agent
@@ -175,9 +173,6 @@ describe('JajanItemControllerRest', () => {
         jajanItem.should.has.property('created_at').equal(requestJajanItem.createdAt.toISOString())
         jajanItem.should.has.property('vendor').deep.equal(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestVendor))))
         jajanItem.should.has.property('category').deep.equal(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestCategory))))
-        jajanItem.should.has.property('transaction_item_histories').deep.members(
-          requestTransactionItemHistories.map((transactionItemHistory: TransactionItemHistory) => humps.decamelizeKeys(JSON.parse(JSON.stringify(transactionItemHistory))))
-        )
       })
     })
   })

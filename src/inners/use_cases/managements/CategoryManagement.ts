@@ -102,7 +102,7 @@ export default class CategoryManagement {
     )
   }
 
-  patchOneRawById = async (id: string, request: CategoryManagementPatchRequest): Promise<Result<Category | null>> => {
+  patchOneRawById = async (id: string, request: any): Promise<Result<Category | null>> => {
     const foundCategory: Result<Category | null> = await this.readOneById(id)
     if (foundCategory.status !== 200 || foundCategory.data === null) {
       return new Result<null>(

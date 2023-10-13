@@ -102,7 +102,7 @@ export default class UserLevelManagement {
     )
   }
 
-  patchOneRawById = async (id: string, request: UserLevelManagementPatchRequest): Promise<Result<UserLevel | null>> => {
+  patchOneRawById = async (id: string, request: any): Promise<Result<UserLevel | null>> => {
     const foundUserLevel: Result<UserLevel | null> = await this.readOneById(id)
     if (foundUserLevel.status !== 200 || foundUserLevel.data === null) {
       return new Result<null>(

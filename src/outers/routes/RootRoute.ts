@@ -54,6 +54,8 @@ import TransactionControllerRest from '../controllers/rests/TransactionControlle
 import CheckoutTransaction from '../../inners/use_cases/transactions/CheckoutTransaction'
 import TopUpHistoryManagement from '../../inners/use_cases/managements/TopUpHistoryManagement'
 import TopUpHistoryController from '../controllers/rests/TopUpHistoryControllerRest'
+import JajanItemSnapshotManagement from '../../inners/use_cases/managements/JajanItemSnapshotManagement'
+import JajanItemSnapshotRepository from '../repositories/JajanItemSnapshotRepository'
 
 export default class RootRoute {
   app: Application
@@ -85,6 +87,7 @@ export default class RootRoute {
     const vendorLevelRepository: VendorLevelRepository = new VendorLevelRepository(this.datastoreOne)
     const categoryRepository: CategoryRepository = new CategoryRepository(this.datastoreOne)
     const topUpHistoryRepository = new TopUpHistoryRepository(this.datastoreOne)
+    const jajanItemSnashotRepository = new JajanItemSnapshotRepository(this.datastoreOne)
 
     const sessionManagement: SessionManagement = new SessionManagement(sessionRepository, objectUtility)
     const authenticationValidation: AuthenticationValidation = new AuthenticationValidation(sessionManagement)
@@ -92,6 +95,7 @@ export default class RootRoute {
     const vendorManagement: VendorManagement = new VendorManagement(vendorRepository, objectUtility)
     const adminManagement: AdminManagement = new AdminManagement(adminRepository, objectUtility)
     const jajanItemManagement: JajanItemManagement = new JajanItemManagement(jajanItemRepository, objectUtility)
+    const jajanItemSnapshotManagement: JajanItemSnapshotManagement = new JajanItemSnapshotManagement(jajanItemSnashotRepository, objectUtility)
     const transactionHistoryManagement: TransactionHistoryManagement = new TransactionHistoryManagement(userManagement, jajanItemManagement, transactionHistoryRepository, objectUtility)
     const vendorLevelManagement: VendorLevelManagement = new VendorLevelManagement(vendorLevelRepository, objectUtility)
     const userLevelManagement: UserLevelManagement = new UserLevelManagement(userLevelRepository, objectUtility)
@@ -116,7 +120,7 @@ export default class RootRoute {
     const topUpWebhook: TopUpWebhook = new TopUpWebhook(topUpHistoryRepository, userRepository)
     const topUp: TopUp = new TopUp(paymentGateway, userManagement)
 
-    const checkoutTransaction: CheckoutTransaction = new CheckoutTransaction(userManagement, jajanItemManagement, transactionHistoryManagement, objectUtility)
+    const checkoutTransaction: CheckoutTransaction = new CheckoutTransaction(userManagement, jajanItemManagement, jajanItemSnapshotManagement, transactionHistoryManagement, objectUtility)
 
     const userControllerRest: UserControllerRest = new UserControllerRest(
       Router(),
