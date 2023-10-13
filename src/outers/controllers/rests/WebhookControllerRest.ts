@@ -1,5 +1,5 @@
 import { type Response, type Request, type Router } from 'express'
-import type TopUpWebhook from '../../../inners/use_cases/top_up/TopUpWebhook'
+import type TopUpWebhook from '../../../inners/use_cases/top_ups/TopUpWebhook'
 import validateXenditCallbackToken from '../../middlewares/ValidateXenditCallbackToken'
 
 export default class WebhookControllerRest {
