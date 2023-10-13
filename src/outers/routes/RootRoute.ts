@@ -40,7 +40,7 @@ import UserLogoutAuthentication from '../../inners/use_cases/authentications/use
 import VendorLogoutAuthentication from '../../inners/use_cases/authentications/vendors/VendorLogoutAuthentication'
 import AdminLogoutAuthentication from '../../inners/use_cases/authentications/admins/AdminLogoutAuthentication'
 import TopUpHistoryRepository from '../repositories/TopUpHistoryRepository'
-import TopUpWebhook from '../../inners/use_cases/top_up/TopUpWebhook'
+import TopUpWebhook from '../../inners/use_cases/top_ups/TopUpWebhook'
 import WebhookControllerRest from '../controllers/rests/WebhookControllerRest'
 import VendorLevelRepository from '../repositories/VendorLevelRepository'
 import VendorLevelManagement from '../../inners/use_cases/managements/VendorLevelManagement'
