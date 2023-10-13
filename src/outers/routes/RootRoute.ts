@@ -50,6 +50,8 @@ import CategoryRepository from '../repositories/CategoryRepository'
 import UserLevelManagement from '../../inners/use_cases/managements/UserLevelManagement'
 import UserLevelControllerRest from '../controllers/rests/UserLevelControllerRest'
 import CategoryControllerRest from '../controllers/rests/CategoryControllerRest'
+import TopUpHistoryManagement from '../../inners/use_cases/managements/TopUpHistoryManagement'
+import TopUpHistoryController from '../controllers/rests/TopUpHistoryControllerRest'
 
 export default class RootRoute {
   app: Application
@@ -82,7 +84,6 @@ export default class RootRoute {
     const userLevelRepository: UserLevelRepository = new UserLevelRepository(this.datastoreOne)
     const vendorLevelRepository: VendorLevelRepository = new VendorLevelRepository(this.datastoreOne)
     const categoryRepository: CategoryRepository = new CategoryRepository(this.datastoreOne)
-
     const topUpHistoryRepository = new TopUpHistoryRepository(this.datastoreOne)
 
     const sessionManagement: SessionManagement = new SessionManagement(sessionRepository, objectUtility)
@@ -95,6 +96,7 @@ export default class RootRoute {
     const vendorLevelManagement: VendorLevelManagement = new VendorLevelManagement(vendorLevelRepository, objectUtility)
     const userLevelManagement: UserLevelManagement = new UserLevelManagement(userLevelRepository, objectUtility)
     const categoryManagement: CategoryManagement = new CategoryManagement(categoryRepository, objectUtility)
+    const topUpHistoryManagement: TopUpHistoryManagement = new TopUpHistoryManagement(topUpHistoryRepository, userManagement, objectUtility)
 
     const userRegisterAuthentication: UserRegisterAuthentication = new UserRegisterAuthentication(userManagement)
     const vendorRegisterAuthentication: VendorRegisterAuthentication = new VendorRegisterAuthentication(vendorManagement)
@@ -213,6 +215,10 @@ export default class RootRoute {
     const webhookControllerRest: WebhookControllerRest = new WebhookControllerRest(Router(), topUpWebhookUseCase)
     webhookControllerRest.registerRoutes()
     routerVersionOne.use('/webhook', webhookControllerRest.router)
+
+    const topUpHistoryControllerRest: TopUpHistoryController = new TopUpHistoryController(Router(), topUpHistoryManagement, authenticationValidation)
+    topUpHistoryControllerRest.registerRoutes()
+    routerVersionOne.use('/top-up-histories', topUpHistoryControllerRest.router)
 
     this.app.use('/api/v1', routerVersionOne)
   }
