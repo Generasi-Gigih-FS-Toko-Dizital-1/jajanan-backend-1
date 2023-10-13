@@ -6,9 +6,11 @@ import AdminMock from '../../../mocks/AdminMock'
 import OneSeeder from '../../../../src/outers/seeders/OneSeeder'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
 import waitUntil from 'async-wait-until'
-import { type TopUpHistory, type Admin, type User } from '@prisma/client'
+import { type TopUpHistory, type Admin, type User, type Prisma } from '@prisma/client'
 import AdminLoginByEmailAndPasswordRequest from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
 import humps from 'humps'
+import TopUpHistoryManagementCreateRequest from '../../../../src/inners/models/value_objects/requests/managements/top_up_history_management/TopUpHistoryManagementCreateRequest'
+import TopUpHistoryManagementPatchRequest from '../../../../src/inners/models/value_objects/requests/managements/top_up_history_management/TopUpHistoryManagementPatchRequest'
 
 chai.use(chaiHttp)
 chai.should()
@@ -147,6 +149,87 @@ describe('TopUpHistoryControllerRest', () => {
       response.body.data.should.has.property('amount').equal(requestTopUpHistory.amount)
       response.body.data.should.has.property('created_at').equal(requestTopUpHistory.createdAt.toISOString())
       response.body.data.should.has.property('updated_at').equal(requestTopUpHistory.updatedAt.toISOString())
+    })
+  })
+
+  describe('POST /api/v1/top-up-histories', () => {
+    it('should return 201 CREATED', async () => {
+      const requestBody: TopUpHistoryManagementCreateRequest = new TopUpHistoryManagementCreateRequest(
+        oneSeeder.userMock.data[0].id,
+        oneSeeder.topUpHistoryMock.data[0].amount,
+        oneSeeder.topUpHistoryMock.data[0].media
+      )
+
+      const response = await agent
+        .post('/api/v1/top-up-histories')
+        .set('Authorization', authorization.convertToString())
+        .send(requestBody)
+
+      response.should.has.status(201)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      response.body.data.should.be.an('object')
+      response.body.data.should.has.property('id')
+      response.body.data.should.has.property('user_id').equal(requestBody.userId)
+      response.body.data.should.has.property('amount').equal(requestBody.amount)
+      response.body.data.should.has.property('media').equal(requestBody.media)
+      response.body.data.should.has.property('created_at')
+      response.body.data.should.has.property('updated_at')
+
+      if (oneDatastore.client === undefined) {
+        throw new Error('oneDatastore client is undefined')
+      }
+      const deleteResult: Prisma.BatchPayload = await oneDatastore.client.topUpHistory.deleteMany({
+        where: {
+          id: response.body.data.id
+        }
+      })
+      deleteResult.should.has.property('count').greaterThanOrEqual(1)
+    })
+  })
+
+  describe('PATCH /api/v1/top-up-histories/:id', () => {
+    it('should return 200 OK', async () => {
+      const requestTopUpHistory: TopUpHistory = oneSeeder.topUpHistoryMock.data[0]
+      const requestBody: TopUpHistoryManagementPatchRequest = new TopUpHistoryManagementPatchRequest(
+        oneSeeder.userMock.data[0].id,
+        oneSeeder.topUpHistoryMock.data[1].amount,
+        oneSeeder.topUpHistoryMock.data[1].media
+      )
+
+      const response = await agent
+        .patch(`/api/v1/top-up-histories/${requestTopUpHistory.id}`)
+        .set('Authorization', authorization.convertToString())
+        .send(requestBody)
+
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      response.body.data.should.be.an('object')
+      response.body.data.should.has.property('id').equal(requestTopUpHistory.id)
+      response.body.data.should.has.property('user_id').equal(requestBody.userId)
+      response.body.data.should.has.property('amount').equal(requestBody.amount)
+      response.body.data.should.has.property('media').equal(requestBody.media)
+      response.body.data.should.has.property('created_at')
+      response.body.data.should.has.property('created_at')
+    })
+  })
+
+  describe('DELETE /api/v1/top-up-histories/:id', () => {
+    it('should return 200 OK', async () => {
+      const requestTopUpHistory: TopUpHistory = oneSeeder.topUpHistoryMock.data[0]
+
+      const response = await agent
+        .delete(`/api/v1/top-up-histories/${requestTopUpHistory.id}`)
+        .set('Authorization', authorization.convertToString())
+        .send()
+
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
     })
   })
 })
