@@ -9,7 +9,6 @@ services:
     entrypoint: [ "/bin/sh", "-c" ]
     command:
       - |
-        export PRISMA_DISABLE_ERD=true && \
         export DS_1_HOST=ds-1 && \
         export DS_2_HOST=ds-2 && \
         yarn build && \
