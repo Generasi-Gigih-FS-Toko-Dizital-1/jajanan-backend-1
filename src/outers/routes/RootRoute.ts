@@ -52,6 +52,9 @@ import UserLevelControllerRest from '../controllers/rests/UserLevelControllerRes
 import CategoryControllerRest from '../controllers/rests/CategoryControllerRest'
 import TopUpHistoryManagement from '../../inners/use_cases/managements/TopUpHistoryManagement'
 import TopUpHistoryController from '../controllers/rests/TopUpHistoryControllerRest'
+import UserSubscriptionRepository from '../repositories/UserSubscriptionRepository'
+import UserSubscriptionManagement from '../../inners/use_cases/managements/UserSubscriptionManagement'
+import UserSubscriptionControllerRest from '../controllers/rests/UserSubscriptionControllerRest'
 
 export default class RootRoute {
   app: Application
@@ -85,6 +88,7 @@ export default class RootRoute {
     const vendorLevelRepository: VendorLevelRepository = new VendorLevelRepository(this.datastoreOne)
     const categoryRepository: CategoryRepository = new CategoryRepository(this.datastoreOne)
     const topUpHistoryRepository = new TopUpHistoryRepository(this.datastoreOne)
+    const userSubscriptionRepository: UserSubscriptionRepository = new UserSubscriptionRepository(this.datastoreOne)
 
     const sessionManagement: SessionManagement = new SessionManagement(sessionRepository, objectUtility)
     const authenticationValidation: AuthenticationValidation = new AuthenticationValidation(sessionManagement)
@@ -97,6 +101,7 @@ export default class RootRoute {
     const userLevelManagement: UserLevelManagement = new UserLevelManagement(userLevelRepository, objectUtility)
     const categoryManagement: CategoryManagement = new CategoryManagement(categoryRepository, objectUtility)
     const topUpHistoryManagement: TopUpHistoryManagement = new TopUpHistoryManagement(topUpHistoryRepository, userManagement, objectUtility)
+    const userSubscriptionManagement: UserSubscriptionManagement = new UserSubscriptionManagement(userSubscriptionRepository, objectUtility)
 
     const userRegisterAuthentication: UserRegisterAuthentication = new UserRegisterAuthentication(userManagement)
     const vendorRegisterAuthentication: VendorRegisterAuthentication = new VendorRegisterAuthentication(vendorManagement)
@@ -139,6 +144,14 @@ export default class RootRoute {
     )
     jajanItemControllerRest.registerRoutes()
     routerVersionOne.use('/jajan-items', jajanItemControllerRest.router)
+
+    const userSubscriptionControllerRest: UserSubscriptionControllerRest = new UserSubscriptionControllerRest(
+      Router(),
+      userSubscriptionManagement,
+      authenticationValidation
+    )
+    userSubscriptionControllerRest.registerRoutes()
+    routerVersionOne.use('/user-subscriptions', userSubscriptionControllerRest.router)
 
     const userLevelControllerRest: UserLevelControllerRest = new UserLevelControllerRest(
       Router(),
