@@ -66,7 +66,8 @@ export default class JajanItemControllerRest {
               jajanItem.createdAt,
               jajanItem.updatedAt,
               (jajanItem as JajanItemAggregate).vendor,
-              (jajanItem as JajanItemAggregate).category
+              (jajanItem as JajanItemAggregate).category,
+              (jajanItem as JajanItemAggregate).snapshots
             )
           )
         )

@@ -4,28 +4,40 @@ import { beforeEach, describe, it } from 'mocha'
 import OneDatastore from '../../../../src/outers/datastores/OneDatastore'
 import { server } from '../../../../src/App'
 import waitUntil from 'async-wait-until'
-import CategoryMock from '../../../mocks/CategoryMock'
-import { type Admin, type Category, type Prisma } from '@prisma/client'
+import {
+  type Admin,
+  type Category,
+  type JajanItem,
+  type JajanItemSnapshot,
+  type Prisma,
+  type TransactionItemHistory,
+  type UserSubscription
+} from '@prisma/client'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
 import AdminMock from '../../../mocks/AdminMock'
 import AdminLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
-import CategoryManagementCreateRequest from '../../../../src/inners/models/value_objects/requests/managements/category_managements/CategoryManagementCreateRequest'
-import CategoryManagementPatchRequest from '../../../../src/inners/models/value_objects/requests/managements/category_managements/CategoryManagementPatchRequest'
+import CategoryManagementCreateRequest
+  from '../../../../src/inners/models/value_objects/requests/managements/category_managements/CategoryManagementCreateRequest'
+import CategoryManagementPatchRequest
+  from '../../../../src/inners/models/value_objects/requests/managements/category_managements/CategoryManagementPatchRequest'
+import humps from 'humps'
+import OneSeeder from '../../../../src/outers/seeders/OneSeeder'
 
 chai.use(chaiHttp)
 chai.should()
 
 describe('CategoryControllerRest', () => {
+  const oneDatastore: OneDatastore = new OneDatastore()
   const authAdminMock: AdminMock = new AdminMock()
-  const categoryMock: CategoryMock = new CategoryMock()
-  const oneDatastore = new OneDatastore()
+  let oneSeeder: OneSeeder
   let agent: ChaiHttp.Agent
   let authorization: Authorization
 
   before(async () => {
     await waitUntil(() => server !== undefined)
     await oneDatastore.connect()
+    oneSeeder = new OneSeeder(oneDatastore)
 
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
@@ -63,30 +75,17 @@ describe('CategoryControllerRest', () => {
   })
 
   beforeEach(async () => {
-    await oneDatastore.connect()
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-
-    await oneDatastore.client.category.createMany({
-      data: categoryMock.data
-    })
+    await oneSeeder.up()
   })
 
   afterEach(async () => {
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-
-    await oneDatastore.client.category.deleteMany({
-      where: {
-        id: {
-          in: categoryMock.data.map((category: Category) => category.id)
-        }
-      }
-    })
-
-    await oneDatastore.disconnect()
+    await oneSeeder.down()
   })
 
   after(async () => {
@@ -108,7 +107,7 @@ describe('CategoryControllerRest', () => {
   describe('GET /api/v1/categories?page_number={}&page_size={}', () => {
     it('should return 200 OK', async () => {
       const pageNumber: number = 1
-      const pageSize: number = categoryMock.data.length
+      const pageSize: number = oneSeeder.categoryMock.data.length
       const response = await agent
         .get(`/api/v1/categories?page_number=${pageNumber}&page_size=${pageSize}`)
         .set('Authorization', authorization.convertToString())
@@ -123,7 +122,7 @@ describe('CategoryControllerRest', () => {
       response.body.data.categories.should.be.an('array')
       response.body.data.categories.forEach((category: Category) => {
         category.should.has.property('id')
-        category.should.has.property('category_name')
+        category.should.has.property('name')
         category.should.has.property('icon_url')
         category.should.has.property('created_at')
         category.should.has.property('updated_at')
@@ -131,9 +130,51 @@ describe('CategoryControllerRest', () => {
     })
   })
 
+  describe('GET /api/v1/categories?page_number={}&page_size={}&where={}&include={}', () => {
+    it('should return 200 OK', async () => {
+      const requestCategory: Category = oneSeeder.categoryMock.data[0]
+      const requestJajanItems: JajanItem[] = oneSeeder.jajanItemMock.data.filter((jajanItem: JajanItem) => jajanItem.categoryId === requestCategory.id)
+      const requestJajanItemSnapshots: JajanItemSnapshot[] = oneSeeder.jajanItemSnapshotMock.data.filter((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.categoryId === requestCategory.id)
+      const requestUserSubscriptions: UserSubscription[] = oneSeeder.userSubscriptionMock.data.filter((userSubscription: UserSubscription) => userSubscription.categoryId === requestCategory.id)
+      const pageNumber: number = 1
+      const pageSize: number = oneSeeder.jajanItemMock.data.length
+      const whereInput: any = {
+        id: requestCategory.id
+      }
+      const where: string = encodeURIComponent(JSON.stringify(whereInput))
+      const includeInput: any = {
+        jajanItems: true,
+        jajanItemSnapshots: true,
+        userSubscriptions: true
+      }
+      const include: string = encodeURIComponent(JSON.stringify(includeInput))
+      const response = await agent
+        .get(`/api/v1/categories?page_number=${pageNumber}&page_size=${pageSize}&where=${where}&include=${include}`)
+        .set('Authorization', authorization.convertToString())
+        .send()
+
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      response.body.data.should.has.property('total_categories')
+      response.body.data.should.has.property('categories')
+      response.body.data.categories.should.be.an('array')
+      response.body.data.categories.length.should.equal(1)
+      response.body.data.categories.forEach((category: any) => {
+        category.should.has.property('id').equal(requestCategory.id)
+        category.should.has.property('name').equal(requestCategory.name)
+        category.should.has.property('icon_url').equal(requestCategory.iconUrl)
+        category.should.has.property('jajan_items').deep.equal(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestJajanItems))))
+        category.should.has.property('jajan_item_snapshots').deep.equal(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestJajanItemSnapshots))))
+        category.should.has.property('user_subscriptions').deep.members(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestUserSubscriptions))))
+      })
+    })
+  })
+
   describe('GET /api/v1/categories/:id', () => {
     it('should return 200 OK', async () => {
-      const requestCategory: Category = categoryMock.data[0]
+      const requestCategory: Category = oneSeeder.categoryMock.data[0]
       const response = await agent
         .get(`/api/v1/categories/${requestCategory.id}`)
         .set('Authorization', authorization.convertToString())
@@ -145,7 +186,7 @@ describe('CategoryControllerRest', () => {
       response.body.should.has.property('data')
       response.body.data.should.be.an('object')
       response.body.data.should.has.property('id').equal(requestCategory.id)
-      response.body.data.should.has.property('category_name').equal(requestCategory.categoryName)
+      response.body.data.should.has.property('name').equal(requestCategory.name)
       response.body.data.should.has.property('icon_url').equal(requestCategory.iconUrl)
       response.body.data.should.has.property('updated_at').equal(requestCategory.updatedAt.toISOString())
       response.body.data.should.has.property('created_at').equal(requestCategory.createdAt.toISOString())
@@ -155,8 +196,8 @@ describe('CategoryControllerRest', () => {
   describe('POST /api/v1/categories', () => {
     it('should return 201 CREATED', async () => {
       const requestBody: CategoryManagementCreateRequest = new CategoryManagementCreateRequest(
-        categoryMock.data[0].categoryName,
-        categoryMock.data[0].iconUrl
+        oneSeeder.categoryMock.data[0].name,
+        oneSeeder.categoryMock.data[0].iconUrl
       )
 
       const response = await agent
@@ -170,7 +211,7 @@ describe('CategoryControllerRest', () => {
       response.body.should.has.property('data')
       response.body.data.should.be.an('object')
       response.body.data.should.has.property('id')
-      response.body.data.should.has.property('category_name').equal(requestBody.categoryName)
+      response.body.data.should.has.property('name').equal(requestBody.name)
       response.body.data.should.has.property('updated_at')
       response.body.data.should.has.property('created_at')
 
@@ -188,9 +229,9 @@ describe('CategoryControllerRest', () => {
 
   describe('PATCH /api/v1/categories/:id', () => {
     it('should return 200 OK', async () => {
-      const requestCategory: Category = categoryMock.data[0]
+      const requestCategory: Category = oneSeeder.categoryMock.data[0]
       const requestBody: CategoryManagementPatchRequest = new CategoryManagementPatchRequest(
-        categoryMock.data[1].categoryName,
+        oneSeeder.categoryMock.data[1].name,
         'https://placehold.co/400x400?text=patchediconUrl0'
       )
 
@@ -205,7 +246,7 @@ describe('CategoryControllerRest', () => {
       response.body.should.has.property('data')
       response.body.data.should.be.an('object')
       response.body.data.should.has.property('id')
-      response.body.data.should.has.property('category_name').equal(requestBody.categoryName)
+      response.body.data.should.has.property('name').equal(requestBody.name)
       response.body.data.should.has.property('icon_url').equal(requestBody.iconUrl)
       response.body.data.should.has.property('updated_at')
       response.body.data.should.has.property('created_at')
@@ -214,7 +255,44 @@ describe('CategoryControllerRest', () => {
 
   describe('DELETE /api/v1/categories/:id', () => {
     it('should return 200 OK', async () => {
-      const requestCategory: Category = categoryMock.data[0]
+      const requestCategory: Category = oneSeeder.categoryMock.data[0]
+      const requestJajanItems: JajanItem[] = oneSeeder.jajanItemMock.data.filter((jajanItem: JajanItem) => jajanItem.categoryId === requestCategory.id)
+      const requestJajanItemSnapshots: JajanItemSnapshot[] = oneSeeder.jajanItemSnapshotMock.data.filter((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.categoryId === requestCategory.id)
+      const requestTransactionItemHistories: TransactionItemHistory[] = oneSeeder.transactionItemHistoryMock.data.filter((transactionItemHistory: TransactionItemHistory) => requestJajanItemSnapshots.map((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.id).includes(transactionItemHistory.jajanItemSnapshotId))
+      const requestUserSubscriptions: UserSubscription[] = oneSeeder.userSubscriptionMock.data.filter((userSubscription: UserSubscription) => userSubscription.categoryId === requestCategory.id)
+
+      if (oneDatastore.client === undefined) {
+        throw new Error('oneDatastore client is undefined')
+      }
+
+      await oneDatastore.client.userSubscription.deleteMany({
+        where: {
+          id: {
+            in: requestUserSubscriptions.map((userSubscription: UserSubscription) => userSubscription.id)
+          }
+        }
+      })
+      await oneDatastore.client.transactionItemHistory.deleteMany({
+        where: {
+          id: {
+            in: requestTransactionItemHistories.map((transactionItemHistory: TransactionItemHistory) => transactionItemHistory.id)
+          }
+        }
+      })
+      await oneDatastore.client.jajanItemSnapshot.deleteMany({
+        where: {
+          id: {
+            in: requestJajanItemSnapshots.map((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.id)
+          }
+        }
+      })
+      await oneDatastore.client.jajanItem.deleteMany({
+        where: {
+          id: {
+            in: requestJajanItems.map((jajanItem: JajanItem) => jajanItem.id)
+          }
+        }
+      })
 
       const response = await agent
         .delete(`/api/v1/categories/${requestCategory.id}`)
@@ -227,9 +305,6 @@ describe('CategoryControllerRest', () => {
       response.body.should.has.property('data')
       assert.isNull(response.body.data)
 
-      if (oneDatastore.client === undefined) {
-        throw new Error('oneDatastore client is undefined')
-      }
       const result: Category | null = await oneDatastore.client.category.findFirst({
         where: {
           id: requestCategory.id

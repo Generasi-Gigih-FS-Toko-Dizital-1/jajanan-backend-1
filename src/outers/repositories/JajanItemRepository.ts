@@ -14,7 +14,8 @@ export default class JajanItemRepository {
     this.aggregatedArgs = {
       include: {
         vendor: true,
-        category: true
+        category: true,
+        snapshots: true
       }
     }
   }

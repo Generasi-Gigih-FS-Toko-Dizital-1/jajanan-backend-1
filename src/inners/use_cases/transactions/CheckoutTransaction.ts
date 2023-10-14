@@ -59,7 +59,8 @@ export default class CheckoutTransaction {
 
     const jajanItemSnapshots: JajanItemSnapshot[] = foundJajanItems.data.map((jajanItem: JajanItem) => {
       return {
-        id: jajanItem.id,
+        id: randomUUID(),
+        originId: jajanItem.id,
         vendorId: jajanItem.vendorId,
         categoryId: jajanItem.categoryId,
         name: jajanItem.name,
@@ -104,7 +105,7 @@ export default class CheckoutTransaction {
     let responseTransactionItems: TransactionItemCheckoutResponse[] | undefined
     try {
       responseTransactionItems = createdJajanItemSnapshots.data.map((jajanItemSnapshot: JajanItemSnapshot) => {
-        const foundTransactionItem: TransactionItemCheckoutRequest | undefined = request.transactionItems.find((transactionItem: TransactionItemCheckoutRequest) => transactionItem.jajanItemId === jajanItemSnapshot.id)
+        const foundTransactionItem: TransactionItemCheckoutRequest | undefined = request.transactionItems.find((transactionItem: TransactionItemCheckoutRequest) => transactionItem.jajanItemId === jajanItemSnapshot.originId)
 
         if (foundTransactionItem === undefined) {
           throw new Error('Found transaction item is undefined.')

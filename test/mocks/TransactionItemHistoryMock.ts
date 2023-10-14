@@ -1,24 +1,24 @@
 import { type TransactionItemHistory } from '@prisma/client'
 import { randomUUID } from 'crypto'
-import type JajanItemMock from './JajanItemMock'
+import type JajanItemSnapshotMock from './JajanItemSnapshotMock'
 import type TransactionHistoryMock from './TransactionHistoryMock'
 
 export default class TransactionItemHistoryMock {
   transactionHistoryMock: TransactionHistoryMock
-  jajanItemMock: JajanItemMock
+  jajanItemSnapshotMock: JajanItemSnapshotMock
   data: TransactionItemHistory[]
 
   constructor (
     transactionHistoryMock: TransactionHistoryMock,
-    jajanItemMock: JajanItemMock
+    jajanItemSnapshotMock: JajanItemSnapshotMock
   ) {
     this.transactionHistoryMock = transactionHistoryMock
-    this.jajanItemMock = jajanItemMock
+    this.jajanItemSnapshotMock = jajanItemSnapshotMock
     this.data = [
       {
         id: randomUUID(),
         transactionId: this.transactionHistoryMock.data[0].id,
-        jajanItemId: this.jajanItemMock.data[0].id,
+        jajanItemSnapshotId: this.jajanItemSnapshotMock.data[0].id,
         quantity: 0.0,
         updatedAt: new Date(),
         createdAt: new Date(),
@@ -27,7 +27,7 @@ export default class TransactionItemHistoryMock {
       {
         id: randomUUID(),
         transactionId: this.transactionHistoryMock.data[1].id,
-        jajanItemId: this.jajanItemMock.data[1].id,
+        jajanItemSnapshotId: this.jajanItemSnapshotMock.data[1].id,
         quantity: 1.0,
         updatedAt: new Date(),
         createdAt: new Date(),

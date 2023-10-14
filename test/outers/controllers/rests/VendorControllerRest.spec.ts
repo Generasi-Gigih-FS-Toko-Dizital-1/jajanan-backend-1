@@ -9,9 +9,10 @@ import VendorManagementCreateRequest
 import {
   type Admin,
   type JajanItem,
+  type JajanItemSnapshot,
   type NotificationHistory,
   type Prisma,
-  type TransactionHistory, type TransactionItemHistory,
+  type TransactionItemHistory,
   type Vendor
 } from '@prisma/client'
 import VendorManagementPatchRequest
@@ -188,12 +189,8 @@ describe('VendorControllerRest', () => {
         vendor.should.has.property('last_longitude').equal(requestVendor.lastLongitude)
         vendor.should.has.property('created_at').equal(requestVendor.createdAt.toISOString())
         vendor.should.has.property('updated_at').equal(requestVendor.updatedAt.toISOString())
-        vendor.should.has.property('notification_histories').deep.members(
-          requestNotificationHistories.map((notificationHistory: NotificationHistory) => humps.decamelizeKeys(JSON.parse(JSON.stringify(notificationHistory))))
-        )
-        vendor.should.has.property('jajan_items').deep.members(
-          requestJajanItems.map((jajanItem: JajanItem) => humps.decamelizeKeys(JSON.parse(JSON.stringify(jajanItem))))
-        )
+        vendor.should.has.property('notification_histories').deep.members(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestNotificationHistories))))
+        vendor.should.has.property('jajan_items').deep.members(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestJajanItems))))
       })
     })
   })
@@ -337,7 +334,8 @@ describe('VendorControllerRest', () => {
       const requestVendor: Vendor = oneSeeder.vendorMock.data[0]
       const requestNotificationHistories: NotificationHistory[] = oneSeeder.notificationHistoryMock.data.filter((notificationHistory: NotificationHistory) => notificationHistory.vendorId === requestVendor.id)
       const requestJajanItems: JajanItem[] = oneSeeder.jajanItemMock.data.filter((jajanItem: JajanItem) => jajanItem.vendorId === requestVendor.id)
-      const requestTransactionItemHistories: TransactionItemHistory[] = oneSeeder.transactionItemHistoryMock.data.filter((transactionItemHistory: TransactionItemHistory) => requestJajanItems.map((jajanItem: JajanItem) => jajanItem.id).includes(transactionItemHistory.jajanItemId))
+      const requestJajanItemSnapshots: JajanItem[] = oneSeeder.jajanItemSnapshotMock.data.filter((jajanItemSnapshot: JajanItemSnapshot) => requestJajanItems.map((jajanItem: JajanItem) => jajanItem.id).includes(jajanItemSnapshot.originId))
+      const requestTransactionItemHistories: TransactionItemHistory[] = oneSeeder.transactionItemHistoryMock.data.filter((transactionItemHistory: TransactionItemHistory) => requestJajanItemSnapshots.map((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.id).includes(transactionItemHistory.jajanItemSnapshotId))
 
       if (oneDatastore.client === undefined) {
         throw new Error('oneDatastore client is undefined')
@@ -346,6 +344,13 @@ describe('VendorControllerRest', () => {
         where: {
           id: {
             in: requestTransactionItemHistories.map((transactionItemHistory: TransactionItemHistory) => transactionItemHistory.id)
+          }
+        }
+      })
+      await oneDatastore.client.jajanItemSnapshot.deleteMany({
+        where: {
+          id: {
+            in: requestJajanItemSnapshots.map((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.id)
           }
         }
       })

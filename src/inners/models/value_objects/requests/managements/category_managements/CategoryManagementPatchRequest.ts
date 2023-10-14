@@ -1,9 +1,9 @@
 export default class CategoryManagementPatchRequest {
-  categoryName: string
+  name: string
   iconUrl: string
 
-  constructor (categoryName: string, iconUrl: string) {
-    this.categoryName = categoryName
+  constructor (name: string, iconUrl: string) {
+    this.name = name
     this.iconUrl = iconUrl
   }
 }

@@ -10,7 +10,6 @@ import cors from 'cors'
 import OneSeeder from './outers/seeders/OneSeeder'
 import TwoDatastore from './outers/datastores/TwoDatastore'
 import cookieParser from 'cookie-parser'
-import PaymentGateway from './outers/gateways/PaymentGateway'
 
 let app: Application | undefined
 let io: socketIo.Server | undefined

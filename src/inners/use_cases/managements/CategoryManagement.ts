@@ -1,11 +1,14 @@
 import { type Category } from '@prisma/client'
 import type CategoryRepository from '../../../outers/repositories/CategoryRepository'
 import Result from '../../models/value_objects/Result'
-import type CategoryManagementCreateRequest from '../../models/value_objects/requests/managements/category_managements/CategoryManagementCreateRequest'
+import type CategoryManagementCreateRequest
+  from '../../models/value_objects/requests/managements/category_managements/CategoryManagementCreateRequest'
 import { randomUUID } from 'crypto'
 import type Pagination from '../../models/value_objects/Pagination'
-import type CategoryManagementPatchRequest from '../../models/value_objects/requests/managements/category_managements/CategoryManagementPatchRequest'
+import type CategoryManagementPatchRequest
+  from '../../models/value_objects/requests/managements/category_managements/CategoryManagementPatchRequest'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
+import type CategoryAggregate from '../../models/aggregates/CategoryAggregate'
 
 export default class CategoryManagement {
   categoryRepository: CategoryRepository
@@ -16,8 +19,8 @@ export default class CategoryManagement {
     this.objectUtility = objectUtility
   }
 
-  readMany = async (pagination: Pagination): Promise<Result<Category[]>> => {
-    const foundCategories: Category[] = await this.categoryRepository.readMany(pagination)
+  readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Result<Category[] | CategoryAggregate[]>> => {
+    const foundCategories: Category[] = await this.categoryRepository.readMany(pagination, whereInput, includeInput)
     return new Result<Category[]>(
       200,
       'Categories read all succeed.',
@@ -46,7 +49,7 @@ export default class CategoryManagement {
   createOne = async (request: CategoryManagementCreateRequest): Promise<Result<Category | null>> => {
     const categoryToCreate: Category = {
       id: randomUUID(),
-      categoryName: request.categoryName,
+      name: request.name,
       iconUrl: request.iconUrl,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -126,8 +129,8 @@ export default class CategoryManagement {
       deletedCategory = await this.categoryRepository.deleteOneById(id)
     } catch (error) {
       return new Result<null>(
-        404,
-        'Category delete one by id failed, category is not found.',
+        500,
+        'Category delete one by id failed.',
         null
       )
     }

@@ -84,21 +84,23 @@ model Admin {
 }
 
 model JajanItem {
-  id         String    @id
+  id         String              @id
   vendorId   String
   categoryId String
-  name       String    @db.VarChar(255)
+  name       String              @db.VarChar(255)
   price      Int
-  imageUrl   String    @db.VarChar(255)
-  updatedAt  DateTime  @db.Timestamptz
-  createdAt  DateTime  @db.Timestamptz
-  deletedAt  DateTime? @db.Timestamptz
-  vendor     Vendor    @relation(fields: [vendorId], references: [id])
-  category   Category  @relation(fields: [categoryId], references: [id])
+  imageUrl   String              @db.VarChar(255)
+  updatedAt  DateTime            @db.Timestamptz
+  createdAt  DateTime            @db.Timestamptz
+  deletedAt  DateTime?           @db.Timestamptz
+  vendor     Vendor              @relation(fields: [vendorId], references: [id])
+  category   Category            @relation(fields: [categoryId], references: [id])
+  snapshots  JajanItemSnapshot[]
 }
 
 model JajanItemSnapshot {
   id                       String                   @id
+  originId                 String
   vendorId                 String
   categoryId               String
   name                     String                   @db.VarChar(255)
@@ -110,11 +112,12 @@ model JajanItemSnapshot {
   transactionItemHistories TransactionItemHistory[]
   vendor                   Vendor                   @relation(fields: [vendorId], references: [id])
   category                 Category                 @relation(fields: [categoryId], references: [id])
+  origin                   JajanItem                @relation(fields: [originId], references: [id])
 }
 
 model Category {
   id                 String              @id
-  categoryName       String              @db.VarChar(255)
+  name               String              @db.VarChar(255)
   iconUrl            String              @db.VarChar(255)
   updatedAt          DateTime            @db.Timestamptz
   createdAt          DateTime            @db.Timestamptz
@@ -202,13 +205,13 @@ model TransactionHistory {
 }
 
 model TransactionItemHistory {
-  id            String             @id
-  transactionId String
-  jajanItemId   String
-  quantity      Float
-  updatedAt     DateTime           @db.Timestamptz
-  createdAt     DateTime           @db.Timestamptz
-  deletedAt     DateTime?          @db.Timestamptz
-  transaction   TransactionHistory @relation(fields: [transactionId], references: [id])
-  jajanItem     JajanItemSnapshot  @relation(fields: [jajanItemId], references: [id])
+  id                  String             @id
+  transactionId       String
+  jajanItemSnapshotId String
+  quantity            Float
+  updatedAt           DateTime           @db.Timestamptz
+  createdAt           DateTime           @db.Timestamptz
+  deletedAt           DateTime?          @db.Timestamptz
+  transaction         TransactionHistory @relation(fields: [transactionId], references: [id])
+  jajanItem           JajanItemSnapshot  @relation(fields: [jajanItemSnapshotId], references: [id])
 }

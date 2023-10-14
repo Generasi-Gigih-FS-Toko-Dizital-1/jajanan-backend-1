@@ -1,15 +1,23 @@
+import { type JajanItem, type JajanItemSnapshot, type UserSubscription } from '@prisma/client'
+
 export default class CategoryManagementReadOneResponse {
   id: string
-  categoryName: string
+  name: string
   iconUrl: string
   createdAt: Date
   updatedAt: Date
+  jajanItems?: JajanItem[]
+  jajanItemSnapshots?: JajanItemSnapshot[]
+  userSubscriptions?: UserSubscription[]
 
-  constructor (id: string, categoryName: string, iconUrl: string, createdAt: Date, updatedAt: Date) {
+  constructor (id: string, name: string, iconUrl: string, createdAt: Date, updatedAt: Date, jajanItems?: JajanItem[], jajanItemSnapshots?: JajanItemSnapshot[], userSubscriptions?: UserSubscription[]) {
     this.id = id
-    this.categoryName = categoryName
+    this.name = name
     this.iconUrl = iconUrl
     this.createdAt = createdAt
     this.updatedAt = updatedAt
+    this.jajanItems = jajanItems
+    this.jajanItemSnapshots = jajanItemSnapshots
+    this.userSubscriptions = userSubscriptions
   }
 }

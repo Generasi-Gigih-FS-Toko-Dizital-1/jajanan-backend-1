@@ -13,6 +13,7 @@ export default class JajanItemSnapshotRepository {
     this.oneDatastore = oneDatastore
     this.aggregatedArgs = {
       include: {
+        origin: true,
         vendor: true,
         category: true,
         transactionItemHistories: true

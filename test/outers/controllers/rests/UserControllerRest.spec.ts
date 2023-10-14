@@ -11,7 +11,8 @@ import {
   type NotificationHistory,
   type Prisma,
   type TopUpHistory,
-  type TransactionHistory, type TransactionItemHistory,
+  type TransactionHistory,
+  type TransactionItemHistory,
   type User,
   type UserSubscription
 } from '@prisma/client'
@@ -187,18 +188,10 @@ describe('UserControllerRest', () => {
         user.should.has.property('last_longitude').equal(requestUser.lastLongitude)
         user.should.has.property('created_at').equal(requestUser.createdAt.toISOString())
         user.should.has.property('updated_at').equal(requestUser.updatedAt.toISOString())
-        user.should.has.property('notification_histories').deep.members(
-          requestNotificationHistories.map((notificationHistory: NotificationHistory) => humps.decamelizeKeys(JSON.parse(JSON.stringify(notificationHistory))))
-        )
-        user.should.has.property('top_up_histories').deep.members(
-          requestTopUpHistories.map((topUpHistory: TopUpHistory) => humps.decamelizeKeys(JSON.parse(JSON.stringify(topUpHistory))))
-        )
-        user.should.has.property('transaction_histories').deep.members(
-          requestTransactionHistories.map((transactionHistory: TransactionHistory) => humps.decamelizeKeys(JSON.parse(JSON.stringify(transactionHistory))))
-        )
-        user.should.has.property('user_subscriptions').deep.members(
-          requestUserSubscriptions.map((userSubscription: UserSubscription) => humps.decamelizeKeys(JSON.parse(JSON.stringify(userSubscription))))
-        )
+        user.should.has.property('notification_histories').deep.members(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestNotificationHistories))))
+        user.should.has.property('top_up_histories').deep.members(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestTopUpHistories))))
+        user.should.has.property('transaction_histories').deep.members(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestTransactionHistories))))
+        user.should.has.property('user_subscriptions').deep.members(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestUserSubscriptions))))
       })
     })
   })

@@ -1,5 +1,3 @@
-import { type PaymentMethod } from '@prisma/client'
-
 export default class TransactionItemCheckoutRequest {
   jajanItemId: string
   quantity: number

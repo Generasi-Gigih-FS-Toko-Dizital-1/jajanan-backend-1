@@ -8,6 +8,7 @@ import {
   type Admin,
   type Category,
   type JajanItem,
+  type JajanItemSnapshot,
   type Prisma,
   type TransactionItemHistory,
   type Vendor
@@ -138,6 +139,7 @@ describe('JajanItemControllerRest', () => {
       const requestJajanItem: JajanItem = oneSeeder.jajanItemMock.data[0]
       const requestVendor: Vendor = oneSeeder.jajanItemMock.vendorMock.data.filter((vendor: Vendor) => vendor.id === requestJajanItem.vendorId)[0]
       const requestCategory: Category = oneSeeder.jajanItemMock.categoryMock.data.filter((category: Category) => category.id === requestJajanItem.categoryId)[0]
+      const requestJajanItemSnapshots: JajanItemSnapshot[] = oneSeeder.jajanItemSnapshotMock.data.filter((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.originId === requestJajanItem.id)
       const pageNumber: number = 1
       const pageSize: number = oneSeeder.jajanItemMock.data.length
       const whereInput: any = {
@@ -146,7 +148,8 @@ describe('JajanItemControllerRest', () => {
       const where: string = encodeURIComponent(JSON.stringify(whereInput))
       const includeInput: any = {
         vendor: true,
-        category: true
+        category: true,
+        snapshots: true
       }
       const include: string = encodeURIComponent(JSON.stringify(includeInput))
       const response = await agent
@@ -173,6 +176,7 @@ describe('JajanItemControllerRest', () => {
         jajanItem.should.has.property('created_at').equal(requestJajanItem.createdAt.toISOString())
         jajanItem.should.has.property('vendor').deep.equal(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestVendor))))
         jajanItem.should.has.property('category').deep.equal(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestCategory))))
+        jajanItem.should.has.property('snapshots').deep.members(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestJajanItemSnapshots))))
       })
     })
   })
@@ -277,14 +281,23 @@ describe('JajanItemControllerRest', () => {
   describe('DELETE /api/v1/jajan-items/:id', () => {
     it('should return 200 OK', async () => {
       const requestJajanItem: JajanItem = oneSeeder.jajanItemMock.data[0]
-      const requestTransactionHistories: TransactionItemHistory[] = oneSeeder.transactionItemHistoryMock.data.filter((transactionItemHistory: TransactionItemHistory) => transactionItemHistory.jajanItemId === requestJajanItem.id)
+      const requestJajanItemSnapshots: JajanItemSnapshot[] = oneSeeder.jajanItemSnapshotMock.data.filter((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.originId === requestJajanItem.id)
+      const requestTransactionItemHistories: TransactionItemHistory[] = oneSeeder.transactionItemHistoryMock.data.filter((transactionItemHistory: TransactionItemHistory) => requestJajanItemSnapshots.map((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.id).includes(transactionItemHistory.jajanItemSnapshotId))
+
       if (oneDatastore.client === undefined) {
         throw new Error('oneDatastore client is undefined')
       }
       await oneDatastore.client.transactionItemHistory.deleteMany({
         where: {
           id: {
-            in: requestTransactionHistories.map((transactionItemHistory: TransactionItemHistory) => transactionItemHistory.id)
+            in: requestTransactionItemHistories.map((transactionItemHistory: TransactionItemHistory) => transactionItemHistory.id)
+          }
+        }
+      })
+      await oneDatastore.client.jajanItemSnapshot.deleteMany({
+        where: {
+          id: {
+            in: requestJajanItemSnapshots.map((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.id)
           }
         }
       })

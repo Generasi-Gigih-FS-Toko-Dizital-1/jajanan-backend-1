@@ -1,33 +1,19 @@
-import chai, { assert } from 'chai'
+import chai from 'chai'
 import chaiHttp from 'chai-http'
 import { beforeEach, describe, it } from 'mocha'
 import OneDatastore from '../../../../src/outers/datastores/OneDatastore'
 import { server } from '../../../../src/App'
 import waitUntil from 'async-wait-until'
-import {
-  type Admin,
-  type JajanItem,
-  type Prisma,
-  type TransactionHistory,
-  type TransactionItemHistory,
-  type User
-} from '@prisma/client'
+import { type Admin, type JajanItem, type User } from '@prisma/client'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
 import AdminMock from '../../../mocks/AdminMock'
 import AdminLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
-import TransactionHistoryManagementCreateRequest
-  from '../../../../src/inners/models/value_objects/requests/managements/transaction_history_management/TransactionHistoryManagementCreateRequest'
-import TransactionHistoryManagementPatchRequest
-  from '../../../../src/inners/models/value_objects/requests/managements/transaction_history_management/TransactionHistoryManagementPatchRequest'
-import humps from 'humps'
 import OneSeeder from '../../../../src/outers/seeders/OneSeeder'
 import TransactionItemCheckoutRequest
   from '../../../../src/inners/models/value_objects/requests/transactions/TransactionItemCheckoutRequest'
 import TransactionCheckoutRequest
   from '../../../../src/inners/models/value_objects/requests/transactions/TransactionCheckoutRequest'
-import TransactionItemCheckoutResponse
-  from '../../../../src/inners/models/value_objects/responses/transactions/TransactionItemCheckoutResponse'
 
 chai.use(chaiHttp)
 chai.should()
@@ -146,11 +132,26 @@ describe('TransactionHistoryControllerRest', () => {
       response.body.data.should.has.property('last_longitude')
       response.body.data.should.has.property('updated_at')
       response.body.data.should.has.property('created_at')
-      response.body.data.transaction_items.deep.members(
-        requestTransactionItem.map((transactionItem: TransactionItemCheckoutRequest) => {
-          return humps.decamelizeKeys(JSON.parse(JSON.stringify(transactionItem)))
-        })
-      )
+      response.body.data.transaction_items.forEach((transactionItem: any) => {
+        transactionItem.should.has.property('jajan_item_snapshot_id')
+        transactionItem.should.has.property('quantity')
+      })
+
+      if (oneDatastore.client === undefined) {
+        throw new Error('Client is undefined.')
+      }
+      await oneDatastore.client.transactionHistory.deleteMany({
+        where: {
+          id: response.body.data.transaction_id
+        }
+      })
+      await oneDatastore.client.jajanItemSnapshot.deleteMany({
+        where: {
+          id: {
+            in: response.body.data.transaction_items.map((transactionItem: any) => transactionItem.jajan_item_snapshot_id)
+          }
+        }
+      })
     })
   })
 })

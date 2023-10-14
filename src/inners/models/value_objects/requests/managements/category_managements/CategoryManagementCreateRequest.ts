@@ -1,9 +1,9 @@
 export default class CategoryManagementCreateRequest {
-  categoryName: string
+  name: string
   iconUrl: string
 
-  constructor (categoryName: string, iconUrl: string) {
-    this.categoryName = categoryName
+  constructor (name: string, iconUrl: string) {
+    this.name = name
     this.iconUrl = iconUrl
   }
 }

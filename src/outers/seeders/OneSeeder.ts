@@ -16,13 +16,18 @@ import {
   type Admin,
   type Category,
   type JajanItem,
+  type JajanItemSnapshot,
   type NotificationHistory,
   type TopUpHistory,
-  type TransactionHistory, type User,
+  type TransactionHistory,
+  type TransactionItemHistory,
+  type User,
   type UserLevel,
-  type UserSubscription, type Vendor,
+  type UserSubscription,
+  type Vendor,
   type VendorLevel
 } from '@prisma/client'
+import JajanItemSnapshotMock from '../../../test/mocks/JajanItemSnapshotMock'
 
 export default class OneSeeder {
   oneDatastore: OneDatastore
@@ -31,6 +36,7 @@ export default class OneSeeder {
   vendorMock: VendorMock
   categoryMock: CategoryMock
   jajanItemMock: JajanItemMock
+  jajanItemSnapshotMock: JajanItemSnapshotMock
   topUpHistoryMock: TopUpHistoryMock
   transactionHistoryMock: TransactionHistoryMock
   transactionItemHistoryMock: TransactionItemHistoryMock
@@ -46,9 +52,10 @@ export default class OneSeeder {
     this.vendorMock = new VendorMock()
     this.categoryMock = new CategoryMock()
     this.jajanItemMock = new JajanItemMock(this.vendorMock, this.categoryMock)
+    this.jajanItemSnapshotMock = new JajanItemSnapshotMock(this.jajanItemMock)
     this.topUpHistoryMock = new TopUpHistoryMock(this.userMock)
     this.transactionHistoryMock = new TransactionHistoryMock(this.userMock, this.jajanItemMock)
-    this.transactionItemHistoryMock = new TransactionItemHistoryMock(this.transactionHistoryMock, this.jajanItemMock)
+    this.transactionItemHistoryMock = new TransactionItemHistoryMock(this.transactionHistoryMock, this.jajanItemSnapshotMock)
     this.notificationHistoryMock = new NotificationHistoryMock(this.userMock, this.vendorMock)
     this.userSubscriptionMock = new UserSubscriptionMock(this.userMock, this.categoryMock)
     this.userLevelMock = new UserLevelMock()
@@ -86,6 +93,9 @@ export default class OneSeeder {
     })
     await this.oneDatastore.client.jajanItem.createMany({
       data: this.jajanItemMock.data
+    })
+    await this.oneDatastore.client.jajanItemSnapshot.createMany({
+      data: this.jajanItemSnapshotMock.data
     })
     await this.oneDatastore.client.topUpHistory.createMany({
       data: this.topUpHistoryMock.data
@@ -161,6 +171,13 @@ export default class OneSeeder {
       where: {
         id: {
           in: this.topUpHistoryMock.data.map((topUpHistory: TopUpHistory) => topUpHistory.id)
+        }
+      }
+    })
+    await this.oneDatastore.client.jajanItemSnapshot.deleteMany({
+      where: {
+        id: {
+          in: this.jajanItemSnapshotMock.data.map((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.id)
         }
       }
     })
