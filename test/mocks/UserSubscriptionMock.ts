@@ -25,8 +25,8 @@ export default class UserSubscriptionMock {
       },
       {
         id: randomUUID(),
-        userId: this.userMock.data[0].id,
-        categoryId: this.categoryMock.data[0].id,
+        userId: this.userMock.data[1].id,
+        categoryId: this.categoryMock.data[1].id,
         updatedAt: new Date(),
         createdAt: new Date(),
         deletedAt: null
