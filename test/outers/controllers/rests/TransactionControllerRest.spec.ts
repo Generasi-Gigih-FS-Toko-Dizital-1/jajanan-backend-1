@@ -1,21 +1,24 @@
-import chaiHttp from 'chai-http'
 import chai from 'chai'
+import chaiHttp from 'chai-http'
+import { beforeEach, describe, it } from 'mocha'
 import OneDatastore from '../../../../src/outers/datastores/OneDatastore'
-import waitUntil from 'async-wait-until'
 import { server } from '../../../../src/App'
-import { type Admin } from '@prisma/client'
-import { randomUUID } from 'crypto'
-import AdminMock from '../../../mocks/AdminMock'
-import OneSeeder from '../../../../src/outers/seeders/OneSeeder'
+import waitUntil from 'async-wait-until'
+import { type Admin, type JajanItem, type User } from '@prisma/client'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
+import AdminMock from '../../../mocks/AdminMock'
 import AdminLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
-import { beforeEach } from 'mocha'
+import OneSeeder from '../../../../src/outers/seeders/OneSeeder'
+import TransactionItemCheckoutRequest
+  from '../../../../src/inners/models/value_objects/requests/transactions/TransactionItemCheckoutRequest'
+import TransactionCheckoutRequest
+  from '../../../../src/inners/models/value_objects/requests/transactions/TransactionCheckoutRequest'
 
 chai.use(chaiHttp)
 chai.should()
 
-describe('WebhookControllerRest', () => {
+describe('TransactionHistoryControllerRest', () => {
   const oneDatastore: OneDatastore = new OneDatastore()
   const authAdminMock: AdminMock = new AdminMock()
   let oneSeeder: OneSeeder
@@ -92,56 +95,61 @@ describe('WebhookControllerRest', () => {
     await oneDatastore.disconnect()
   })
 
-  describe('POST /api/v1/webhooks/top-ups', () => {
-    it('should return 200 OK', async () => {
-      const requestBody: any = {
-        id: randomUUID(),
-        external_id: oneSeeder.userMock.data[0].id,
-        user_id: '5781d19b2e2385880609791c',
-        is_high: true,
-        payment_method: 'BANK_TRANSFER',
-        status: 'PAID',
-        merchant_name: 'Xendit',
-        amount: 50000,
-        paid_amount: 50000,
-        bank_code: 'PERMATA',
-        paid_at: '2016-10-12T08:15:03.404Z',
-        payer_email: 'wildan@xendit.co',
-        description: 'This is a description',
-        adjusted_received_amount: 47500,
-        fees_paid_amount: 0,
-        updated: '2016-10-10T08:15:03.404Z',
-        created: '2016-10-10T08:15:03.404Z',
-        currency: 'IDR',
-        payment_channel: 'PERMATA',
-        payment_destination: '888888888888'
-      }
+  describe('POST /api/v1/transactions/checkout', () => {
+    it('should return 201 CREATED', async () => {
+      const requestTransactionItem: TransactionItemCheckoutRequest[] = oneSeeder.jajanItemMock.data.map((jajanItem: JajanItem) => {
+        return new TransactionItemCheckoutRequest(
+          jajanItem.id,
+          1
+        )
+      })
 
-      const callbackToken = process.env.XENDIT_CALLBACK_TOKEN
+      const requestUser: User = oneSeeder.userMock.data[0]
+
+      const requestBody: TransactionCheckoutRequest = new TransactionCheckoutRequest(
+        requestUser.id,
+        requestTransactionItem,
+        'BALANCE',
+        0,
+        0
+      )
+
       const response = await agent
-        .post('/api/v1/webhooks/top-ups')
-        .set('x-callback-token', String(callbackToken))
+        .post('/api/v1/transactions/checkout')
         .set('Authorization', authorization.convertToString())
         .send(requestBody)
 
-      response.should.have.status(200)
+      response.should.has.status(201)
       response.body.should.be.an('object')
       response.body.should.has.property('message')
       response.body.should.has.property('data')
       response.body.data.should.be.an('object')
-      response.body.data.should.has.property('id')
+      response.body.data.should.has.property('transaction_id')
       response.body.data.should.has.property('user_id')
-      response.body.data.should.has.property('amount')
-      response.body.data.should.has.property('media')
+      response.body.data.should.has.property('transaction_items').an('array').lengthOf(2)
+      response.body.data.should.has.property('payment_method')
+      response.body.data.should.has.property('last_latitude')
+      response.body.data.should.has.property('last_longitude')
       response.body.data.should.has.property('updated_at')
       response.body.data.should.has.property('created_at')
+      response.body.data.transaction_items.forEach((transactionItem: any) => {
+        transactionItem.should.has.property('jajan_item_snapshot_id')
+        transactionItem.should.has.property('quantity')
+      })
 
       if (oneDatastore.client === undefined) {
         throw new Error('Client is undefined.')
       }
-      await oneDatastore.client.topUpHistory.deleteMany({
+      await oneDatastore.client.transactionHistory.deleteMany({
         where: {
-          id: response.body.data.id
+          id: response.body.data.transaction_id
+        }
+      })
+      await oneDatastore.client.jajanItemSnapshot.deleteMany({
+        where: {
+          id: {
+            in: response.body.data.transaction_items.map((transactionItem: any) => transactionItem.jajan_item_snapshot_id)
+          }
         }
       })
     })

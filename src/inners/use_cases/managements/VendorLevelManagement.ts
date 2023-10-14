@@ -3,8 +3,10 @@ import type Pagination from '../../models/value_objects/Pagination'
 import Result from '../../models/value_objects/Result'
 import { randomUUID } from 'crypto'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
-import type VendorLevelManagementPatchRequest from '../../models/value_objects/requests/managements/vendor_level_managements/VendorLevelManagementCreateRequest'
-import type VendorLevelManagementCreateRequest from '../../models/value_objects/requests/managements/vendor_level_managements/VendorLevelManagementPatchRequest'
+import type VendorLevelManagementPatchRequest
+  from '../../models/value_objects/requests/managements/vendor_level_managements/VendorLevelManagementCreateRequest'
+import type VendorLevelManagementCreateRequest
+  from '../../models/value_objects/requests/managements/vendor_level_managements/VendorLevelManagementPatchRequest'
 import type VendorLevelRepository from '../../../outers/repositories/VendorLevelRepository'
 
 export default class VendorLevelManagement {
@@ -102,7 +104,7 @@ export default class VendorLevelManagement {
     )
   }
 
-  patchOneRawById = async (id: string, request: VendorLevelManagementPatchRequest): Promise<Result<VendorLevel | null>> => {
+  patchOneRawById = async (id: string, request: any): Promise<Result<VendorLevel | null>> => {
     const foundVendorLevel: Result<VendorLevel | null> = await this.readOneById(id)
     if (foundVendorLevel.status !== 200 || foundVendorLevel.data === null) {
       return new Result<null>(

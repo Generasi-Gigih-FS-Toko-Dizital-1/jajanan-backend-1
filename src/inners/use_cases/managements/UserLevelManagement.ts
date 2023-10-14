@@ -4,8 +4,10 @@ import type Pagination from '../../models/value_objects/Pagination'
 import Result from '../../models/value_objects/Result'
 import { randomUUID } from 'crypto'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
-import type UserLevelManagementPatchRequest from '../../models/value_objects/requests/user_level_managements/UserLevelManagementCreateRequest'
-import type UserLevelManagementCreateRequest from '../../models/value_objects/requests/user_level_managements/UserLevelManagementPatchRequest'
+import type UserLevelManagementPatchRequest
+  from '../../models/value_objects/requests/managements/user_level_managements/UserLevelManagementCreateRequest'
+import type UserLevelManagementCreateRequest
+  from '../../models/value_objects/requests/managements/user_level_managements/UserLevelManagementPatchRequest'
 
 export default class UserLevelManagement {
   userLevelRepository: UserLevelRepository
@@ -102,7 +104,7 @@ export default class UserLevelManagement {
     )
   }
 
-  patchOneRawById = async (id: string, request: UserLevelManagementPatchRequest): Promise<Result<UserLevel | null>> => {
+  patchOneRawById = async (id: string, request: any): Promise<Result<UserLevel | null>> => {
     const foundUserLevel: Result<UserLevel | null> = await this.readOneById(id)
     if (foundUserLevel.status !== 200 || foundUserLevel.data === null) {
       return new Result<null>(

@@ -34,7 +34,7 @@ export default class VendorMock {
         password: 'password1',
         username: `${randomUUID()}`,
         balance: 1.0,
-        gender: 'MALE',
+        gender: 'FEMALE',
         experience: 1,
         lastLatitude: 1.0,
         lastLongitude: 1.0,

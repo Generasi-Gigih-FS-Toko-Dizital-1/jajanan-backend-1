@@ -14,19 +14,19 @@ export default class CategoryRepository {
     this.aggregatedArgs = {
       include: {
         jajanItems: true,
+        jajanItemSnapshot: true,
         userSubscriptions: true
       }
     }
   }
 
-  readMany = async (pagination: Pagination, isAggregated?: boolean): Promise<Category[] | CategoryAggregate[]> => {
+  readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Category[] | CategoryAggregate[]> => {
     const offset: number = (pagination.pageNumber - 1) * pagination.pageSize
     const args: any = {
       take: pagination.pageSize,
-      skip: offset
-    }
-    if (isAggregated === true) {
-      args.include = this.aggregatedArgs.include
+      skip: offset,
+      where: whereInput,
+      include: includeInput
     }
 
     if (this.oneDatastore.client === undefined) {
@@ -96,7 +96,7 @@ export default class CategoryRepository {
 
     const patchedUser: Category | CategoryAggregate = await this.oneDatastore.client.category.update(args)
     if (patchedUser === null) {
-      throw new Error('Patched category item is undefined.')
+      throw new Error('Patched category is undefined.')
     }
     return patchedUser
   }

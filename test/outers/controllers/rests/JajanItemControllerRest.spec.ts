@@ -8,8 +8,9 @@ import {
   type Admin,
   type Category,
   type JajanItem,
+  type JajanItemSnapshot,
   type Prisma,
-  type TransactionHistory,
+  type TransactionItemHistory,
   type Vendor
 } from '@prisma/client'
 import JajanItemManagementCreateRequest
@@ -138,7 +139,7 @@ describe('JajanItemControllerRest', () => {
       const requestJajanItem: JajanItem = oneSeeder.jajanItemMock.data[0]
       const requestVendor: Vendor = oneSeeder.jajanItemMock.vendorMock.data.filter((vendor: Vendor) => vendor.id === requestJajanItem.vendorId)[0]
       const requestCategory: Category = oneSeeder.jajanItemMock.categoryMock.data.filter((category: Category) => category.id === requestJajanItem.categoryId)[0]
-      const requestTransactionHistories: TransactionHistory[] = oneSeeder.transactionHistoryMock.data.filter((transactionHistory: TransactionHistory) => transactionHistory.jajanItemId === requestJajanItem.id)
+      const requestJajanItemSnapshots: JajanItemSnapshot[] = oneSeeder.jajanItemSnapshotMock.data.filter((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.originId === requestJajanItem.id)
       const pageNumber: number = 1
       const pageSize: number = oneSeeder.jajanItemMock.data.length
       const whereInput: any = {
@@ -148,7 +149,7 @@ describe('JajanItemControllerRest', () => {
       const includeInput: any = {
         vendor: true,
         category: true,
-        transactionHistories: true
+        snapshots: true
       }
       const include: string = encodeURIComponent(JSON.stringify(includeInput))
       const response = await agent
@@ -175,9 +176,7 @@ describe('JajanItemControllerRest', () => {
         jajanItem.should.has.property('created_at').equal(requestJajanItem.createdAt.toISOString())
         jajanItem.should.has.property('vendor').deep.equal(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestVendor))))
         jajanItem.should.has.property('category').deep.equal(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestCategory))))
-        jajanItem.should.has.property('transaction_histories').deep.members(
-          requestTransactionHistories.map((transactionHistory: TransactionHistory) => humps.decamelizeKeys(JSON.parse(JSON.stringify(transactionHistory))))
-        )
+        jajanItem.should.has.property('snapshots').deep.members(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestJajanItemSnapshots))))
       })
     })
   })
@@ -282,14 +281,23 @@ describe('JajanItemControllerRest', () => {
   describe('DELETE /api/v1/jajan-items/:id', () => {
     it('should return 200 OK', async () => {
       const requestJajanItem: JajanItem = oneSeeder.jajanItemMock.data[0]
-      const requestTransactionHistories: TransactionHistory[] = oneSeeder.transactionHistoryMock.data.filter((transactionHistory: TransactionHistory) => transactionHistory.jajanItemId === requestJajanItem.id)
+      const requestJajanItemSnapshots: JajanItemSnapshot[] = oneSeeder.jajanItemSnapshotMock.data.filter((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.originId === requestJajanItem.id)
+      const requestTransactionItemHistories: TransactionItemHistory[] = oneSeeder.transactionItemHistoryMock.data.filter((transactionItemHistory: TransactionItemHistory) => requestJajanItemSnapshots.map((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.id).includes(transactionItemHistory.jajanItemSnapshotId))
+
       if (oneDatastore.client === undefined) {
         throw new Error('oneDatastore client is undefined')
       }
-      await oneDatastore.client.transactionHistory.deleteMany({
+      await oneDatastore.client.transactionItemHistory.deleteMany({
         where: {
           id: {
-            in: requestTransactionHistories.map((transactionHistory: TransactionHistory) => transactionHistory.id)
+            in: requestTransactionItemHistories.map((transactionItemHistory: TransactionItemHistory) => transactionItemHistory.id)
+          }
+        }
+      })
+      await oneDatastore.client.jajanItemSnapshot.deleteMany({
+        where: {
+          id: {
+            in: requestJajanItemSnapshots.map((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.id)
           }
         }
       })

@@ -4,7 +4,7 @@ import { beforeEach, describe, it } from 'mocha'
 import OneDatastore from '../../../../src/outers/datastores/OneDatastore'
 import { server } from '../../../../src/App'
 import waitUntil from 'async-wait-until'
-import { type Admin, type JajanItem, type Prisma, type TransactionHistory, type User } from '@prisma/client'
+import { type Admin, type Prisma, type TransactionHistory, type TransactionItemHistory, type User } from '@prisma/client'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
 import AdminMock from '../../../mocks/AdminMock'
 import AdminLoginByEmailAndPasswordRequest
@@ -116,8 +116,6 @@ describe('TransactionHistoryControllerRest', () => {
       response.body.data.transaction_histories.forEach((transactionHistory: any) => {
         transactionHistory.should.has.property('id')
         transactionHistory.should.has.property('user_id')
-        transactionHistory.should.has.property('jajan_item_id')
-        transactionHistory.should.has.property('amount')
         transactionHistory.should.has.property('payment_method')
         transactionHistory.should.has.property('last_latitude')
         transactionHistory.should.has.property('last_longitude')
@@ -130,8 +128,8 @@ describe('TransactionHistoryControllerRest', () => {
   describe('GET /api/v1/transaction-histories?page_number={}&page_size={}&where={}&include={}', () => {
     it('should return 200 OK', async () => {
       const requestTransactionHistory: TransactionHistory = oneSeeder.transactionHistoryMock.data[0]
+      const requestTransactionItemHistory: TransactionItemHistory[] = oneSeeder.transactionItemHistoryMock.data.filter((transactionItemHistory: TransactionItemHistory) => transactionItemHistory.transactionId === requestTransactionHistory.id)
       const requestUser: User = oneSeeder.userMock.data[0]
-      const requestJajanItem: JajanItem = oneSeeder.jajanItemMock.data[0]
       const pageNumber: number = 1
       const pageSize: number = oneSeeder.transactionHistoryMock.data.length
       const whereInput: any = {
@@ -140,7 +138,7 @@ describe('TransactionHistoryControllerRest', () => {
       const where: string = encodeURIComponent(JSON.stringify(whereInput))
       const includeInput: any = {
         user: true,
-        jajanItem: true
+        transactionItems: true
       }
       const include: string = encodeURIComponent(JSON.stringify(includeInput))
       const response = await agent
@@ -159,15 +157,13 @@ describe('TransactionHistoryControllerRest', () => {
       response.body.data.transaction_histories.forEach((transactionHistory: any) => {
         transactionHistory.should.has.property('id').equal(requestTransactionHistory.id)
         transactionHistory.should.has.property('user_id').equal(requestTransactionHistory.userId)
-        transactionHistory.should.has.property('jajan_item_id').equal(requestTransactionHistory.jajanItemId)
-        transactionHistory.should.has.property('amount').equal(requestTransactionHistory.amount)
         transactionHistory.should.has.property('payment_method').equal(requestTransactionHistory.paymentMethod)
         transactionHistory.should.has.property('last_latitude').equal(requestTransactionHistory.lastLatitude)
         transactionHistory.should.has.property('last_longitude').equal(requestTransactionHistory.lastLongitude)
         transactionHistory.should.has.property('updated_at').equal(requestTransactionHistory.updatedAt.toISOString())
         transactionHistory.should.has.property('created_at').equal(requestTransactionHistory.createdAt.toISOString())
         transactionHistory.should.has.property('user').deep.equal(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestUser))))
-        transactionHistory.should.has.property('jajan_item').deep.equal(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestJajanItem))))
+        transactionHistory.should.has.property('transaction_items').deep.members(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestTransactionItemHistory))))
       })
     })
   })
@@ -187,8 +183,6 @@ describe('TransactionHistoryControllerRest', () => {
       response.body.data.should.be.an('object')
       response.body.data.should.has.property('id').equal(requestTransactionHistory.id)
       response.body.data.should.has.property('user_id').equal(requestTransactionHistory.userId)
-      response.body.data.should.has.property('jajan_item_id').equal(requestTransactionHistory.jajanItemId)
-      response.body.data.should.has.property('amount').equal(requestTransactionHistory.amount)
       response.body.data.should.has.property('payment_method').equal(requestTransactionHistory.paymentMethod)
       response.body.data.should.has.property('last_latitude').equal(requestTransactionHistory.lastLatitude)
       response.body.data.should.has.property('last_longitude').equal(requestTransactionHistory.lastLongitude)
@@ -201,8 +195,6 @@ describe('TransactionHistoryControllerRest', () => {
     it('should return 201 CREATED', async () => {
       const requestBody: TransactionHistoryManagementCreateRequest = new TransactionHistoryManagementCreateRequest(
         oneSeeder.transactionHistoryMock.data[0].userId,
-        oneSeeder.transactionHistoryMock.data[0].jajanItemId,
-        oneSeeder.transactionHistoryMock.data[0].amount,
         oneSeeder.transactionHistoryMock.data[0].paymentMethod,
         oneSeeder.transactionHistoryMock.data[0].lastLatitude,
         oneSeeder.transactionHistoryMock.data[0].lastLongitude
@@ -220,8 +212,6 @@ describe('TransactionHistoryControllerRest', () => {
       response.body.data.should.be.an('object')
       response.body.data.should.has.property('id')
       response.body.data.should.has.property('user_id').equal(requestBody.userId)
-      response.body.data.should.has.property('jajan_item_id').equal(requestBody.jajanItemId)
-      response.body.data.should.has.property('amount').equal(requestBody.amount)
       response.body.data.should.has.property('payment_method').equal(requestBody.paymentMethod)
       response.body.data.should.has.property('last_latitude').equal(requestBody.lastLatitude)
       response.body.data.should.has.property('last_longitude').equal(requestBody.lastLongitude)
@@ -245,8 +235,6 @@ describe('TransactionHistoryControllerRest', () => {
       const requestTransactionHistory: TransactionHistory = oneSeeder.transactionHistoryMock.data[0]
       const requestBody: TransactionHistoryManagementPatchRequest = new TransactionHistoryManagementPatchRequest(
         oneSeeder.transactionHistoryMock.data[1].userId,
-        oneSeeder.transactionHistoryMock.data[1].jajanItemId,
-        oneSeeder.transactionHistoryMock.data[1].amount,
         oneSeeder.transactionHistoryMock.data[1].paymentMethod,
         oneSeeder.transactionHistoryMock.data[1].lastLatitude,
         oneSeeder.transactionHistoryMock.data[1].lastLongitude
@@ -264,8 +252,6 @@ describe('TransactionHistoryControllerRest', () => {
       response.body.data.should.be.an('object')
       response.body.data.should.has.property('id')
       response.body.data.should.has.property('user_id').equal(requestBody.userId)
-      response.body.data.should.has.property('jajan_item_id').equal(requestBody.jajanItemId)
-      response.body.data.should.has.property('amount').equal(requestBody.amount)
       response.body.data.should.has.property('payment_method').equal(requestBody.paymentMethod)
       response.body.data.should.has.property('last_latitude').equal(requestBody.lastLatitude)
       response.body.data.should.has.property('last_longitude').equal(requestBody.lastLongitude)
@@ -277,6 +263,18 @@ describe('TransactionHistoryControllerRest', () => {
   describe('DELETE /api/v1/transaction-histories/:id', () => {
     it('should return 200 OK', async () => {
       const requestTransactionHistory: TransactionHistory = oneSeeder.transactionHistoryMock.data[0]
+      const requestTransactionItemHistory: TransactionItemHistory[] = oneSeeder.transactionItemHistoryMock.data.filter((transactionItemHistory: TransactionItemHistory) => transactionItemHistory.transactionId === requestTransactionHistory.id)
+
+      if (oneDatastore.client === undefined) {
+        throw new Error('oneDatastore client is undefined')
+      }
+      await oneDatastore.client.transactionItemHistory.deleteMany({
+        where: {
+          id: {
+            in: requestTransactionItemHistory.map((transactionItemHistory: TransactionItemHistory) => transactionItemHistory.id)
+          }
+        }
+      })
 
       const response = await agent
         .delete(`/api/v1/transaction-histories/${requestTransactionHistory.id}`)
@@ -289,9 +287,6 @@ describe('TransactionHistoryControllerRest', () => {
       response.body.should.has.property('data')
       assert.isNull(response.body.data)
 
-      if (oneDatastore.client === undefined) {
-        throw new Error('oneDatastore client is undefined')
-      }
       const result: TransactionHistory | null = await oneDatastore.client.transactionHistory.findFirst({
         where: {
           id: requestTransactionHistory.id

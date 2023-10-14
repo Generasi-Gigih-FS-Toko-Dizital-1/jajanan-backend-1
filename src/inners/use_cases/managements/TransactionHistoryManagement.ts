@@ -73,8 +73,6 @@ export default class TransactionHistoryManagement {
     const transactionHistory: TransactionHistory = {
       id: randomUUID(),
       userId: request.userId,
-      jajanItemId: request.jajanItemId,
-      amount: request.amount,
       paymentMethod: request.paymentMethod,
       lastLatitude: request.lastLatitude,
       lastLongitude: request.lastLongitude,
@@ -109,15 +107,6 @@ export default class TransactionHistoryManagement {
       )
     }
 
-    const foundJajanItem: Result<any> = await this.jajanItemManagement.readOneById(transactionHistory.jajanItemId)
-    if (foundJajanItem.status !== 200 || foundJajanItem.data === null) {
-      return new Result<null>(
-        404,
-        'TransactionHistory create one failed, jajan item is not found.',
-        null
-      )
-    }
-
     const createdTransactionHistory: any = await this.transactionHistoryRepository.createOne(transactionHistory)
     return new Result<TransactionHistory>(
       201,
@@ -142,7 +131,7 @@ export default class TransactionHistoryManagement {
     )
   }
 
-  patchOneRawById = async (id: string, request: TransactionHistoryManagementPatchRequest): Promise<Result<TransactionHistory | null>> => {
+  patchOneRawById = async (id: string, request: any): Promise<Result<TransactionHistory | null>> => {
     const foundTransactionHistory: Result<TransactionHistory | null> = await this.readOneById(id)
     if (foundTransactionHistory.status !== 200 || foundTransactionHistory.data === null) {
       return new Result<null>(

@@ -7,7 +7,7 @@ export default class Authorization {
     this.scheme = scheme
   }
 
-  static parseFromString (authorizationHeader: string): Authorization {
+  static convertFromString (authorizationHeader: string): Authorization {
     const [scheme, token] = authorizationHeader.split(' ')
     return new Authorization(token, scheme)
   }

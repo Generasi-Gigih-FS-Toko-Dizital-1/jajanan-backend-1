@@ -3,10 +3,12 @@ import type TopUpHistoryRepository from '../../../outers/repositories/TopUpHisto
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
 import type Pagination from '../../models/value_objects/Pagination'
 import Result from '../../models/value_objects/Result'
-import type TopUpHistoryManagementCreateRequest from '../../models/value_objects/requests/managements/top_up_history_management/TopUpHistoryManagementCreateRequest'
+import type TopUpHistoryManagementCreateRequest
+  from '../../models/value_objects/requests/managements/top_up_history_management/TopUpHistoryManagementCreateRequest'
 import { randomUUID } from 'crypto'
 import type UserManagement from './UserManagement'
-import type TopUpHistoryManagementPatchRequest from '../../models/value_objects/requests/managements/top_up_history_management/TopUpHistoryManagementPatchRequest'
+import type TopUpHistoryManagementPatchRequest
+  from '../../models/value_objects/requests/managements/top_up_history_management/TopUpHistoryManagementPatchRequest'
 
 export default class TopUpHistoryManagement {
   topUpHistoryRepository: TopUpHistoryRepository
@@ -50,7 +52,9 @@ export default class TopUpHistoryManagement {
   createOne = async (request: TopUpHistoryManagementCreateRequest): Promise<Result<TopUpHistory | null>> => {
     const topUpHistoryToCreate: TopUpHistory = {
       id: randomUUID(),
-      ...request,
+      userId: request.userId,
+      amount: request.amount,
+      media: request.media,
       updatedAt: new Date(),
       createdAt: new Date(),
       deletedAt: null
@@ -77,7 +81,7 @@ export default class TopUpHistoryManagement {
   }
 
   patchOneById = async (id: string, request: TopUpHistoryManagementPatchRequest): Promise<Result<TopUpHistory | null>> => {
-    const patchedTopUpHistory: Result<TopUpHistory | null> = await this.patchOneByIdRaw(id, request)
+    const patchedTopUpHistory: Result<TopUpHistory | null> = await this.patchOneRawById(id, request)
 
     if (patchedTopUpHistory.status !== 200 || patchedTopUpHistory.data === null) {
       return new Result<null>(patchedTopUpHistory.status, `TopUpHistory patch one by id failed, ${patchedTopUpHistory.message}`, null)
@@ -86,7 +90,7 @@ export default class TopUpHistoryManagement {
     return new Result<TopUpHistory>(200, 'TopUpHistory patch one by id succeed.', patchedTopUpHistory.data)
   }
 
-  patchOneByIdRaw = async (id: string, request: TopUpHistoryManagementPatchRequest): Promise<Result<TopUpHistory | null>> => {
+  patchOneRawById = async (id: string, request: any): Promise<Result<TopUpHistory | null>> => {
     const foundTopUpHistory: Result<TopUpHistory | null> = await this.readOneById(id)
     if (foundTopUpHistory.status !== 200 || foundTopUpHistory.data === null) {
       return new Result<null>(404, 'TopUpHistory patch one by id failed, topup history is not found.', null)

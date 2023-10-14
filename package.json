@@ -10,7 +10,7 @@
 		"swagger-generate": "node ./swagger.js"
 	},
 	"dependencies": {
-		"@prisma/client": "^5.3.1",
+		"@prisma/client": "^5.4.2",
 		"async-wait-until": "^2.0.12",
 		"axios": "^1.4.0",
 		"bcrypt": "^5.1.1",
@@ -31,6 +31,7 @@
 	},
 	"devDependencies": {
 		"@istanbuljs/nyc-config-typescript": "^1.0.2",
+		"@mermaid-js/mermaid-cli": "^10.5.0",
 		"@types/bcrypt": "^10.0.28-alpha",
 		"@types/chai": "^4.3.5",
 		"@types/chai-http": "^4.2.0",
@@ -59,7 +60,8 @@
 		"mocha": "^10.2.0",
 		"nodemon": "^3.0.1",
 		"nyc": "^15.1.0",
-		"prisma": "^5.3.1",
+		"prisma": "^5.4.2",
+		"prisma-erd-generator": "^1.11.1",
 		"source-map-support": "^0.5.21",
 		"swagger-autogen": "^2.23.6",
 		"swagger-ui-express": "^5.0.0",
