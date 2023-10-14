@@ -1,14 +1,14 @@
 import { type Category } from '@prisma/client'
 import type CategoryRepository from '../../../outers/repositories/CategoryRepository'
 import Result from '../../models/value_objects/Result'
+import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
+import type CategoryAggregate from '../../models/aggregates/CategoryAggregate'
 import type CategoryManagementCreateRequest
   from '../../models/value_objects/requests/managements/category_managements/CategoryManagementCreateRequest'
 import { randomUUID } from 'crypto'
 import type Pagination from '../../models/value_objects/Pagination'
 import type CategoryManagementPatchRequest
   from '../../models/value_objects/requests/managements/category_managements/CategoryManagementPatchRequest'
-import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
-import type CategoryAggregate from '../../models/aggregates/CategoryAggregate'
 
 export default class CategoryManagement {
   categoryRepository: CategoryRepository

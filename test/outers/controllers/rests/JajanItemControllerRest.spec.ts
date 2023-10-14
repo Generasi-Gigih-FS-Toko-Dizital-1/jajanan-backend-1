@@ -176,7 +176,9 @@ describe('JajanItemControllerRest', () => {
         jajanItem.should.has.property('created_at').equal(requestJajanItem.createdAt.toISOString())
         jajanItem.should.has.property('vendor').deep.equal(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestVendor))))
         jajanItem.should.has.property('category').deep.equal(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestCategory))))
-        jajanItem.should.has.property('snapshots').deep.members(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestJajanItemSnapshots))))
+        jajanItem.should.has.property('snapshots').deep.members(
+          requestJajanItemSnapshots.map((jajanItemSnapshot: JajanItemSnapshot) => humps.decamelizeKeys(JSON.parse(JSON.stringify(jajanItemSnapshot))))
+        )
       })
     })
   })

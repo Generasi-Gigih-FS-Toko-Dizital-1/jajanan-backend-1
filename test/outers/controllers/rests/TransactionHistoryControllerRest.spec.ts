@@ -163,7 +163,9 @@ describe('TransactionHistoryControllerRest', () => {
         transactionHistory.should.has.property('updated_at').equal(requestTransactionHistory.updatedAt.toISOString())
         transactionHistory.should.has.property('created_at').equal(requestTransactionHistory.createdAt.toISOString())
         transactionHistory.should.has.property('user').deep.equal(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestUser))))
-        transactionHistory.should.has.property('transaction_items').deep.members(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestTransactionItemHistory))))
+        transactionHistory.should.has.property('transaction_items').deep.members(
+          requestTransactionItemHistory.map((transactionItemHistory: TransactionItemHistory) => humps.decamelizeKeys(JSON.parse(JSON.stringify(transactionItemHistory))))
+        )
       })
     })
   })
