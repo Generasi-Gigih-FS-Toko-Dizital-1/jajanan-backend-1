@@ -17,12 +17,12 @@ import Authorization from '../../../../src/inners/models/value_objects/Authoriza
 import AdminMock from '../../../mocks/AdminMock'
 import AdminLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
+import humps from 'humps'
+import OneSeeder from '../../../../src/outers/seeders/OneSeeder'
 import CategoryManagementCreateRequest
   from '../../../../src/inners/models/value_objects/requests/managements/category_managements/CategoryManagementCreateRequest'
 import CategoryManagementPatchRequest
   from '../../../../src/inners/models/value_objects/requests/managements/category_managements/CategoryManagementPatchRequest'
-import humps from 'humps'
-import OneSeeder from '../../../../src/outers/seeders/OneSeeder'
 
 chai.use(chaiHttp)
 chai.should()
@@ -167,7 +167,9 @@ describe('CategoryControllerRest', () => {
         category.should.has.property('icon_url').equal(requestCategory.iconUrl)
         category.should.has.property('jajan_items').deep.equal(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestJajanItems))))
         category.should.has.property('jajan_item_snapshots').deep.equal(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestJajanItemSnapshots))))
-        category.should.has.property('user_subscriptions').deep.members(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestUserSubscriptions))))
+        category.should.has.property('user_subscriptions').deep.members(
+          requestUserSubscriptions.map((userSubscription: UserSubscription) => humps.decamelizeKeys(JSON.parse(JSON.stringify(userSubscription))))
+        )
       })
     })
   })
