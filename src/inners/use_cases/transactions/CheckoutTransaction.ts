@@ -57,7 +57,10 @@ export default class CheckoutTransaction {
       )
     }
 
+    let totalPrice: number = 0
+
     const jajanItemSnapshots: JajanItemSnapshot[] = foundJajanItems.data.map((jajanItem: JajanItem) => {
+      totalPrice += jajanItem.price
       return {
         id: randomUUID(),
         originId: jajanItem.id,
@@ -71,6 +74,17 @@ export default class CheckoutTransaction {
         deletedAt: null
       }
     })
+
+    foundUser.data.experience += totalPrice
+    const patchedUser: Result<User | null> = await this.userManagement.patchOneRawById(request.userId, foundUser.data)
+
+    if (patchedUser.status !== 200 || patchedUser.data === null) {
+      return new Result<null>(
+        patchedUser.status,
+            `Transaction checkout failed, ${patchedUser.message}`,
+            null
+      )
+    }
 
     const createdJajanItemSnapshots: Result<JajanItemSnapshot[] | null> = await this.jajanItemSnapshotManagement.createManyRaw(jajanItemSnapshots)
 
