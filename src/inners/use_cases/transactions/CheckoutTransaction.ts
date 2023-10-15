@@ -33,6 +33,14 @@ export default class CheckoutTransaction {
   }
 
   checkout = async (request: TransactionCheckoutRequest): Promise<Result<TransactionCheckoutResponse | null>> => {
+    if (!['BALANCE', 'CASH'].includes(request.paymentMethod)) {
+      return new Result<null>(
+        400,
+        'Transaction checkout failed, payment method is invalid.',
+        null
+      )
+    }
+
     const foundUser: Result<User | null> = await this.userManagement.readOneById(request.userId)
     if (foundUser.status !== 200 || foundUser.data === null) {
       return new Result<null>(
