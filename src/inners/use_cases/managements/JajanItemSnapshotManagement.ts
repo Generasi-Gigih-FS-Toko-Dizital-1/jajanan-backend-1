@@ -3,6 +3,7 @@ import type JajanItemSnapshotRepository from '../../../outers/repositories/Jajan
 import type Pagination from '../../models/value_objects/Pagination'
 import Result from '../../models/value_objects/Result'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
+import RepositoryArgument from '../../models/value_objects/RepositoryArgument'
 
 export default class JajanItemSnapshotManagement {
   jajanItemSnapshotRepository: JajanItemSnapshotRepository
@@ -14,7 +15,12 @@ export default class JajanItemSnapshotManagement {
   }
 
   readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Result<JajanItemSnapshot[]>> => {
-    const foundJajanItemSnapshots: JajanItemSnapshot[] = await this.jajanItemSnapshotRepository.readMany(pagination, whereInput, includeInput)
+    const args: RepositoryArgument = new RepositoryArgument(
+      whereInput,
+      includeInput,
+      pagination
+    )
+    const foundJajanItemSnapshots: JajanItemSnapshot[] = await this.jajanItemSnapshotRepository.readMany(args)
     return new Result<JajanItemSnapshot[]>(
       200,
       'Jajan Item Snapshot Snapshots read many succeed.',
@@ -23,7 +29,12 @@ export default class JajanItemSnapshotManagement {
   }
 
   readManyByIds = async (ids: string[]): Promise<Result<JajanItemSnapshot[]>> => {
-    const foundJajanItemSnapshots: JajanItemSnapshot[] = await this.jajanItemSnapshotRepository.readManyByIds(ids)
+    const args: RepositoryArgument = new RepositoryArgument(
+      { id: { in: ids } },
+      undefined,
+      undefined
+    )
+    const foundJajanItemSnapshots: JajanItemSnapshot[] = await this.jajanItemSnapshotRepository.readMany(args)
     return new Result<JajanItemSnapshot[]>(
       200,
       'Jajan Item Snapshot Snapshots read many by ids succeed.',
@@ -34,7 +45,12 @@ export default class JajanItemSnapshotManagement {
   readOneById = async (id: string): Promise<Result<JajanItemSnapshot | null>> => {
     let foundJajanItemSnapshot: JajanItemSnapshot
     try {
-      foundJajanItemSnapshot = await this.jajanItemSnapshotRepository.readOneById(id)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined
+      )
+      foundJajanItemSnapshot = await this.jajanItemSnapshotRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
@@ -52,7 +68,13 @@ export default class JajanItemSnapshotManagement {
   createOneRaw = async (jajanItemSnapshot: JajanItemSnapshot): Promise<Result<JajanItemSnapshot | null>> => {
     let createdJajanItemSnapshot: JajanItemSnapshot
     try {
-      createdJajanItemSnapshot = await this.jajanItemSnapshotRepository.createOne(jajanItemSnapshot)
+      const args: RepositoryArgument = new RepositoryArgument(
+        undefined,
+        undefined,
+        undefined,
+        jajanItemSnapshot
+      )
+      createdJajanItemSnapshot = await this.jajanItemSnapshotRepository.createOne(args)
     } catch (error) {
       return new Result<null>(
         500,
@@ -70,7 +92,13 @@ export default class JajanItemSnapshotManagement {
   createManyRaw = async (jajanItemSnapshots: JajanItemSnapshot[]): Promise<Result<JajanItemSnapshot[] | null>> => {
     let createdJajanItemSnapshots: JajanItemSnapshot[]
     try {
-      createdJajanItemSnapshots = await this.jajanItemSnapshotRepository.createMany(jajanItemSnapshots)
+      const args: RepositoryArgument = new RepositoryArgument(
+        undefined,
+        undefined,
+        undefined,
+        jajanItemSnapshots
+      )
+      createdJajanItemSnapshots = await this.jajanItemSnapshotRepository.createMany(args)
     } catch (error) {
       return new Result<null>(
         500,
@@ -95,7 +123,13 @@ export default class JajanItemSnapshotManagement {
       )
     }
     this.objectUtility.patch(foundJajanItemSnapshot.data, request)
-    const patchedJajanItemSnapshot: JajanItemSnapshot = await this.jajanItemSnapshotRepository.patchOneById(id, foundJajanItemSnapshot.data)
+    const args: RepositoryArgument = new RepositoryArgument(
+      { id },
+      undefined,
+      undefined,
+      foundJajanItemSnapshot.data
+    )
+    const patchedJajanItemSnapshot: JajanItemSnapshot = await this.jajanItemSnapshotRepository.patchOne(args)
     return new Result<JajanItemSnapshot>(
       200,
       'Jajan Item Snapshot patch one raw by id succeed.',
@@ -106,7 +140,13 @@ export default class JajanItemSnapshotManagement {
   deleteOneById = async (id: string): Promise<Result<JajanItemSnapshot | null>> => {
     let deletedJajanItemSnapshot: JajanItemSnapshot
     try {
-      deletedJajanItemSnapshot = await this.jajanItemSnapshotRepository.deleteOneById(id)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        undefined
+      )
+      deletedJajanItemSnapshot = await this.jajanItemSnapshotRepository.deleteOne(args)
     } catch (error) {
       return new Result<null>(
         500,
