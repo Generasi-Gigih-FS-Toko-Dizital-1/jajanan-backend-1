@@ -9,6 +9,7 @@ import type AdminManagementCreateRequest
 import type AdminManagementPatchRequest
   from '../../models/value_objects/requests/managements/admin_managements/AdminManagementPatchRequest'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
+import RepositoryArgument from '../../models/value_objects/RepositoryArgument'
 
 export default class AdminManagement {
   adminRepository: AdminRepository
@@ -20,7 +21,13 @@ export default class AdminManagement {
   }
 
   readMany = async (pagination: Pagination, whereInput: any): Promise<Result<Admin[]>> => {
-    const foundAdmins: Admin[] = await this.adminRepository.readMany(pagination, whereInput)
+    const args: RepositoryArgument = new RepositoryArgument(
+      whereInput,
+      undefined,
+      pagination
+    )
+
+    const foundAdmins: Admin[] = await this.adminRepository.readMany(args)
     return new Result<Admin[]>(
       200,
       'Admin read many succeed.',
@@ -31,7 +38,12 @@ export default class AdminManagement {
   readOneById = async (id: string): Promise<Result<Admin | null>> => {
     let foundAdmin: Admin
     try {
-      foundAdmin = await this.adminRepository.readOneById(id)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined
+      )
+      foundAdmin = await this.adminRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
@@ -50,7 +62,12 @@ export default class AdminManagement {
   readOneByEmail = async (email: string): Promise<Result<Admin | null>> => {
     let foundAdmin: Admin
     try {
-      foundAdmin = await this.adminRepository.readOneByEmail(email)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { email },
+        undefined,
+        undefined
+      )
+      foundAdmin = await this.adminRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
@@ -68,7 +85,12 @@ export default class AdminManagement {
   readOneByEmailAndPassword = async (email: string, password: string): Promise<Result<Admin | null>> => {
     let foundAdmin: Admin
     try {
-      foundAdmin = await this.adminRepository.readOneByEmailAndPassword(email, password)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { email, password },
+        undefined,
+        undefined
+      )
+      foundAdmin = await this.adminRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
@@ -99,7 +121,13 @@ export default class AdminManagement {
       createdAt: new Date(),
       deletedAt: null
     }
-    const createdAdmin: any = await this.adminRepository.createOne(adminToCreate)
+    const args: RepositoryArgument = new RepositoryArgument(
+      undefined,
+      undefined,
+      undefined,
+      adminToCreate
+    )
+    const createdAdmin: any = await this.adminRepository.createOne(args)
     return new Result<Admin>(
       201,
       'Admin create one succeed.',
@@ -127,7 +155,13 @@ export default class AdminManagement {
     }
 
     this.objectUtility.patch(foundAdmin.data, request)
-    const patchedAdmin: Admin = await this.adminRepository.patchOneById(id, foundAdmin.data)
+    const args: RepositoryArgument = new RepositoryArgument(
+      { id },
+      undefined,
+      undefined,
+      foundAdmin.data
+    )
+    const patchedAdmin: Admin = await this.adminRepository.patchOne(args)
     return new Result<Admin>(
       200,
       'Admin patch one by id succeed.',
@@ -138,7 +172,13 @@ export default class AdminManagement {
   deleteOneById = async (id: string): Promise<Result<Admin | null>> => {
     let deletedAdmin: Admin
     try {
-      deletedAdmin = await this.adminRepository.deleteOneById(id)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        undefined
+      )
+      deletedAdmin = await this.adminRepository.deleteOne(args)
     } catch (error) {
       return new Result<null>(
         404,

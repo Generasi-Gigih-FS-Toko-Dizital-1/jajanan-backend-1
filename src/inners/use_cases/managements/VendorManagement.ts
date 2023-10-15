@@ -10,6 +10,7 @@ import type VendorManagementPatchRequest
   from '../../models/value_objects/requests/managements/vendor_managements/VendorManagementPatchRequest'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
 import type VendorAggregate from '../../models/aggregates/VendorAggregate'
+import RepositoryArgument from '../../models/value_objects/RepositoryArgument'
 
 export default class VendorManagement {
   vendorRepository: VendorRepository
@@ -21,7 +22,12 @@ export default class VendorManagement {
   }
 
   readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Result<Vendor[] | VendorAggregate[]>> => {
-    const foundVendors: Vendor[] = await this.vendorRepository.readMany(pagination, whereInput, includeInput)
+    const args: RepositoryArgument = new RepositoryArgument(
+      whereInput,
+      includeInput,
+      pagination
+    )
+    const foundVendors: Vendor[] = await this.vendorRepository.readMany(args)
     return new Result<Vendor[]>(
       200,
       'Vendor read many succeed.',
@@ -32,7 +38,12 @@ export default class VendorManagement {
   readOneById = async (id: string): Promise<Result<Vendor | null>> => {
     let foundVendor: Vendor
     try {
-      foundVendor = await this.vendorRepository.readOneById(id)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined
+      )
+      foundVendor = await this.vendorRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
@@ -50,7 +61,13 @@ export default class VendorManagement {
   readOneByUsername = async (username: string): Promise<Result<Vendor | null>> => {
     let foundVendor: Vendor
     try {
-      foundVendor = await this.vendorRepository.readOneByUsername(username)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { username },
+        undefined,
+        undefined,
+        undefined
+      )
+      foundVendor = await this.vendorRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
@@ -68,7 +85,13 @@ export default class VendorManagement {
   readOneByEmail = async (email: string): Promise<Result<Vendor | null>> => {
     let foundVendor: Vendor
     try {
-      foundVendor = await this.vendorRepository.readOneByEmail(email)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { email },
+        undefined,
+        undefined,
+        undefined
+      )
+      foundVendor = await this.vendorRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
@@ -86,7 +109,13 @@ export default class VendorManagement {
   readOneByUsernameAndPassword = async (username: string, password: string): Promise<Result<Vendor | null>> => {
     let foundVendor: Vendor
     try {
-      foundVendor = await this.vendorRepository.readOneByUsernameAndPassword(username, password)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { username, password },
+        undefined,
+        undefined,
+        undefined
+      )
+      foundVendor = await this.vendorRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
@@ -104,7 +133,13 @@ export default class VendorManagement {
   readOneByEmailAndPassword = async (email: string, password: string): Promise<Result<Vendor | null>> => {
     let foundVendor: Vendor
     try {
-      foundVendor = await this.vendorRepository.readOneByEmailAndPassword(email, password)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { email, password },
+        undefined,
+        undefined,
+        undefined
+      )
+      foundVendor = await this.vendorRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
@@ -164,7 +199,13 @@ export default class VendorManagement {
   createOneRaw = async (vendor: Vendor): Promise<Result<Vendor | null>> => {
     let createdVendor: Vendor
     try {
-      createdVendor = await this.vendorRepository.createOne(vendor)
+      const args: RepositoryArgument = new RepositoryArgument(
+        undefined,
+        undefined,
+        undefined,
+        vendor
+      )
+      createdVendor = await this.vendorRepository.createOne(args)
     } catch (error) {
       return new Result<null>(
         500,
@@ -215,7 +256,13 @@ export default class VendorManagement {
     this.objectUtility.patch(foundVendor.data, request)
     let patchedVendor: Vendor
     try {
-      patchedVendor = await this.vendorRepository.patchOneById(id, foundVendor.data)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        foundVendor.data
+      )
+      patchedVendor = await this.vendorRepository.patchOne(args)
     } catch (error) {
       return new Result<null>(
         500,
@@ -233,7 +280,13 @@ export default class VendorManagement {
   deleteOneById = async (id: string): Promise<Result<Vendor | null>> => {
     let deletedVendor: Vendor
     try {
-      deletedVendor = await this.vendorRepository.deleteOneById(id)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        undefined
+      )
+      deletedVendor = await this.vendorRepository.deleteOne(args)
     } catch (error) {
       return new Result<null>(
         500,
