@@ -96,7 +96,7 @@ describe('TransactionHistoryControllerRest', () => {
   })
 
   describe('POST /api/v1/transactions/checkout', () => {
-    it('should return 201 CREATED', async () => {
+    it('should return 201 CREATED by BALANCE', async () => {
       const requestTransactionItem: TransactionItemCheckoutRequest[] = oneSeeder.jajanItemMock.data.map((jajanItem: JajanItem) => {
         return new TransactionItemCheckoutRequest(
           jajanItem.id,
@@ -125,11 +125,69 @@ describe('TransactionHistoryControllerRest', () => {
       response.body.should.has.property('data')
       response.body.data.should.be.an('object')
       response.body.data.should.has.property('transaction_id')
-      response.body.data.should.has.property('user_id')
+      response.body.data.should.has.property('user_id').equal(requestBody.userId)
       response.body.data.should.has.property('transaction_items').an('array').lengthOf(2)
-      response.body.data.should.has.property('payment_method')
-      response.body.data.should.has.property('last_latitude')
-      response.body.data.should.has.property('last_longitude')
+      response.body.data.should.has.property('payment_method').equal(requestBody.paymentMethod)
+      response.body.data.should.has.property('last_latitude').equal(requestBody.lastLatitude)
+      response.body.data.should.has.property('last_longitude').equal(requestBody.lastLongitude)
+      response.body.data.should.has.property('updated_at')
+      response.body.data.should.has.property('created_at')
+      response.body.data.transaction_items.forEach((transactionItem: any) => {
+        transactionItem.should.has.property('jajan_item_snapshot_id')
+        transactionItem.should.has.property('quantity')
+      })
+
+      if (oneDatastore.client === undefined) {
+        throw new Error('Client is undefined.')
+      }
+      await oneDatastore.client.transactionHistory.deleteMany({
+        where: {
+          id: response.body.data.transaction_id
+        }
+      })
+      await oneDatastore.client.jajanItemSnapshot.deleteMany({
+        where: {
+          id: {
+            in: response.body.data.transaction_items.map((transactionItem: any) => transactionItem.jajan_item_snapshot_id)
+          }
+        }
+      })
+    })
+
+    it('should return 201 CREATED by CASH', async () => {
+      const requestTransactionItem: TransactionItemCheckoutRequest[] = oneSeeder.jajanItemMock.data.map((jajanItem: JajanItem) => {
+        return new TransactionItemCheckoutRequest(
+          jajanItem.id,
+          1
+        )
+      })
+
+      const requestUser: User = oneSeeder.userMock.data[0]
+
+      const requestBody: TransactionCheckoutRequest = new TransactionCheckoutRequest(
+        requestUser.id,
+        requestTransactionItem,
+        'CASH',
+        0,
+        0
+      )
+
+      const response = await agent
+        .post('/api/v1/transactions/checkout')
+        .set('Authorization', authorization.convertToString())
+        .send(requestBody)
+
+      response.should.has.status(201)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      response.body.data.should.be.an('object')
+      response.body.data.should.has.property('transaction_id')
+      response.body.data.should.has.property('user_id').equal(requestBody.userId)
+      response.body.data.should.has.property('transaction_items').an('array').lengthOf(2)
+      response.body.data.should.has.property('payment_method').equal(requestBody.paymentMethod)
+      response.body.data.should.has.property('last_latitude').equal(requestBody.lastLatitude)
+      response.body.data.should.has.property('last_longitude').equal(requestBody.lastLongitude)
       response.body.data.should.has.property('updated_at')
       response.body.data.should.has.property('created_at')
       response.body.data.transaction_items.forEach((transactionItem: any) => {

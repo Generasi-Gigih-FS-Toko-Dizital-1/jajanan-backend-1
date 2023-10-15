@@ -1,8 +1,6 @@
-import { Admin, type JajanItemSnapshot, JajanItem } from '@prisma/client'
+import { type JajanItemSnapshot } from '@prisma/client'
 import type OneDatastore from '../datastores/OneDatastore'
 import type JajanItemSnapshotAggregate from '../../inners/models/aggregates/JajanItemSnapshotAggregate'
-import type Pagination from '../../inners/models/value_objects/Pagination'
-import JajanItemAggregate from '../../inners/models/aggregates/JajanItemAggregate'
 import type RepositoryArgument from '../../inners/models/value_objects/RepositoryArgument'
 
 export default class JajanItemSnapshotRepository {
@@ -15,8 +13,8 @@ export default class JajanItemSnapshotRepository {
     this.oneDatastore = oneDatastore
   }
 
-  readMany = async (argument: RepositoryArgument): Promise<JajanItemSnapshot[] | JajanItemSnapshotAggregate[]> => {
-    const args: any = argument.convertToPrismaArgs()
+  readMany = async (repositoryArgument: RepositoryArgument): Promise<JajanItemSnapshot[] | JajanItemSnapshotAggregate[]> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -30,8 +28,8 @@ export default class JajanItemSnapshotRepository {
     return foundJajanItemSnapshots
   }
 
-  createOne = async (argument: RepositoryArgument): Promise<JajanItemSnapshot | JajanItemSnapshotAggregate> => {
-    const args: any = argument.convertToPrismaArgs()
+  createOne = async (repositoryArgument: RepositoryArgument): Promise<JajanItemSnapshot | JajanItemSnapshotAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -42,8 +40,8 @@ export default class JajanItemSnapshotRepository {
     return createdJajanItemSnapshot
   }
 
-  readOne = async (argument: RepositoryArgument): Promise<JajanItemSnapshot | JajanItemSnapshotAggregate> => {
-    const args: any = argument.convertToPrismaArgs()
+  readOne = async (repositoryArgument: RepositoryArgument): Promise<JajanItemSnapshot | JajanItemSnapshotAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -57,8 +55,8 @@ export default class JajanItemSnapshotRepository {
     return foundJajanItemSnapshot
   }
 
-  patchOne = async (argument: RepositoryArgument): Promise<JajanItemSnapshot | JajanItemSnapshotAggregate> => {
-    const args: any = argument.convertToPrismaArgs()
+  patchOne = async (repositoryArgument: RepositoryArgument): Promise<JajanItemSnapshot | JajanItemSnapshotAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -72,8 +70,8 @@ export default class JajanItemSnapshotRepository {
     return patchedUser
   }
 
-  deleteOne = async (argument: RepositoryArgument): Promise<JajanItemSnapshot | JajanItemSnapshotAggregate> => {
-    const args: any = argument.convertToPrismaArgs()
+  deleteOne = async (repositoryArgument: RepositoryArgument): Promise<JajanItemSnapshot | JajanItemSnapshotAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -84,8 +82,8 @@ export default class JajanItemSnapshotRepository {
     return deletedJajanItemSnapshot
   }
 
-  createMany = async (argument: RepositoryArgument): Promise<JajanItemSnapshot[] | JajanItemSnapshotAggregate[]> => {
-    const args: any = argument.convertToPrismaArgs()
+  createMany = async (repositoryArgument: RepositoryArgument): Promise<JajanItemSnapshot[] | JajanItemSnapshotAggregate[]> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -93,6 +91,6 @@ export default class JajanItemSnapshotRepository {
 
     await this.oneDatastore.client.jajanItemSnapshot.createMany(args)
 
-    return argument.data
+    return repositoryArgument.data
   }
 }

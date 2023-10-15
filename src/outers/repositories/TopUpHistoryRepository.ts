@@ -13,8 +13,8 @@ export default class TopUpHistoryRepository {
     this.oneDatastore = oneDatastore
   }
 
-  readMany = async (argument: RepositoryArgument): Promise<TopUpHistory[] | TopUpHistoryAggregate[]> => {
-    const args: any = argument.convertToPrismaArgs()
+  readMany = async (repositoryArgument: RepositoryArgument): Promise<TopUpHistory[] | TopUpHistoryAggregate[]> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -28,8 +28,8 @@ export default class TopUpHistoryRepository {
     return foundTopUpHistories
   }
 
-  createOne = async (argument: RepositoryArgument): Promise<TopUpHistory | TopUpHistoryAggregate> => {
-    const args: any = argument.convertToPrismaArgs()
+  createOne = async (repositoryArgument: RepositoryArgument): Promise<TopUpHistory | TopUpHistoryAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -40,8 +40,8 @@ export default class TopUpHistoryRepository {
     return createdTopUpHistory
   }
 
-  readOne = async (argument: RepositoryArgument): Promise<TopUpHistory | TopUpHistoryAggregate> => {
-    const args: any = argument.convertToPrismaArgs()
+  readOne = async (repositoryArgument: RepositoryArgument): Promise<TopUpHistory | TopUpHistoryAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -55,8 +55,8 @@ export default class TopUpHistoryRepository {
     return foundTopUpHistory
   }
 
-  patchOne = async (argument: RepositoryArgument): Promise<TopUpHistory | TopUpHistoryAggregate> => {
-    const args: any = argument.convertToPrismaArgs()
+  patchOne = async (repositoryArgument: RepositoryArgument): Promise<TopUpHistory | TopUpHistoryAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -70,8 +70,8 @@ export default class TopUpHistoryRepository {
     return patchedUser
   }
 
-  deleteOne = async (argument: RepositoryArgument): Promise<TopUpHistory | TopUpHistoryAggregate> => {
-    const args: any = argument.convertToPrismaArgs()
+  deleteOne = async (repositoryArgument: RepositoryArgument): Promise<TopUpHistory | TopUpHistoryAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')

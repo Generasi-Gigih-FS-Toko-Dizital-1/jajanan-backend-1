@@ -10,8 +10,8 @@ export default class AdminRepository {
     this.oneDatastore = oneDatastore
   }
 
-  readMany = async (argument: RepositoryArgument): Promise<Admin[] > => {
-    const args: any = argument.convertToPrismaArgs()
+  readMany = async (repositoryArgument: RepositoryArgument): Promise<Admin[] > => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -25,8 +25,8 @@ export default class AdminRepository {
     return foundAdmins
   }
 
-  createOne = async (argument: RepositoryArgument): Promise<Admin> => {
-    const args: any = argument.convertToPrismaArgs()
+  createOne = async (repositoryArgument: RepositoryArgument): Promise<Admin> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -37,8 +37,8 @@ export default class AdminRepository {
     return createdAdmin
   }
 
-  readOne = async (argument: RepositoryArgument): Promise<Admin> => {
-    const args: any = argument.convertToPrismaArgs()
+  readOne = async (repositoryArgument: RepositoryArgument): Promise<Admin> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -52,8 +52,8 @@ export default class AdminRepository {
     return foundAdmin
   }
 
-  patchOne = async (argument: RepositoryArgument): Promise<Admin> => {
-    const args: any = argument.convertToPrismaArgs()
+  patchOne = async (repositoryArgument: RepositoryArgument): Promise<Admin> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -67,8 +67,8 @@ export default class AdminRepository {
     return patchedAdmin
   }
 
-  deleteOne = async (argument: RepositoryArgument): Promise<Admin> => {
-    const args: any = argument.convertToPrismaArgs()
+  deleteOne = async (repositoryArgument: RepositoryArgument): Promise<Admin> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')

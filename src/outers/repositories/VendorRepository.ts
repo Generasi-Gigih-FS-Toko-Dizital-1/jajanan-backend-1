@@ -11,8 +11,8 @@ export default class VendorRepository {
     this.oneDatastore = oneDatastore
   }
 
-  readMany = async (argument: RepositoryArgument): Promise<Vendor[] | VendorAggregate[]> => {
-    const args: any = argument.convertToPrismaArgs()
+  readMany = async (repositoryArgument: RepositoryArgument): Promise<Vendor[] | VendorAggregate[]> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -26,8 +26,8 @@ export default class VendorRepository {
     return foundVendors
   }
 
-  createOne = async (argument: RepositoryArgument): Promise<Vendor | VendorAggregate> => {
-    const args: any = argument.convertToPrismaArgs()
+  createOne = async (repositoryArgument: RepositoryArgument): Promise<Vendor | VendorAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -38,8 +38,8 @@ export default class VendorRepository {
     return createdVendor
   }
 
-  readOne = async (argument: RepositoryArgument): Promise<Vendor | VendorAggregate> => {
-    const args: any = argument.convertToPrismaArgs()
+  readOne = async (repositoryArgument: RepositoryArgument): Promise<Vendor | VendorAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -53,8 +53,8 @@ export default class VendorRepository {
     return foundVendor
   }
 
-  patchOne = async (argument: RepositoryArgument): Promise<Vendor | VendorAggregate> => {
-    const args: any = argument.convertToPrismaArgs()
+  patchOne = async (repositoryArgument: RepositoryArgument): Promise<Vendor | VendorAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -68,8 +68,8 @@ export default class VendorRepository {
     return patchedVendor
   }
 
-  deleteOne = async (argument: RepositoryArgument): Promise<Vendor | VendorAggregate> => {
-    const args: any = argument.convertToPrismaArgs()
+  deleteOne = async (repositoryArgument: RepositoryArgument): Promise<Vendor | VendorAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -78,5 +78,22 @@ export default class VendorRepository {
     const deletedVendor: Vendor | VendorAggregate = await this.oneDatastore.client.vendor.delete(args)
 
     return deletedVendor
+  }
+
+  patchMany = async (repositoryArguments: RepositoryArgument[]): Promise<Vendor[] | VendorAggregate[]> => {
+    if (this.oneDatastore.client === undefined) {
+      throw new Error('oneDatastore client is undefined.')
+    }
+
+    const operations: any[] = []
+    for (const repositoryArgument of repositoryArguments) {
+      const args: any = repositoryArgument.convertToPrismaArgs()
+      const operation: any = this.oneDatastore.client.vendor.update(args)
+      operations.push(operation)
+    }
+
+    const patchedVendors: Vendor[] | VendorAggregate[] = await this.oneDatastore.client.$transaction(operations)
+
+    return patchedVendors
   }
 }

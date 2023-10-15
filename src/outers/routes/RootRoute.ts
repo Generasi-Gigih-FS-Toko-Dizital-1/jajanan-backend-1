@@ -120,7 +120,7 @@ export default class RootRoute {
     const topUpWebhook: TopUpWebhook = new TopUpWebhook(topUpHistoryRepository, userRepository)
     const topUp: TopUp = new TopUp(paymentGateway, userManagement)
 
-    const checkoutTransaction: CheckoutTransaction = new CheckoutTransaction(userManagement, jajanItemManagement, jajanItemSnapshotManagement, transactionHistoryManagement, objectUtility)
+    const checkoutTransaction: CheckoutTransaction = new CheckoutTransaction(userManagement, vendorManagement, jajanItemManagement, jajanItemSnapshotManagement, transactionHistoryManagement, objectUtility)
 
     const userControllerRest: UserControllerRest = new UserControllerRest(
       Router(),

@@ -40,6 +40,15 @@ export default class JajanItemManagement {
       undefined
     )
     const foundJajanItems: JajanItem[] = await this.jajanItemRepository.readMany(args)
+
+    if (foundJajanItems.length !== ids.length) {
+      return new Result<JajanItem[]>(
+        404,
+        'Jajan Items read many by ids failed, some jajan item ids is not found.',
+        foundJajanItems
+      )
+    }
+
     return new Result<JajanItem[]>(
       200,
       'Jajan Items read many by ids succeed.',

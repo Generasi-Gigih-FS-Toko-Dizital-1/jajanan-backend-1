@@ -32,8 +32,8 @@ export default class TransactionHistoryRepository {
     return foundTransactionHistory
   }
 
-  readMany = async (argument: RepositoryArgument): Promise<TransactionHistory[] | TransactionHistoryAggregate[]> => {
-    const args: any = argument.convertToPrismaArgs()
+  readMany = async (repositoryArgument: RepositoryArgument): Promise<TransactionHistory[] | TransactionHistoryAggregate[]> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -47,8 +47,8 @@ export default class TransactionHistoryRepository {
     return foundTransactionHistories
   }
 
-  createOne = async (argument: RepositoryArgument): Promise<TransactionHistory | TransactionHistoryAggregate> => {
-    const args: any = argument.convertToPrismaArgs()
+  createOne = async (repositoryArgument: RepositoryArgument): Promise<TransactionHistory | TransactionHistoryAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -59,8 +59,8 @@ export default class TransactionHistoryRepository {
     return createdTransactionHistory
   }
 
-  readOne = async (argument: RepositoryArgument): Promise<TransactionHistory | TransactionHistoryAggregate> => {
-    const args: any = argument.convertToPrismaArgs()
+  readOne = async (repositoryArgument: RepositoryArgument): Promise<TransactionHistory | TransactionHistoryAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -74,8 +74,8 @@ export default class TransactionHistoryRepository {
     return foundTransactionHistory
   }
 
-  patchOne = async (argument: RepositoryArgument): Promise<TransactionHistory | TransactionHistoryAggregate> => {
-    const args: any = argument.convertToPrismaArgs()
+  patchOne = async (repositoryArgument: RepositoryArgument): Promise<TransactionHistory | TransactionHistoryAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -89,8 +89,8 @@ export default class TransactionHistoryRepository {
     return patchedTransactionHistory
   }
 
-  deleteOne = async (argument: RepositoryArgument): Promise<TransactionHistory | TransactionHistoryAggregate> => {
-    const args: any = argument.convertToPrismaArgs()
+  deleteOne = async (repositoryArgument: RepositoryArgument): Promise<TransactionHistory | TransactionHistoryAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
