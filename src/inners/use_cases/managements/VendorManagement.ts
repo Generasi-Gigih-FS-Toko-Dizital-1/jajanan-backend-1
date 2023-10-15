@@ -35,6 +35,29 @@ export default class VendorManagement {
     )
   }
 
+  readManyByIds = async (ids: string[]): Promise<Result<Vendor[] | null>> => {
+    const args: RepositoryArgument = new RepositoryArgument(
+      { id: { in: ids } },
+      undefined,
+      undefined
+    )
+    const foundVendors: Vendor[] = await this.vendorRepository.readMany(args)
+
+    if (foundVendors.length !== ids.length) {
+      return new Result<null>(
+        404,
+        'Vendor read many by ids failed, some vendor ids is not found.',
+        null
+      )
+    }
+
+    return new Result<Vendor[]>(
+      200,
+      'Vendor read many by ids succeed.',
+      foundVendors
+    )
+  }
+
   readOneById = async (id: string): Promise<Result<Vendor | null>> => {
     let foundVendor: Vendor
     try {
@@ -298,6 +321,48 @@ export default class VendorManagement {
       200,
       'Vendor delete one by id succeed.',
       deletedVendor
+    )
+  }
+
+  patchManyRawByIds = async (ids: string[], requests: any[]): Promise<Result<Vendor[] | null>> => {
+    const foundVendors: Result<Vendor[] | null> = await this.readManyByIds(ids)
+    if (foundVendors.status !== 200 || foundVendors.data === null) {
+      return new Result<null>(
+        foundVendors.status,
+        `Vendor patch many by ids failed, ${foundVendors.message}`,
+        null
+      )
+    }
+
+    const args: RepositoryArgument[] = []
+    for (let i = 0; i < ids.length; i++) {
+      const vendorId: string = ids[i]
+      const foundVendor: Vendor = foundVendors.data.find((vendor: Vendor) => vendor.id === vendorId) as Vendor
+      const request: any = requests.find((request: any) => request.id === vendorId)
+      this.objectUtility.patch(foundVendor, request)
+      const arg = new RepositoryArgument(
+        { id: vendorId },
+        undefined,
+        undefined,
+        foundVendor
+      )
+      args.push(arg)
+    }
+
+    let patchedVendors: Vendor[]
+    try {
+      patchedVendors = await this.vendorRepository.patchMany(args)
+    } catch (error) {
+      return new Result<null>(
+        500,
+          `Vendor patch one by id failed, ${(error as Error).message}`,
+          null
+      )
+    }
+    return new Result<Vendor[]>(
+      200,
+      'Vendor patch one by id succeed.',
+      patchedVendors
     )
   }
 }

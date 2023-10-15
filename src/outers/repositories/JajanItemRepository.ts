@@ -14,8 +14,8 @@ export default class JajanItemRepository {
     this.oneDatastore = oneDatastore
   }
 
-  readMany = async (argument: RepositoryArgument): Promise<JajanItem[] | JajanItemAggregate[]> => {
-    const args: any = argument.convertToPrismaArgs()
+  readMany = async (repositoryArgument: RepositoryArgument): Promise<JajanItem[] | JajanItemAggregate[]> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -29,8 +29,8 @@ export default class JajanItemRepository {
     return foundJajanItems
   }
 
-  createOne = async (argument: RepositoryArgument): Promise<JajanItem | JajanItemAggregate> => {
-    const args: any = argument.convertToPrismaArgs()
+  createOne = async (repositoryArgument: RepositoryArgument): Promise<JajanItem | JajanItemAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -41,8 +41,8 @@ export default class JajanItemRepository {
     return createdJajanItem
   }
 
-  readOne = async (argument: RepositoryArgument): Promise<JajanItem | JajanItemAggregate> => {
-    const args: any = argument.convertToPrismaArgs()
+  readOne = async (repositoryArgument: RepositoryArgument): Promise<JajanItem | JajanItemAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -56,8 +56,8 @@ export default class JajanItemRepository {
     return foundJajanItem
   }
 
-  patchOne = async (argument: RepositoryArgument): Promise<JajanItem | JajanItemAggregate> => {
-    const args: any = argument.convertToPrismaArgs()
+  patchOne = async (repositoryArgument: RepositoryArgument): Promise<JajanItem | JajanItemAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -71,8 +71,8 @@ export default class JajanItemRepository {
     return patchedUser
   }
 
-  deleteOne = async (argument: RepositoryArgument): Promise<JajanItem | JajanItemAggregate> => {
-    const args: any = argument.convertToPrismaArgs()
+  deleteOne = async (repositoryArgument: RepositoryArgument): Promise<JajanItem | JajanItemAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')

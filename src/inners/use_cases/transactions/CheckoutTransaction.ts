@@ -1,6 +1,6 @@
 import Result from '../../models/value_objects/Result'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
-import { type JajanItem, type JajanItemSnapshot, type TransactionHistory, type User } from '@prisma/client'
+import { type JajanItem, type JajanItemSnapshot, type TransactionHistory, type User, type Vendor } from '@prisma/client'
 import type TransactionCheckoutRequest
   from '../../models/value_objects/requests/transactions/TransactionCheckoutRequest'
 import { randomUUID } from 'crypto'
@@ -13,16 +13,19 @@ import type TransactionItemCheckoutRequest
 import TransactionCheckoutResponse from '../../models/value_objects/responses/transactions/TransactionCheckoutResponse'
 import TransactionItemCheckoutResponse
   from '../../models/value_objects/responses/transactions/TransactionItemCheckoutResponse'
+import type VendorManagement from '../managements/VendorManagement'
 
 export default class CheckoutTransaction {
   userManagement: UserManagement
+  vendorManagement: VendorManagement
   jajanItemManagement: JajanItemManagement
   jajanItemSnapshotManagement: JajanItemSnapshotManagement
   transactionHistoryManagement: TransactionHistoryManagement
   objectUtility: ObjectUtility
 
-  constructor (userManagement: UserManagement, jajanItemManagement: JajanItemManagement, jajanItemSnapshotManagement: JajanItemSnapshotManagement, transactionHistoryManagement: TransactionHistoryManagement, objectUtility: ObjectUtility) {
+  constructor (userManagement: UserManagement, vendorManagement: VendorManagement, jajanItemManagement: JajanItemManagement, jajanItemSnapshotManagement: JajanItemSnapshotManagement, transactionHistoryManagement: TransactionHistoryManagement, objectUtility: ObjectUtility) {
     this.userManagement = userManagement
+    this.vendorManagement = vendorManagement
     this.jajanItemManagement = jajanItemManagement
     this.jajanItemSnapshotManagement = jajanItemSnapshotManagement
     this.transactionHistoryManagement = transactionHistoryManagement
@@ -49,18 +52,12 @@ export default class CheckoutTransaction {
       )
     }
 
-    if (foundJajanItems.data.length !== request.transactionItems.length) {
-      return new Result<null>(
-        404,
-        'Transaction checkout failed, some jajan item ids is not found.',
-        null
-      )
-    }
-
     let totalPrice: number = 0
+    const vendorIds: string[] = []
 
     const jajanItemSnapshots: JajanItemSnapshot[] = foundJajanItems.data.map((jajanItem: JajanItem) => {
       totalPrice += jajanItem.price
+      vendorIds.push(jajanItem.vendorId)
       return {
         id: randomUUID(),
         originId: jajanItem.id,
@@ -76,8 +73,41 @@ export default class CheckoutTransaction {
     })
 
     foundUser.data.experience += totalPrice
-    const patchedUser: Result<User | null> = await this.userManagement.patchOneRawById(request.userId, foundUser.data)
 
+    if (request.paymentMethod === 'BALANCE') {
+      foundUser.data.balance -= totalPrice
+      if (foundUser.data.balance < 0) {
+        return new Result<null>(
+          403,
+          'Transaction checkout failed, user has insufficient balance.',
+          null
+        )
+      }
+
+      const foundVendors: Result<Vendor[] | null> = await this.vendorManagement.readManyByIds(vendorIds)
+      if (foundVendors.status !== 200 || foundVendors.data === null) {
+        return new Result<null>(
+          foundVendors.status,
+            `Transaction checkout failed, ${foundVendors.message}`,
+            null
+        )
+      }
+
+      foundVendors.data.forEach((vendor: Vendor) => {
+        vendor.balance += totalPrice
+      })
+
+      const patchedVendors: Result<Vendor[] | null> = await this.vendorManagement.patchManyRawByIds(vendorIds, foundVendors.data)
+      if (patchedVendors.status !== 200 || patchedVendors.data === null) {
+        return new Result<null>(
+          patchedVendors.status,
+            `Transaction checkout failed, ${patchedVendors.message}`,
+            null
+        )
+      }
+    }
+
+    const patchedUser: Result<User | null> = await this.userManagement.patchOneRawById(request.userId, foundUser.data)
     if (patchedUser.status !== 200 || patchedUser.data === null) {
       return new Result<null>(
         patchedUser.status,

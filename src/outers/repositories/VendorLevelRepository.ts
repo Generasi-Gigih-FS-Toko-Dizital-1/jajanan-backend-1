@@ -11,8 +11,8 @@ export default class VendorLevelRepository {
     this.oneDatastore = oneDatastore
   }
 
-  readMany = async (argument: RepositoryArgument): Promise<VendorLevel[]> => {
-    const args: any = argument.convertToPrismaArgs()
+  readMany = async (repositoryArgument: RepositoryArgument): Promise<VendorLevel[]> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -26,8 +26,8 @@ export default class VendorLevelRepository {
     return foundVendorLevels
   }
 
-  createOne = async (argument: RepositoryArgument): Promise<VendorLevel> => {
-    const args: any = argument.convertToPrismaArgs()
+  createOne = async (repositoryArgument: RepositoryArgument): Promise<VendorLevel> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -38,8 +38,8 @@ export default class VendorLevelRepository {
     return createdVendorLevel
   }
 
-  readOne = async (argument: RepositoryArgument): Promise<VendorLevel> => {
-    const args: any = argument.convertToPrismaArgs()
+  readOne = async (repositoryArgument: RepositoryArgument): Promise<VendorLevel> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -53,8 +53,8 @@ export default class VendorLevelRepository {
     return foundVendorLevel
   }
 
-  patchOne = async (argument: RepositoryArgument): Promise<VendorLevel> => {
-    const args: any = argument.convertToPrismaArgs()
+  patchOne = async (repositoryArgument: RepositoryArgument): Promise<VendorLevel> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -68,8 +68,8 @@ export default class VendorLevelRepository {
     return patchedVendor
   }
 
-  deleteOne = async (argument: RepositoryArgument): Promise<VendorLevel> => {
-    const args: any = argument.convertToPrismaArgs()
+  deleteOne = async (repositoryArgument: RepositoryArgument): Promise<VendorLevel> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
