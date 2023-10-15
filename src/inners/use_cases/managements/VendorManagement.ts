@@ -61,7 +61,13 @@ export default class VendorManagement {
   readOneByUsername = async (username: string): Promise<Result<Vendor | null>> => {
     let foundVendor: Vendor
     try {
-      foundVendor = await this.vendorRepository.readOneByUsername(username)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { username },
+        undefined,
+        undefined,
+        undefined
+      )
+      foundVendor = await this.vendorRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
@@ -79,7 +85,13 @@ export default class VendorManagement {
   readOneByEmail = async (email: string): Promise<Result<Vendor | null>> => {
     let foundVendor: Vendor
     try {
-      foundVendor = await this.vendorRepository.readOneByEmail(email)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { email },
+        undefined,
+        undefined,
+        undefined
+      )
+      foundVendor = await this.vendorRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
@@ -97,7 +109,13 @@ export default class VendorManagement {
   readOneByUsernameAndPassword = async (username: string, password: string): Promise<Result<Vendor | null>> => {
     let foundVendor: Vendor
     try {
-      foundVendor = await this.vendorRepository.readOneByUsernameAndPassword(username, password)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { username, password },
+        undefined,
+        undefined,
+        undefined
+      )
+      foundVendor = await this.vendorRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
@@ -115,7 +133,13 @@ export default class VendorManagement {
   readOneByEmailAndPassword = async (email: string, password: string): Promise<Result<Vendor | null>> => {
     let foundVendor: Vendor
     try {
-      foundVendor = await this.vendorRepository.readOneByEmailAndPassword(email, password)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { email, password },
+        undefined,
+        undefined,
+        undefined
+      )
+      foundVendor = await this.vendorRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
