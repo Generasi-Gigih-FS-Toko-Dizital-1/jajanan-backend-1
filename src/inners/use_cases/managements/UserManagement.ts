@@ -61,7 +61,13 @@ export default class UserManagement {
   readOneByUsername = async (username: string): Promise<Result<User | null>> => {
     let foundUser: User
     try {
-      foundUser = await this.userRepository.readOneByUsername(username)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { username },
+        undefined,
+        undefined,
+        undefined
+      )
+      foundUser = await this.userRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
@@ -79,7 +85,13 @@ export default class UserManagement {
   readOneByEmail = async (email: string): Promise<Result<User | null>> => {
     let foundUser: User
     try {
-      foundUser = await this.userRepository.readOneByEmail(email)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { email },
+        undefined,
+        undefined,
+        undefined
+      )
+      foundUser = await this.userRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
@@ -97,7 +109,13 @@ export default class UserManagement {
   readOneByUsernameAndPassword = async (username: string, password: string): Promise<Result<User | null>> => {
     let foundUser: User
     try {
-      foundUser = await this.userRepository.readOneByUsernameAndPassword(username, password)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { username, password },
+        undefined,
+        undefined,
+        undefined
+      )
+      foundUser = await this.userRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
@@ -115,7 +133,13 @@ export default class UserManagement {
   readOneByEmailAndPassword = async (email: string, password: string): Promise<Result<User | null>> => {
     let foundUser: User
     try {
-      foundUser = await this.userRepository.readOneByEmailAndPassword(email, password)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { email, password },
+        undefined,
+        undefined,
+        undefined
+      )
+      foundUser = await this.userRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
