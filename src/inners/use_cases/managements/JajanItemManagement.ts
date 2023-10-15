@@ -8,6 +8,7 @@ import { randomUUID } from 'crypto'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
 import type JajanItemManagementPatchRequest
   from '../../models/value_objects/requests/managements/jajan_item_management/JajanItemManagementPatchRequest'
+import RepositoryArgument from '../../models/value_objects/RepositoryArgument'
 
 export default class JajanItemManagement {
   jajanItemRepository: JajanItemRepository
@@ -19,7 +20,12 @@ export default class JajanItemManagement {
   }
 
   readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Result<JajanItem[]>> => {
-    const foundJajanItems: JajanItem[] = await this.jajanItemRepository.readMany(pagination, whereInput, includeInput)
+    const args: RepositoryArgument = new RepositoryArgument(
+      whereInput,
+      includeInput,
+      pagination
+    )
+    const foundJajanItems: JajanItem[] = await this.jajanItemRepository.readMany(args)
     return new Result<JajanItem[]>(
       200,
       'Jajan Items read many succeed.',
@@ -28,7 +34,12 @@ export default class JajanItemManagement {
   }
 
   readManyByIds = async (ids: string[]): Promise<Result<JajanItem[]>> => {
-    const foundJajanItems: JajanItem[] = await this.jajanItemRepository.readManyByIds(ids)
+    const args: RepositoryArgument = new RepositoryArgument(
+      { id: { in: ids } },
+      undefined,
+      undefined
+    )
+    const foundJajanItems: JajanItem[] = await this.jajanItemRepository.readMany(args)
     return new Result<JajanItem[]>(
       200,
       'Jajan Items read many by ids succeed.',
@@ -39,7 +50,12 @@ export default class JajanItemManagement {
   readOneById = async (id: string): Promise<Result<JajanItem | null>> => {
     let foundJajanItem: JajanItem
     try {
-      foundJajanItem = await this.jajanItemRepository.readOneById(id)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined
+      )
+      foundJajanItem = await this.jajanItemRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
@@ -84,7 +100,13 @@ export default class JajanItemManagement {
   createOneRaw = async (jajanItem: JajanItem): Promise<Result<JajanItem | null>> => {
     let createdJajanItem: JajanItem
     try {
-      createdJajanItem = await this.jajanItemRepository.createOne(jajanItem)
+      const args: RepositoryArgument = new RepositoryArgument(
+        undefined,
+        undefined,
+        undefined,
+        jajanItem
+      )
+      createdJajanItem = await this.jajanItemRepository.createOne(args)
     } catch (error) {
       return new Result<null>(
         500,
@@ -125,7 +147,13 @@ export default class JajanItemManagement {
       )
     }
     this.objectUtility.patch(foundJajanItem.data, request)
-    const patchedJajanItem: JajanItem = await this.jajanItemRepository.patchOneById(id, foundJajanItem.data)
+    const args: RepositoryArgument = new RepositoryArgument(
+      { id },
+      undefined,
+      undefined,
+      foundJajanItem.data
+    )
+    const patchedJajanItem: JajanItem = await this.jajanItemRepository.patchOne(args)
     return new Result<JajanItem>(
       200,
       'Jajan Item patch one raw by id succeed.',
@@ -136,7 +164,13 @@ export default class JajanItemManagement {
   deleteOneById = async (id: string): Promise<Result<JajanItem | null>> => {
     let deletedJajanItem: JajanItem
     try {
-      deletedJajanItem = await this.jajanItemRepository.deleteOneById(id)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        undefined
+      )
+      deletedJajanItem = await this.jajanItemRepository.deleteOne(args)
     } catch (error) {
       return new Result<null>(
         500,

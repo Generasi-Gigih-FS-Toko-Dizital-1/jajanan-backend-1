@@ -9,6 +9,7 @@ import { randomUUID } from 'crypto'
 import type Pagination from '../../models/value_objects/Pagination'
 import type CategoryManagementPatchRequest
   from '../../models/value_objects/requests/managements/category_managements/CategoryManagementPatchRequest'
+import RepositoryArgument from '../../models/value_objects/RepositoryArgument'
 
 export default class CategoryManagement {
   categoryRepository: CategoryRepository
@@ -20,7 +21,12 @@ export default class CategoryManagement {
   }
 
   readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Result<Category[] | CategoryAggregate[]>> => {
-    const foundCategories: Category[] = await this.categoryRepository.readMany(pagination, whereInput, includeInput)
+    const args: RepositoryArgument = new RepositoryArgument(
+      whereInput,
+      includeInput,
+      pagination
+    )
+    const foundCategories: Category[] = await this.categoryRepository.readMany(args)
     return new Result<Category[]>(
       200,
       'Categories read all succeed.',
@@ -31,7 +37,12 @@ export default class CategoryManagement {
   readOneById = async (id: string): Promise<Result<Category | null>> => {
     let foundCategory: Category
     try {
-      foundCategory = await this.categoryRepository.readOneById(id)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined
+      )
+      foundCategory = await this.categoryRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
@@ -74,7 +85,13 @@ export default class CategoryManagement {
   createOneRaw = async (category: Category): Promise<Result<Category | null>> => {
     let createdCategory: Category
     try {
-      createdCategory = await this.categoryRepository.createOne(category)
+      const args: RepositoryArgument = new RepositoryArgument(
+        undefined,
+        undefined,
+        undefined,
+        category
+      )
+      createdCategory = await this.categoryRepository.createOne(args)
     } catch (error) {
       return new Result<null>(
         500,
@@ -115,7 +132,13 @@ export default class CategoryManagement {
       )
     }
     this.objectUtility.patch(foundCategory.data, request)
-    const patchedCategory: Category = await this.categoryRepository.patchOneById(id, foundCategory.data)
+    const args: RepositoryArgument = new RepositoryArgument(
+      { id },
+      undefined,
+      undefined,
+      foundCategory.data
+    )
+    const patchedCategory: Category = await this.categoryRepository.patchOne(args)
     return new Result<Category>(
       200,
       'Category patch one raw by id succeed.',
@@ -126,7 +149,13 @@ export default class CategoryManagement {
   deleteOneById = async (id: string): Promise<Result<Category | null>> => {
     let deletedCategory: Category
     try {
-      deletedCategory = await this.categoryRepository.deleteOneById(id)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        undefined
+      )
+      deletedCategory = await this.categoryRepository.deleteOne(args)
     } catch (error) {
       return new Result<null>(
         500,
