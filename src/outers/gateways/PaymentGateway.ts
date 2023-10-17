@@ -26,7 +26,7 @@ export default class PaymentGateway {
     return response.invoiceUrl
   }
 
-  generatePayoutUrl = async (data: any): Promise<string> => {
+  generatePayoutUrl = async (data: any): Promise<any> => {
     if (this.apiKey === undefined) {
       throw new Error('Payment gateway api key undefined')
     }
@@ -41,22 +41,20 @@ export default class PaymentGateway {
         data
       })
 
-      console.log('Payout request successful. Response:', response.data)
-      return response.data.payout_url
+      return response.data
     } catch (error: any) {
-      console.error('Error making the payout request:', error)
       throw new Error(error.message)
     }
   }
 
-  getPayoutListByUserId = async (userId: string): Promise<any> => {
+  getPayout = async (payoutId: string): Promise<any> => {
     if (this.apiKey === undefined) {
       throw new Error('Payment gateway api key undefined')
     }
     try {
       const response = await axios({
         method: 'get',
-        url: 'https://api.xendit.co/payouts?statuses=["PENDING","EXPIRED"]',
+        url: `https://api.xendit.co/payouts/${payoutId}`,
         headers: {
           Authorization: `Basic ${Buffer.from(this.apiKey + ':').toString('base64')}`,
           'Content-Type': 'application/json'
@@ -69,11 +67,23 @@ export default class PaymentGateway {
     }
   }
 
-  getPayouts = async (userId: string): Promise<any> => {
-    const response = await this.client?.Payout.getPayouts({
-      referenceId: userId
-    })
-    console.log('Payouts:', response)
-    return response
+  voidPayout = async (payoutId: string): Promise<any> => {
+    if (this.apiKey === undefined) {
+      throw new Error('Payment gateway api key undefined')
+    }
+    try {
+      const response = await axios({
+        method: 'post',
+        url: `https://api.xendit.co/payouts/${payoutId}/void`,
+        headers: {
+          Authorization: `Basic ${Buffer.from(this.apiKey + ':').toString('base64')}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      console.log('Void payout request successful. Response:', response.data)
+    } catch (error: any) {
+      console.error('Error making the payout request:', error)
+    }
   }
 }
