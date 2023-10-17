@@ -13,7 +13,7 @@ export default class VendorMock {
         email: `${randomUUID()}@mail.com`,
         password: 'password0',
         username: `${randomUUID()}`,
-        balance: 0.0,
+        balance: 100000.0,
         gender: 'MALE',
         experience: 0,
         lastLatitude: 0.0,
