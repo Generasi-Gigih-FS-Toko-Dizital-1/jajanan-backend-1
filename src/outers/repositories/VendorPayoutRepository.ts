@@ -31,15 +31,13 @@ export default class VendorPayoutRepository {
     return createdVendorPayout
   }
 
-  delete = async (repositoryArgument: RepositoryArgument): Promise<VendorPayout | null> => {
+  delete = async (repositoryArgument: RepositoryArgument): Promise<void> => {
     const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
     }
 
-    const deletedVendorPayout: VendorPayout | null = await this.oneDatastore.client.vendorPayout.delete(args)
-
-    return deletedVendorPayout
+    await this.oneDatastore.client.vendorPayout.deleteMany(args)
   }
 }

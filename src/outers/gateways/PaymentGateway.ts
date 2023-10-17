@@ -47,32 +47,12 @@ export default class PaymentGateway {
     }
   }
 
-  getPayout = async (payoutId: string): Promise<any> => {
-    if (this.apiKey === undefined) {
-      throw new Error('Payment gateway api key undefined')
-    }
-    try {
-      const response = await axios({
-        method: 'get',
-        url: `https://api.xendit.co/payouts/${payoutId}`,
-        headers: {
-          Authorization: `Basic ${Buffer.from(this.apiKey + ':').toString('base64')}`,
-          'Content-Type': 'application/json'
-        }
-      })
-
-      console.log('Payout request successful. Response:', response.data)
-    } catch (error: any) {
-      console.error('Error making the payout request:', error)
-    }
-  }
-
   voidPayout = async (payoutId: string): Promise<any> => {
     if (this.apiKey === undefined) {
       throw new Error('Payment gateway api key undefined')
     }
     try {
-      const response = await axios({
+      await axios({
         method: 'post',
         url: `https://api.xendit.co/payouts/${payoutId}/void`,
         headers: {
@@ -80,10 +60,10 @@ export default class PaymentGateway {
           'Content-Type': 'application/json'
         }
       })
-
-      console.log('Void payout request successful. Response:', response.data)
     } catch (error: any) {
-      console.error('Error making the payout request:', error)
+      if (error.response.status === 403) {
+        throw new Error(error.message)
+      }
     }
   }
 }

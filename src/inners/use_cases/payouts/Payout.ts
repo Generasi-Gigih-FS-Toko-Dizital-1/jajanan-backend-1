@@ -1,4 +1,4 @@
-import { type Vendor } from '@prisma/client'
+import { type VendorPayout, type Vendor } from '@prisma/client'
 import type PaymentGateway from '../../../outers/gateways/PaymentGateway'
 import Result from '../../models/value_objects/Result'
 import type PayoutCreateRequest from '../../models/value_objects/requests/payouts/PayoutCreateRequest'
@@ -22,45 +22,59 @@ export default class Payout {
   generatePayoutUrl = async (request: PayoutCreateRequest): Promise<Result<string | null>> => {
     const foundVendor: Result<Vendor | null> = await this.vendorManagement.readOneById(request.vendorId)
     if (foundVendor.status !== 200 || foundVendor.data === null) {
-      return new Result<string | null>(
+      return new Result<null>(
         404,
         'Vendor not found.',
         null
       )
     }
 
-    const deleteArgs: RepositoryArgument = new RepositoryArgument(
+    if (request.amount > foundVendor.data.balance) {
+      return new Result<null>(
+        400,
+        'Insufficient balance.',
+        null
+      )
+    }
+
+    const readArgs: RepositoryArgument = new RepositoryArgument(
       { vendorId: request.vendorId },
       undefined,
       undefined
     )
 
-    const deletedVendorPayout = await this.vendorPayoutRepository.delete(deleteArgs)
+    const VendorPayout = await this.vendorPayoutRepository.readOne(readArgs)
 
-    if (deletedVendorPayout !== null) {
-      const response = await this.paymentGateway.voidPayout(deletedVendorPayout.payoutId)
-      console.log('void payout response :', response)
+    if (VendorPayout !== null) {
+      await this.paymentGateway.voidPayout(VendorPayout.payoutId)
+      await this.vendorPayoutRepository.delete(readArgs)
     }
 
     const createPayoutRequest: XenditCreatePayoutRequest = {
-      externalId: foundVendor.data.id,
+      external_id: foundVendor.data.id,
       amount: request.amount,
       email: foundVendor.data.email
     }
 
     const generatedPayout = await this.paymentGateway.generatePayoutUrl(createPayoutRequest)
-    console.log('generatedPayoutUrl :', generatedPayout)
+
+    const createVendorPayout: VendorPayout = {
+      id: randomUUID(),
+      vendorId: foundVendor.data.id,
+      payoutId: generatedPayout.id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deletedAt: null
+    }
 
     const createArgs: RepositoryArgument = new RepositoryArgument(
       undefined,
       undefined,
       undefined,
-      { id: randomUUID(), vendorId: foundVendor.data.id, payoutId: generatedPayout.id }
+      createVendorPayout
     )
-    const newVendorPayout = await this.vendorPayoutRepository.createOne(createArgs)
+    await this.vendorPayoutRepository.createOne(createArgs)
 
-    console.log('newVendorPayout :', newVendorPayout)
-
-    return new Result<string | null>(200, 'Payout url generated.', generatedPayout.payout_url)
+    return new Result<string | null>(201, 'Payout url generated.', generatedPayout.payout_url)
   }
 }

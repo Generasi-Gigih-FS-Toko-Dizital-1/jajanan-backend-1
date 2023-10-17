@@ -17,7 +17,7 @@ export default class PayoutControllerRest {
   }
 
   registerRoutes = (): void => {
-    // this.router.use(validateAuthenticationMiddleware(this.authenticationValidation))
+    this.router.use(validateAuthenticationMiddleware(this.authenticationValidation))
     this.router.post('', this.generatePayout)
   }
 
@@ -25,7 +25,7 @@ export default class PayoutControllerRest {
     this.payout
       .generatePayoutUrl(req.body)
       .then((result: Result<string | null>) => {
-        let data: any | null = null
+        let data: string | null = null
         if (result.status === 201 && result.data !== null) {
           data = result.data
         } else {
