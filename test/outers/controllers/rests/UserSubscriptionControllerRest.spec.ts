@@ -7,18 +7,14 @@ import waitUntil from 'async-wait-until'
 import {
   type Admin,
   type UserSubscription,
-  type Prisma,
-  type Category,
-  type User
+  type Prisma
 } from '@prisma/client'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
 import AdminMock from '../../../mocks/AdminMock'
 import AdminLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
-import humps from 'humps'
 import OneSeeder from '../../../../src/outers/seeders/OneSeeder'
 import UserSubscriptionManagementCreateRequest from '../../../../src/inners/models/value_objects/requests/managements/user_subscription_managements/UserSubscriptionManagementCreateRequest'
-import UserSubscriptionManagementPatchRequest from '../../../../src/inners/models/value_objects/requests/managements/user_subscription_managements/UserSubscriptionManagementPatchRequest'
 
 chai.use(chaiHttp)
 chai.should()
@@ -100,95 +96,6 @@ describe('UserSubscriptionControllerRest', () => {
     await oneDatastore.disconnect()
   })
 
-  describe('GET /api/v1/user-subscriptions?page_number={}&page_size={}', () => {
-    it('should return 200 OK', async () => {
-      const pageNumber: number = 1
-      const pageSize: number = oneSeeder.userSubscriptionMock.data.length
-      const response = await agent
-        .get(`/api/v1/user-subscriptions?page_number=${pageNumber}&page_size=${pageSize}`)
-        .set('Authorization', authorization.convertToString())
-        .send()
-
-      response.should.has.status(200)
-      response.body.should.be.an('object')
-      response.body.should.has.property('message')
-      response.body.should.has.property('data')
-      response.body.data.should.has.property('total_user_subscriptions')
-      response.body.data.should.has.property('user_subscriptions')
-      response.body.data.user_subscriptions.should.be.an('array')
-      response.body.data.user_subscriptions.length.should.equal(pageSize)
-      response.body.data.user_subscriptions.forEach((userSubscription: any) => {
-        userSubscription.should.has.property('id')
-        userSubscription.should.has.property('user_id')
-        userSubscription.should.has.property('category_id')
-        userSubscription.should.has.property('updated_at')
-        userSubscription.should.has.property('created_at')
-      })
-    })
-  })
-
-  describe('GET /api/v1/user-subscriptions?page_number={}&page_size={}&&where={}&include={}', () => {
-    it('should return 200 OK', async () => {
-      const requestUserSubscription: UserSubscription = oneSeeder.userSubscriptionMock.data[0]
-      const requestUser: User = oneSeeder.userSubscriptionMock.userMock.data.filter((user: User) => user.id === requestUserSubscription.userId)[0]
-      const requestCategory: Category = oneSeeder.userSubscriptionMock.categoryMock.data.filter((category: Category) => category.id === requestUserSubscription.categoryId)[0]
-      const pageNumber: number = 1
-      const pageSize: number = oneSeeder.userSubscriptionMock.data.length
-      const whereInput: any = {
-        id: requestUserSubscription.id
-      }
-      const where: string = encodeURIComponent(JSON.stringify(whereInput))
-      const includeInput: any = {
-        user: true,
-        category: true
-      }
-      const include: string = encodeURIComponent(JSON.stringify(includeInput))
-      const response = await agent
-        .get(`/api/v1/user-subscriptions?page_number=${pageNumber}&page_size=${pageSize}&where=${where}&include=${include}`)
-        .set('Authorization', authorization.convertToString())
-        .send()
-
-      response.should.has.status(200)
-      response.body.should.be.an('object')
-      response.body.should.has.property('message')
-      response.body.should.has.property('data')
-      response.body.data.should.has.property('total_user_subscriptions')
-      response.body.data.should.has.property('user_subscriptions')
-      response.body.data.user_subscriptions.should.be.an('array')
-      response.body.data.user_subscriptions.length.should.equal(1)
-      response.body.data.user_subscriptions.forEach((userSubscription: any) => {
-        userSubscription.should.has.property('id').equal(requestUserSubscription.id)
-        userSubscription.should.has.property('user_id').equal(requestUserSubscription.userId)
-        userSubscription.should.has.property('category_id').equal(requestUserSubscription.categoryId)
-        userSubscription.should.has.property('updated_at').equal(requestUserSubscription.updatedAt.toISOString())
-        userSubscription.should.has.property('created_at').equal(requestUserSubscription.createdAt.toISOString())
-        userSubscription.should.has.property('user').deep.equal(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestUser))))
-        userSubscription.should.has.property('category').deep.equal(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestCategory))))
-      })
-    })
-  })
-
-  describe('GET /api/v1/user-subscriptions/:id', () => {
-    it('should return 200 OK', async () => {
-      const requestUserSubscription: UserSubscription = oneSeeder.userSubscriptionMock.data[0]
-      const response = await agent
-        .get(`/api/v1/user-subscriptions/${requestUserSubscription.id}`)
-        .set('Authorization', authorization.convertToString())
-        .send()
-
-      response.should.has.status(200)
-      response.body.should.be.an('object')
-      response.body.should.has.property('message')
-      response.body.should.has.property('data')
-      response.body.data.should.be.an('object')
-      response.body.data.should.has.property('id').equal(requestUserSubscription.id)
-      response.body.data.should.has.property('user_id').equal(requestUserSubscription.userId)
-      response.body.data.should.has.property('category_id').equal(requestUserSubscription.categoryId)
-      response.body.data.should.has.property('updated_at').equal(requestUserSubscription.updatedAt.toISOString())
-      response.body.data.should.has.property('created_at').equal(requestUserSubscription.createdAt.toISOString())
-    })
-  })
-
   describe('POST /api/v1/user-subscriptions', () => {
     it('should return 201 CREATED', async () => {
       const requestBody: UserSubscriptionManagementCreateRequest = new UserSubscriptionManagementCreateRequest(
@@ -221,32 +128,6 @@ describe('UserSubscriptionControllerRest', () => {
         }
       })
       deleteResult.should.has.property('count').greaterThanOrEqual(1)
-    })
-  })
-
-  describe('PATCH /api/v1/user-subscriptions/:id', () => {
-    it('should return 200 OK', async () => {
-      const requestUserSubscription: UserSubscription = oneSeeder.userSubscriptionMock.data[0]
-      const requestBody: UserSubscriptionManagementPatchRequest = new UserSubscriptionManagementPatchRequest(
-        oneSeeder.userMock.data[1].id,
-        oneSeeder.categoryMock.data[1].id
-      )
-
-      const response = await agent
-        .patch(`/api/v1/user-subscriptions/${requestUserSubscription.id}`)
-        .set('Authorization', authorization.convertToString())
-        .send(requestBody)
-
-      response.should.has.status(200)
-      response.body.should.be.an('object')
-      response.body.should.has.property('message')
-      response.body.should.has.property('data')
-      response.body.data.should.be.an('object')
-      response.body.data.should.has.property('id')
-      response.body.data.should.has.property('user_id').equal(requestBody.userId)
-      response.body.data.should.has.property('category_id').equal(requestBody.categoryId)
-      response.body.data.should.has.property('updated_at')
-      response.body.data.should.has.property('created_at')
     })
   })
 

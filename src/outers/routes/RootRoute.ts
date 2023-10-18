@@ -55,7 +55,7 @@ import CheckoutTransaction from '../../inners/use_cases/transactions/CheckoutTra
 import TopUpHistoryManagement from '../../inners/use_cases/managements/TopUpHistoryManagement'
 import TopUpHistoryController from '../controllers/rests/TopUpHistoryControllerRest'
 import UserSubscriptionRepository from '../repositories/UserSubscriptionRepository'
-import UserSubscriptionManagement from '../../inners/use_cases/managements/UserSubscriptionManagement'
+import UserSubscriptionManagement from '../../inners/use_cases/subscriptions/UserSubscriptionManagement'
 import UserSubscriptionControllerRest from '../controllers/rests/UserSubscriptionControllerRest'
 import JajanItemSnapshotManagement from '../../inners/use_cases/managements/JajanItemSnapshotManagement'
 import JajanItemSnapshotRepository from '../repositories/JajanItemSnapshotRepository'
