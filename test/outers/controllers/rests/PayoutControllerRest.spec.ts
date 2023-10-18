@@ -5,15 +5,17 @@ import OneDatastore from '../../../../src/outers/datastores/OneDatastore'
 import { server } from '../../../../src/App'
 import chaiHttp from 'chai-http'
 import { type Vendor } from '@prisma/client'
-import fetchMock from 'fetch-mock'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
 import VendorMock from '../../../mocks/VendorMock'
 import PayoutResponseMock from '../../../mocks/PayoutResponseMock'
 import VendorLoginByEmailAndPasswordRequest from '../../../../src/inners/models/value_objects/requests/authentications/vendors/VendorLoginByEmailAndPasswordRequest'
 import type PayoutCreateRequest from '../../../../src/inners/models/value_objects/requests/payouts/PayoutCreateRequest'
+import axios from 'axios'
+import MockAdafter from 'axios-mock-adapter'
 
 chai.use(chaiHttp)
 chai.should()
+const mock = new MockAdafter(axios)
 
 describe('PayoutControllerRest', () => {
   const vendorMock: VendorMock = new VendorMock()
@@ -34,7 +36,7 @@ describe('PayoutControllerRest', () => {
       data: vendorMock.data
     })
 
-    fetchMock.mock('https://api.xendit.co/payouts', payoutResponseMock.data)
+    mock.onPost('https://api.xendit.co/payouts').reply(201, payoutResponseMock.data)
   })
 
   beforeEach(async () => {
@@ -89,13 +91,11 @@ describe('PayoutControllerRest', () => {
       console.log(response.body)
 
       response.should.have.status(201)
-    //   response.body.should.be.a('object')
-    //   response.body.should.have.property('data')
-    //   response.body.data.should.have.property('external_id')
-    //   response.body.data.should.have.property('status')
-    //   response.body.data.should.have.property('amount')
-    //   response.body.data.should.have.property('created')
-    //   response.body.data.should.have.property('updated')
+      response.body.should.be.a('object')
+      response.body.should.have.property('data')
+      response.body.should.have.property('message')
+      response.body.data.should.be.an('object')
+      response.body.data.should.have.property('redirect_url')
     })
   })
 })

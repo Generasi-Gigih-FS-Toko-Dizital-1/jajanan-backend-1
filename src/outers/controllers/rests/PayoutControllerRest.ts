@@ -4,6 +4,7 @@ import validateAuthenticationMiddleware from '../../middlewares/ValidateAuthenti
 import type AuthenticationValidation from '../../../inners/use_cases/authentications/AuthenticationValidation'
 import type Result from '../../../inners/models/value_objects/Result'
 import ResponseBody from '../../../inners/models/value_objects/responses/ResponseBody'
+import PayoutCreateResponse from '../../../inners/models/value_objects/responses/payouts/PayoutCreateResponse'
 
 export default class PayoutControllerRest {
   router: Router
@@ -25,13 +26,13 @@ export default class PayoutControllerRest {
     this.payout
       .generatePayoutUrl(req.body)
       .then((result: Result<string | null>) => {
-        let data: string | null = null
+        let data: PayoutCreateResponse | null = null
         if (result.status === 201 && result.data !== null) {
-          data = result.data
+          data = new PayoutCreateResponse(result.data)
         } else {
           data = null
         }
-        const responseBody: ResponseBody<any | null> = new ResponseBody<string | null>(result.message, data)
+        const responseBody: ResponseBody<PayoutCreateResponse | null> = new ResponseBody<PayoutCreateResponse | null>(result.message, data)
         res.status(result.status).json(responseBody)
       })
       .catch((error) => {
