@@ -49,6 +49,7 @@
 		"@types/swagger-ui-express": "^4.1.4",
 		"@types/underscore": "^1.11.6",
 		"@typescript-eslint/eslint-plugin": "^5.50.0",
+		"axios-mock-adapter": "^1.22.0",
 		"chai": "^4.3.7",
 		"chai-http": "^4.4.0",
 		"eslint": "^8.0.1",

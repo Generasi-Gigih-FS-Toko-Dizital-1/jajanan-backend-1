@@ -66,6 +66,7 @@ model Vendor {
   jajanItems            JajanItem[]
   payoutHistory         PayoutHistory[]
   jajanItemSnapshot     JajanItemSnapshot[]
+  VendorPayout          VendorPayout[]
 }
 
 model Admin {
@@ -146,14 +147,15 @@ model TopUpHistory {
 }
 
 model PayoutHistory {
-  id        String    @id
-  vendorId  String
-  amount    Float
-  media     String    @db.VarChar(255)
-  updatedAt DateTime  @db.Timestamptz
-  createdAt DateTime  @db.Timestamptz
-  deletedAt DateTime? @db.Timestamptz
-  vendor    Vendor    @relation(fields: [vendorId], references: [id])
+  id             String    @id
+  xenditPayoutId String
+  vendorId       String
+  amount         Float
+  media          String    @db.VarChar(255)
+  updatedAt      DateTime  @db.Timestamptz
+  createdAt      DateTime  @db.Timestamptz
+  deletedAt      DateTime? @db.Timestamptz
+  vendor         Vendor    @relation(fields: [vendorId], references: [id])
 }
 
 model UserLevel {
@@ -210,4 +212,14 @@ model TransactionItemHistory {
   deletedAt           DateTime?          @db.Timestamptz
   transaction         TransactionHistory @relation(fields: [transactionId], references: [id])
   jajanItem           JajanItemSnapshot  @relation(fields: [jajanItemSnapshotId], references: [id])
+}
+
+model VendorPayout {
+  id        String    @id
+  vendorId  String
+  payoutId  String
+  updatedAt DateTime  @db.Timestamptz
+  createdAt DateTime  @db.Timestamptz
+  deletedAt DateTime? @db.Timestamptz
+  vendor    Vendor    @relation(fields: [vendorId], references: [id])
 }

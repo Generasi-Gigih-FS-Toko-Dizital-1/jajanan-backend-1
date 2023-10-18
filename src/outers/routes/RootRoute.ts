@@ -56,6 +56,9 @@ import TopUpHistoryManagement from '../../inners/use_cases/managements/TopUpHist
 import TopUpHistoryController from '../controllers/rests/TopUpHistoryControllerRest'
 import JajanItemSnapshotManagement from '../../inners/use_cases/managements/JajanItemSnapshotManagement'
 import JajanItemSnapshotRepository from '../repositories/JajanItemSnapshotRepository'
+import PayoutControllerRest from '../controllers/rests/PayoutControllerRest'
+import Payout from '../../inners/use_cases/payouts/Payout'
+import VendorPayoutRepository from '../repositories/VendorPayoutRepository'
 
 export default class RootRoute {
   app: Application
@@ -88,6 +91,7 @@ export default class RootRoute {
     const categoryRepository: CategoryRepository = new CategoryRepository(this.datastoreOne)
     const topUpHistoryRepository = new TopUpHistoryRepository(this.datastoreOne)
     const jajanItemSnashotRepository = new JajanItemSnapshotRepository(this.datastoreOne)
+    const vendorPayoutRepository = new VendorPayoutRepository(this.datastoreOne)
 
     const sessionManagement: SessionManagement = new SessionManagement(sessionRepository, objectUtility)
     const authenticationValidation: AuthenticationValidation = new AuthenticationValidation(sessionManagement)
@@ -119,6 +123,8 @@ export default class RootRoute {
 
     const topUpWebhook: TopUpWebhook = new TopUpWebhook(topUpHistoryRepository, userRepository)
     const topUp: TopUp = new TopUp(paymentGateway, userManagement)
+
+    const payout: Payout = new Payout(vendorPayoutRepository, paymentGateway, vendorManagement)
 
     const checkoutTransaction: CheckoutTransaction = new CheckoutTransaction(userManagement, vendorManagement, jajanItemManagement, jajanItemSnapshotManagement, transactionHistoryManagement, objectUtility)
 
@@ -233,6 +239,10 @@ export default class RootRoute {
     const topUpHistoryControllerRest: TopUpHistoryController = new TopUpHistoryController(Router(), topUpHistoryManagement, authenticationValidation)
     topUpHistoryControllerRest.registerRoutes()
     routerVersionOne.use('/top-up-histories', topUpHistoryControllerRest.router)
+
+    const payoutControllerRest: PayoutControllerRest = new PayoutControllerRest(Router(), payout, authenticationValidation)
+    payoutControllerRest.registerRoutes()
+    routerVersionOne.use('/payouts', payoutControllerRest.router)
 
     this.app.use('/api/v1', routerVersionOne)
   }
