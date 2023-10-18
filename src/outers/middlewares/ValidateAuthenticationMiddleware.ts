@@ -17,7 +17,7 @@ const validateAuthenticationMiddleware = (authenticationValidation: Authenticati
       return
     }
 
-    const authorization: Authorization = Authorization.parseFromString(request.headers.authorization)
+    const authorization: Authorization = Authorization.convertFromString(request.headers.authorization)
     const validatedSession: Result<Session | null> = await authenticationValidation.validateAuthorization(authorization)
     if (validatedSession.status !== 200 || validatedSession.data === null) {
       response.status(validatedSession.status).send(

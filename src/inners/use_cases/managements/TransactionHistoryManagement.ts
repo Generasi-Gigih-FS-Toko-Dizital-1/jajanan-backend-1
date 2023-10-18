@@ -10,6 +10,7 @@ import type TransactionHistoryManagementPatchRequest
   from '../../models/value_objects/requests/managements/transaction_history_management/TransactionHistoryManagementPatchRequest'
 import type UserManagement from './UserManagement'
 import type JajanItemManagement from './JajanItemManagement'
+import RepositoryArgument from '../../models/value_objects/RepositoryArgument'
 
 export default class TransactionHistoryManagement {
   userManagement: UserManagement
@@ -25,7 +26,12 @@ export default class TransactionHistoryManagement {
   }
 
   readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Result<TransactionHistory[]>> => {
-    const foundTransactionHistories: TransactionHistory[] = await this.transactionHistoryRepository.readMany(pagination, whereInput, includeInput)
+    const args: RepositoryArgument = new RepositoryArgument(
+      whereInput,
+      includeInput,
+      pagination
+    )
+    const foundTransactionHistories: TransactionHistory[] = await this.transactionHistoryRepository.readMany(args)
     return new Result<TransactionHistory[]>(
       200,
       'TransactionHistory read many succeed.',
@@ -36,7 +42,12 @@ export default class TransactionHistoryManagement {
   readOneById = async (id: string): Promise<Result<TransactionHistory | null>> => {
     let foundTransactionHistory: TransactionHistory
     try {
-      foundTransactionHistory = await this.transactionHistoryRepository.readOneById(id)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined
+      )
+      foundTransactionHistory = await this.transactionHistoryRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
@@ -73,8 +84,6 @@ export default class TransactionHistoryManagement {
     const transactionHistory: TransactionHistory = {
       id: randomUUID(),
       userId: request.userId,
-      jajanItemId: request.jajanItemId,
-      amount: request.amount,
       paymentMethod: request.paymentMethod,
       lastLatitude: request.lastLatitude,
       lastLongitude: request.lastLongitude,
@@ -109,16 +118,13 @@ export default class TransactionHistoryManagement {
       )
     }
 
-    const foundJajanItem: Result<any> = await this.jajanItemManagement.readOneById(transactionHistory.jajanItemId)
-    if (foundJajanItem.status !== 200 || foundJajanItem.data === null) {
-      return new Result<null>(
-        404,
-        'TransactionHistory create one failed, jajan item is not found.',
-        null
-      )
-    }
-
-    const createdTransactionHistory: any = await this.transactionHistoryRepository.createOne(transactionHistory)
+    const args: RepositoryArgument = new RepositoryArgument(
+      undefined,
+      undefined,
+      undefined,
+      transactionHistory
+    )
+    const createdTransactionHistory: any = await this.transactionHistoryRepository.createOne(args)
     return new Result<TransactionHistory>(
       201,
       'TransactionHistory create one raw succeed.',
@@ -142,7 +148,7 @@ export default class TransactionHistoryManagement {
     )
   }
 
-  patchOneRawById = async (id: string, request: TransactionHistoryManagementPatchRequest): Promise<Result<TransactionHistory | null>> => {
+  patchOneRawById = async (id: string, request: any): Promise<Result<TransactionHistory | null>> => {
     const foundTransactionHistory: Result<TransactionHistory | null> = await this.readOneById(id)
     if (foundTransactionHistory.status !== 200 || foundTransactionHistory.data === null) {
       return new Result<null>(
@@ -152,7 +158,13 @@ export default class TransactionHistoryManagement {
       )
     }
     this.objectUtility.patch(foundTransactionHistory.data, request)
-    const patchedTransactionHistory: TransactionHistory = await this.transactionHistoryRepository.patchOneById(id, foundTransactionHistory.data)
+    const args: RepositoryArgument = new RepositoryArgument(
+      { id },
+      undefined,
+      undefined,
+      foundTransactionHistory.data
+    )
+    const patchedTransactionHistory: TransactionHistory = await this.transactionHistoryRepository.patchOne(args)
     return new Result<TransactionHistory>(
       200,
       'TransactionHistory patch one by id succeed.',
@@ -160,8 +172,23 @@ export default class TransactionHistoryManagement {
     )
   }
 
-  deleteOneById = async (id: string): Promise<Result<TransactionHistory>> => {
-    const deletedTransactionHistory: any = await this.transactionHistoryRepository.deleteOneById(id)
+  deleteOneById = async (id: string): Promise<Result<TransactionHistory | null>> => {
+    let deletedTransactionHistory: TransactionHistory
+    try {
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        undefined
+      )
+      deletedTransactionHistory = await this.transactionHistoryRepository.deleteOne(args)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'TransactionHistory delete one by id failed, transaction history is not found.',
+        null
+      )
+    }
     return new Result<TransactionHistory>(
       200,
       'TransactionHistory delete one by id succeed.',

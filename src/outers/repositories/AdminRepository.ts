@@ -1,6 +1,6 @@
 import type OneDatastore from '../datastores/OneDatastore'
 import { type Admin } from '@prisma/client'
-import type Pagination from '../../inners/models/value_objects/Pagination'
+import type RepositoryArgument from '../../inners/models/value_objects/RepositoryArgument'
 
 export default class AdminRepository {
   oneDatastore: OneDatastore
@@ -10,103 +10,23 @@ export default class AdminRepository {
     this.oneDatastore = oneDatastore
   }
 
-  readMany = async (pagination: Pagination, whereInput: any): Promise<Admin[] > => {
-    const offset: number = (pagination.pageNumber - 1) * pagination.pageSize
-    const args: any = {
-      take: pagination.pageSize,
-      skip: offset,
-      where: whereInput
-    }
+  readMany = async (repositoryArgument: RepositoryArgument): Promise<Admin[] > => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
     }
 
-    const foundAdmin: Admin[] = await this.oneDatastore.client.admin.findMany(args)
-    if (foundAdmin === null) {
+    const foundAdmins: Admin[] = await this.oneDatastore.client.admin.findMany(args)
+    if (foundAdmins === null) {
       throw new Error('Found admins is undefined.')
     }
-    return foundAdmin
+
+    return foundAdmins
   }
 
-  readOneById = async (id: string): Promise<Admin > => {
-    const args: any = {
-      where: {
-        id
-      }
-    }
-
-    if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined.')
-    }
-
-    const foundAdmin: Admin | null = await this.oneDatastore.client.admin.findFirst(args)
-    if (foundAdmin === null) {
-      throw new Error('Found admins is null.')
-    }
-    return foundAdmin
-  }
-
-  readOneByEmail = async (email: string): Promise<any > => {
-    const args: any = {
-      where: {
-        email
-      }
-    }
-
-    if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined.')
-    }
-
-    const foundAdmin: Admin | null = await this.oneDatastore.client.admin.findFirst(args)
-    if (foundAdmin === null) {
-      throw new Error('Found admins is null.')
-    }
-    return foundAdmin
-  }
-
-  readOneByUsernameAndPassword = async (username: string, password: string): Promise<Admin > => {
-    const args: any = {
-      where: {
-        username,
-        password
-      }
-    }
-
-    if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined.')
-    }
-
-    const foundAdmin: Admin | null = await this.oneDatastore.client.admin.findFirst(args)
-    if (foundAdmin === null) {
-      throw new Error('Found admins is null.')
-    }
-    return foundAdmin
-  }
-
-  readOneByEmailAndPassword = async (email: string, password: string): Promise<Admin > => {
-    const args: any = {
-      where: {
-        email,
-        password
-      }
-    }
-
-    if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined.')
-    }
-
-    const foundAdmin: Admin | null = await this.oneDatastore.client.admin.findFirst(args)
-    if (foundAdmin === null) {
-      throw new Error('Found admins is null.')
-    }
-    return foundAdmin
-  }
-
-  createOne = async (admin: Admin): Promise<Admin > => {
-    const args: any = {
-      data: admin
-    }
+  createOne = async (repositoryArgument: RepositoryArgument): Promise<Admin> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -117,13 +37,23 @@ export default class AdminRepository {
     return createdAdmin
   }
 
-  patchOneById = async (id: string, admin: Admin): Promise<Admin > => {
-    const args: any = {
-      where: {
-        id
-      },
-      data: admin
+  readOne = async (repositoryArgument: RepositoryArgument): Promise<Admin> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
+
+    if (this.oneDatastore.client === undefined) {
+      throw new Error('oneDatastore client is undefined.')
     }
+
+    const foundAdmin: Admin | null = await this.oneDatastore.client.admin.findFirst(args)
+    if (foundAdmin === null) {
+      throw new Error('Found admin is null.')
+    }
+
+    return foundAdmin
+  }
+
+  patchOne = async (repositoryArgument: RepositoryArgument): Promise<Admin> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -131,17 +61,14 @@ export default class AdminRepository {
 
     const patchedAdmin: Admin = await this.oneDatastore.client.admin.update(args)
     if (patchedAdmin === null) {
-      throw new Error('Patched admins is undefined.')
+      throw new Error('Patched admin is undefined.')
     }
+
     return patchedAdmin
   }
 
-  deleteOneById = async (id: string): Promise<Admin > => {
-    const args: any = {
-      where: {
-        id
-      }
-    }
+  deleteOne = async (repositoryArgument: RepositoryArgument): Promise<Admin> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')

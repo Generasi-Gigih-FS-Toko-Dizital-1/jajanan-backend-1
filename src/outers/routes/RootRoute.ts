@@ -50,25 +50,27 @@ import CategoryRepository from '../repositories/CategoryRepository'
 import UserLevelManagement from '../../inners/use_cases/managements/UserLevelManagement'
 import UserLevelControllerRest from '../controllers/rests/UserLevelControllerRest'
 import CategoryControllerRest from '../controllers/rests/CategoryControllerRest'
+import TransactionControllerRest from '../controllers/rests/TransactionControllerRest'
+import CheckoutTransaction from '../../inners/use_cases/transactions/CheckoutTransaction'
 import TopUpHistoryManagement from '../../inners/use_cases/managements/TopUpHistoryManagement'
 import TopUpHistoryController from '../controllers/rests/TopUpHistoryControllerRest'
 import UserSubscriptionRepository from '../repositories/UserSubscriptionRepository'
 import UserSubscriptionManagement from '../../inners/use_cases/managements/UserSubscriptionManagement'
 import UserSubscriptionControllerRest from '../controllers/rests/UserSubscriptionControllerRest'
+import JajanItemSnapshotManagement from '../../inners/use_cases/managements/JajanItemSnapshotManagement'
+import JajanItemSnapshotRepository from '../repositories/JajanItemSnapshotRepository'
 
 export default class RootRoute {
   app: Application
   io: Server
   datastoreOne: OneDatastore
   twoDatastore: TwoDatastore
-  paymentGateway: PaymentGateway
 
-  constructor (app: Application, io: Server, datastoreOne: OneDatastore, twoDatastore: TwoDatastore, paymentGateway: PaymentGateway) {
+  constructor (app: Application, io: Server, datastoreOne: OneDatastore, twoDatastore: TwoDatastore) {
     this.app = app
     this.io = io
     this.datastoreOne = datastoreOne
     this.twoDatastore = twoDatastore
-    this.paymentGateway = paymentGateway
   }
 
   registerRoutes = async (): Promise<void> => {
@@ -89,6 +91,7 @@ export default class RootRoute {
     const categoryRepository: CategoryRepository = new CategoryRepository(this.datastoreOne)
     const topUpHistoryRepository = new TopUpHistoryRepository(this.datastoreOne)
     const userSubscriptionRepository: UserSubscriptionRepository = new UserSubscriptionRepository(this.datastoreOne)
+    const jajanItemSnashotRepository = new JajanItemSnapshotRepository(this.datastoreOne)
 
     const sessionManagement: SessionManagement = new SessionManagement(sessionRepository, objectUtility)
     const authenticationValidation: AuthenticationValidation = new AuthenticationValidation(sessionManagement)
@@ -96,6 +99,7 @@ export default class RootRoute {
     const vendorManagement: VendorManagement = new VendorManagement(vendorRepository, objectUtility)
     const adminManagement: AdminManagement = new AdminManagement(adminRepository, objectUtility)
     const jajanItemManagement: JajanItemManagement = new JajanItemManagement(jajanItemRepository, objectUtility)
+    const jajanItemSnapshotManagement: JajanItemSnapshotManagement = new JajanItemSnapshotManagement(jajanItemSnashotRepository, objectUtility)
     const transactionHistoryManagement: TransactionHistoryManagement = new TransactionHistoryManagement(userManagement, jajanItemManagement, transactionHistoryRepository, objectUtility)
     const vendorLevelManagement: VendorLevelManagement = new VendorLevelManagement(vendorLevelRepository, objectUtility)
     const userLevelManagement: UserLevelManagement = new UserLevelManagement(userLevelRepository, objectUtility)
@@ -114,12 +118,14 @@ export default class RootRoute {
     const vendorRefreshAuthentication: VendorRefreshAuthentication = new VendorRefreshAuthentication(vendorManagement, sessionManagement)
     const adminRefreshAuthentication: AdminRefreshAuthentication = new AdminRefreshAuthentication(adminManagement, sessionManagement)
 
-    const topUpWebhookUseCase = new TopUpWebhook(topUpHistoryRepository, userRepository)
-    const topUp = new TopUp(paymentGateway, userManagement)
-
     const userLogoutAuthentication: UserLogoutAuthentication = new UserLogoutAuthentication(userManagement, sessionManagement)
     const vendorLogoutAuthentication: VendorLogoutAuthentication = new VendorLogoutAuthentication(vendorManagement, sessionManagement)
     const adminLogoutAuthentication: AdminLogoutAuthentication = new AdminLogoutAuthentication(adminManagement, sessionManagement)
+
+    const topUpWebhook: TopUpWebhook = new TopUpWebhook(topUpHistoryRepository, userRepository)
+    const topUp: TopUp = new TopUp(paymentGateway, userManagement)
+
+    const checkoutTransaction: CheckoutTransaction = new CheckoutTransaction(userManagement, vendorManagement, jajanItemManagement, jajanItemSnapshotManagement, transactionHistoryManagement, objectUtility)
 
     const userControllerRest: UserControllerRest = new UserControllerRest(
       Router(),
@@ -184,6 +190,14 @@ export default class RootRoute {
     transactionHistoryControllerRest.registerRoutes()
     routerVersionOne.use('/transaction-histories', transactionHistoryControllerRest.router)
 
+    const transactionControllerRest: TransactionControllerRest = new TransactionControllerRest(
+      Router(),
+      checkoutTransaction,
+      authenticationValidation
+    )
+    transactionControllerRest.registerRoutes()
+    routerVersionOne.use('/transactions', transactionControllerRest.router)
+
     const adminControllerRest: AdminControllerRest = new AdminControllerRest(
       Router(),
       adminManagement,
@@ -225,9 +239,9 @@ export default class RootRoute {
     topUpControllerRest.registerRoutes()
     routerVersionOne.use('/top-ups', topUpControllerRest.router)
 
-    const webhookControllerRest: WebhookControllerRest = new WebhookControllerRest(Router(), topUpWebhookUseCase)
+    const webhookControllerRest: WebhookControllerRest = new WebhookControllerRest(Router(), topUpWebhook)
     webhookControllerRest.registerRoutes()
-    routerVersionOne.use('/webhook', webhookControllerRest.router)
+    routerVersionOne.use('/webhooks', webhookControllerRest.router)
 
     const topUpHistoryControllerRest: TopUpHistoryController = new TopUpHistoryController(Router(), topUpHistoryManagement, authenticationValidation)
     topUpHistoryControllerRest.registerRoutes()

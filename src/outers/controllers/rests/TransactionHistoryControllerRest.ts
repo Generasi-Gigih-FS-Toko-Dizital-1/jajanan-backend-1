@@ -59,15 +59,13 @@ export default class TransactionHistoryControllerRest {
             new TransactionHistoryManagementReadOneResponse(
               transactionHistory.id,
               transactionHistory.userId,
-              transactionHistory.jajanItemId,
-              transactionHistory.amount,
               transactionHistory.paymentMethod,
               transactionHistory.lastLatitude,
               transactionHistory.lastLongitude,
               transactionHistory.updatedAt,
               transactionHistory.createdAt,
               (transactionHistory as TransactionHistoryAggregate).user,
-              (transactionHistory as TransactionHistoryAggregate).jajanItem
+              (transactionHistory as TransactionHistoryAggregate).transactionItems
             )
           )
         )
@@ -92,8 +90,6 @@ export default class TransactionHistoryControllerRest {
           data = new TransactionHistoryManagementReadOneResponse(
             result.data.id,
             result.data.userId,
-            result.data.jajanItemId,
-            result.data.amount,
             result.data.paymentMethod,
             result.data.lastLatitude,
             result.data.lastLongitude,
@@ -123,8 +119,6 @@ export default class TransactionHistoryControllerRest {
           data = new TransactionHistoryManagementCreateResponse(
             result.data.id,
             result.data.userId,
-            result.data.jajanItemId,
-            result.data.amount,
             result.data.paymentMethod,
             result.data.lastLatitude,
             result.data.lastLongitude,
@@ -155,8 +149,6 @@ export default class TransactionHistoryControllerRest {
           data = new TransactionHistoryManagementPatchResponse(
             result.data.id,
             result.data.userId,
-            result.data.jajanItemId,
-            result.data.amount,
             result.data.paymentMethod,
             result.data.lastLatitude,
             result.data.lastLongitude,

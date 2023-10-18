@@ -1,29 +1,20 @@
 import { type TopUpHistory } from '@prisma/client'
 import type OneDatastore from '../datastores/OneDatastore'
-import type Pagination from '../../inners/models/value_objects/Pagination'
 import type TopUpHistoryAggregate from '../../inners/models/aggregates/TopUpHistoryAggregate'
+import type RepositoryArgument from '../../inners/models/value_objects/RepositoryArgument'
 
 export default class TopUpHistoryRepository {
   oneDatastore: OneDatastore
-  aggregatedArgs: any
+  aggregatedArgs?: any
 
-  constructor (oneDatastore: OneDatastore) {
+  constructor (
+    oneDatastore: OneDatastore
+  ) {
     this.oneDatastore = oneDatastore
-    this.aggregatedArgs = {
-      include: {
-        user: true
-      }
-    }
   }
 
-  readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<TopUpHistory[] | TopUpHistoryAggregate[]> => {
-    const offset: number = (pagination.pageNumber - 1) * pagination.pageSize
-    const args: any = {
-      take: pagination.pageSize,
-      skip: offset,
-      where: whereInput,
-      include: includeInput
-    }
+  readMany = async (repositoryArgument: RepositoryArgument): Promise<TopUpHistory[] | TopUpHistoryAggregate[]> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -31,109 +22,63 @@ export default class TopUpHistoryRepository {
 
     const foundTopUpHistories: TopUpHistory[] | TopUpHistoryAggregate[] = await this.oneDatastore.client.topUpHistory.findMany(args)
     if (foundTopUpHistories === null) {
-      throw new Error('Found topUpHistory is undefined.')
+      throw new Error('Found topUpHistories is undefined.')
     }
+
     return foundTopUpHistories
   }
 
-  readOneById = async (id: string, check?: boolean, isAggregated?: boolean): Promise<TopUpHistory | TopUpHistoryAggregate | null> => {
-    const args: any = {
-      where: {
-        id
-      }
-    }
-
-    if (isAggregated === true) {
-      args.include = this.aggregatedArgs.include
-    }
+  createOne = async (repositoryArgument: RepositoryArgument): Promise<TopUpHistory | TopUpHistoryAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
-    }
-
-    const topUpHistory: TopUpHistory | TopUpHistoryAggregate | null = await this.oneDatastore.client.topUpHistory.findUnique(args)
-    if (topUpHistory === undefined && check !== true) {
-      throw new Error('TopUpHistory not found.')
-    }
-    return topUpHistory
-  }
-
-  readManyByUserId = async (userId: string, pagination: Pagination, includeInput: any): Promise<TopUpHistory[] | TopUpHistoryAggregate[]> => {
-    const offset: number = (pagination.pageNumber - 1) * pagination.pageSize
-    const args: any = {
-      take: pagination.pageSize,
-      skip: offset,
-      where: userId,
-      include: includeInput
-    }
-
-    if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined.')
-    }
-
-    const foundTopUpHistories: TopUpHistory[] | TopUpHistoryAggregate[] = await this.oneDatastore.client.topUpHistory.findMany(args)
-    if (foundTopUpHistories === null) {
-      throw new Error('Found topUpHistory is undefined.')
-    }
-    return foundTopUpHistories
-  }
-
-  createOne = async (topUpHistory: TopUpHistory, isAggregated?: boolean): Promise<TopUpHistory | TopUpHistoryAggregate> => {
-    const args: any = {
-      data: topUpHistory
-    }
-
-    if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined.')
-    }
-    if (isAggregated === true) {
-      args.include = this.aggregatedArgs.include
     }
 
     const createdTopUpHistory: TopUpHistory | TopUpHistoryAggregate = await this.oneDatastore.client.topUpHistory.create(args)
+
     return createdTopUpHistory
   }
 
-  patchOneById = async (id: string, topUpHistory: TopUpHistory, isAggregated?: boolean): Promise<TopUpHistory | TopUpHistoryAggregate> => {
-    const args: any = {
-      where: {
-        id
-      },
-      data: topUpHistory
-    }
-    if (isAggregated === true) {
-      args.include = this.aggregatedArgs.include
-    }
+  readOne = async (repositoryArgument: RepositoryArgument): Promise<TopUpHistory | TopUpHistoryAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
     }
 
-    const patchedTopUpHistory: TopUpHistory | TopUpHistoryAggregate = await this.oneDatastore.client.topUpHistory.update(args)
-    if (patchedTopUpHistory === null) {
-      throw new Error('Patched topUpHistory is undefined.')
+    const foundTopUpHistory: TopUpHistory | TopUpHistoryAggregate | null = await this.oneDatastore.client.topUpHistory.findFirst(args)
+    if (foundTopUpHistory === null) {
+      throw new Error('Found topUpHistory is null.')
     }
-    return patchedTopUpHistory
+
+    return foundTopUpHistory
   }
 
-  deleteOneById = async (id: string, isAggregated?: boolean): Promise<TopUpHistory | TopUpHistoryAggregate> => {
-    const args: any = {
-      where: {
-        id
-      }
+  patchOne = async (repositoryArgument: RepositoryArgument): Promise<TopUpHistory | TopUpHistoryAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
+
+    if (this.oneDatastore.client === undefined) {
+      throw new Error('oneDatastore client is undefined.')
     }
-    if (isAggregated === true) {
-      args.include = this.aggregatedArgs.include
+
+    const patchedUser: TopUpHistory | TopUpHistoryAggregate = await this.oneDatastore.client.topUpHistory.update(args)
+    if (patchedUser === null) {
+      throw new Error('Patched topUpHistory is undefined.')
     }
+
+    return patchedUser
+  }
+
+  deleteOne = async (repositoryArgument: RepositoryArgument): Promise<TopUpHistory | TopUpHistoryAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
     }
 
     const deletedTopUpHistory: TopUpHistory | TopUpHistoryAggregate = await this.oneDatastore.client.topUpHistory.delete(args)
-    if (deletedTopUpHistory === null) {
-      throw new Error('Deleted topUpHistory is undefined.')
-    }
+
     return deletedTopUpHistory
   }
 
@@ -156,6 +101,7 @@ export default class TopUpHistoryRepository {
     }
 
     const createdTopUpHistory = await this.oneDatastore.client.topUpHistory.create(args)
+
     return createdTopUpHistory
   }
 }

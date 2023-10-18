@@ -12,6 +12,7 @@ import {
   type Prisma,
   type TopUpHistory,
   type TransactionHistory,
+  type TransactionItemHistory,
   type User,
   type UserSubscription
 } from '@prisma/client'
@@ -322,8 +323,9 @@ describe('UserControllerRest', () => {
       const requestUser: User = oneSeeder.userMock.data[0]
       const requestNotificationHistories: NotificationHistory[] = oneSeeder.notificationHistoryMock.data.filter((notificationHistory: NotificationHistory) => notificationHistory.userId === requestUser.id)
       const requestTopUpHistories: TopUpHistory[] = oneSeeder.topUpHistoryMock.data.filter((topUpHistory: TopUpHistory) => topUpHistory.userId === requestUser.id)
-      const requestTransactionHistories: TransactionHistory[] = oneSeeder.transactionHistoryMock.data.filter((transactionHistory: TransactionHistory) => transactionHistory.userId === requestUser.id)
       const requestUserSubscriptions: UserSubscription[] = oneSeeder.userSubscriptionMock.data.filter((userSubscription: UserSubscription) => userSubscription.userId === requestUser.id)
+      const requestTransactionHistories: TransactionHistory[] = oneSeeder.transactionHistoryMock.data.filter((transactionHistory: TransactionHistory) => transactionHistory.userId === requestUser.id)
+      const requestTransactionItemHistories: TransactionItemHistory[] = oneSeeder.transactionItemHistoryMock.data.filter((transactionItemHistory: TransactionItemHistory) => requestTransactionHistories.map((transactionHistory: TransactionHistory) => transactionHistory.id).includes(transactionItemHistory.transactionId))
 
       if (oneDatastore.client === undefined) {
         throw new Error('oneDatastore client is undefined')
@@ -339,6 +341,13 @@ describe('UserControllerRest', () => {
         where: {
           id: {
             in: requestTopUpHistories.map((topUpHistory: TopUpHistory) => topUpHistory.id)
+          }
+        }
+      })
+      await oneDatastore.client.transactionItemHistory.deleteMany({
+        where: {
+          id: {
+            in: requestTransactionItemHistories.map((transactionItemHistory: TransactionItemHistory) => transactionItemHistory.id)
           }
         }
       })

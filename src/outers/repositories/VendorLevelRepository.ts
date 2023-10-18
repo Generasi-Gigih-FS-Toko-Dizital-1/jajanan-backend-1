@@ -1,6 +1,6 @@
 import { type VendorLevel } from '@prisma/client'
-import type Pagination from '../../inners/models/value_objects/Pagination'
 import type OneDatastore from '../datastores/OneDatastore'
+import type RepositoryArgument from '../../inners/models/value_objects/RepositoryArgument'
 
 export default class VendorLevelRepository {
   oneDatastore: OneDatastore
@@ -11,14 +11,8 @@ export default class VendorLevelRepository {
     this.oneDatastore = oneDatastore
   }
 
-  readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<VendorLevel[]> => {
-    const offset: number = (pagination.pageNumber - 1) * pagination.pageSize
-    const args: any = {
-      take: pagination.pageSize,
-      skip: offset,
-      where: whereInput,
-      include: includeInput
-    }
+  readMany = async (repositoryArgument: RepositoryArgument): Promise<VendorLevel[]> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -26,31 +20,26 @@ export default class VendorLevelRepository {
 
     const foundVendorLevels: VendorLevel[] = await this.oneDatastore.client.vendorLevel.findMany(args)
     if (foundVendorLevels === null) {
-      throw new Error('Found vendor level is undefined.')
+      throw new Error('Found vendorLevels is undefined.')
     }
+
     return foundVendorLevels
   }
 
-  createOne = async (vendorLevel: VendorLevel): Promise<VendorLevel> => {
-    const args: any = {
-      data: vendorLevel
-    }
+  createOne = async (repositoryArgument: RepositoryArgument): Promise<VendorLevel> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
     }
 
-    const createdItem: VendorLevel = await this.oneDatastore.client.vendorLevel.create(args)
+    const createdVendorLevel: VendorLevel = await this.oneDatastore.client.vendorLevel.create(args)
 
-    return createdItem
+    return createdVendorLevel
   }
 
-  readOneById = async (id: string): Promise<VendorLevel> => {
-    const args: any = {
-      where: {
-        id
-      }
-    }
+  readOne = async (repositoryArgument: RepositoryArgument): Promise<VendorLevel> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -58,18 +47,14 @@ export default class VendorLevelRepository {
 
     const foundVendorLevel: VendorLevel | null = await this.oneDatastore.client.vendorLevel.findFirst(args)
     if (foundVendorLevel === null) {
-      throw new Error('Found vendor level is null.')
+      throw new Error('Found vendorLevel is null.')
     }
+
     return foundVendorLevel
   }
 
-  patchOneById = async (id: string, vendorLevel: VendorLevel): Promise<VendorLevel> => {
-    const args: any = {
-      where: {
-        id
-      },
-      data: vendorLevel
-    }
+  patchOne = async (repositoryArgument: RepositoryArgument): Promise<VendorLevel> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -77,18 +62,14 @@ export default class VendorLevelRepository {
 
     const patchedVendor: VendorLevel = await this.oneDatastore.client.vendorLevel.update(args)
     if (patchedVendor === null) {
-      throw new Error('Patched vendor level is undefined.')
+      throw new Error('Patched vendorLevel is undefined.')
     }
+
     return patchedVendor
   }
 
-  deleteOneById = async (id: string): Promise<VendorLevel> => {
-    const args: any = {
-      where: {
-        id
-      }
-
-    }
+  deleteOne = async (repositoryArgument: RepositoryArgument): Promise<VendorLevel> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')

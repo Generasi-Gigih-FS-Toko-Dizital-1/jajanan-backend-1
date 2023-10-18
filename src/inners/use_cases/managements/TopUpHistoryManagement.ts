@@ -3,10 +3,14 @@ import type TopUpHistoryRepository from '../../../outers/repositories/TopUpHisto
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
 import type Pagination from '../../models/value_objects/Pagination'
 import Result from '../../models/value_objects/Result'
-import type TopUpHistoryManagementCreateRequest from '../../models/value_objects/requests/managements/top_up_history_management/TopUpHistoryManagementCreateRequest'
+import type TopUpHistoryManagementCreateRequest
+  from '../../models/value_objects/requests/managements/top_up_history_management/TopUpHistoryManagementCreateRequest'
 import { randomUUID } from 'crypto'
 import type UserManagement from './UserManagement'
-import type TopUpHistoryManagementPatchRequest from '../../models/value_objects/requests/managements/top_up_history_management/TopUpHistoryManagementPatchRequest'
+import type TopUpHistoryManagementPatchRequest
+  from '../../models/value_objects/requests/managements/top_up_history_management/TopUpHistoryManagementPatchRequest'
+import RepositoryArgument from '../../models/value_objects/RepositoryArgument'
+import type TopUpHistoryAggregate from '../../models/aggregates/TopUpHistoryAggregate'
 
 export default class TopUpHistoryManagement {
   topUpHistoryRepository: TopUpHistoryRepository
@@ -20,7 +24,12 @@ export default class TopUpHistoryManagement {
   }
 
   readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Result<TopUpHistory[]>> => {
-    const foundTopUpHistories: TopUpHistory[] = await this.topUpHistoryRepository.readMany(pagination, whereInput, includeInput)
+    const args: RepositoryArgument = new RepositoryArgument(
+      whereInput,
+      includeInput,
+      pagination
+    )
+    const foundTopUpHistories: TopUpHistory[] = await this.topUpHistoryRepository.readMany(args)
     return new Result<TopUpHistory[]>(
       200,
       'TopUpHistory read many succeed.',
@@ -31,15 +40,26 @@ export default class TopUpHistoryManagement {
   readOneById = async (id: string): Promise<Result<TopUpHistory | null>> => {
     let foundTopUpHistory: TopUpHistory | null
     try {
-      foundTopUpHistory = await this.topUpHistoryRepository.readOneById(id)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined
+      )
+      foundTopUpHistory = await this.topUpHistoryRepository.readOne(args)
     } catch (error) {
       return new Result<TopUpHistory | null>(400, 'TopUpHistory read one by id failed, topup history not found', null)
     }
     return new Result<TopUpHistory | null>(200, 'TopUpHistory read one by id succeed.', foundTopUpHistory)
   }
 
-  readManyByUserId = async (userId: string, pagination: Pagination, includeInput: any): Promise<Result<TopUpHistory[]>> => {
-    const foundTopUpHistories: TopUpHistory[] = await this.topUpHistoryRepository.readManyByUserId(userId, pagination, includeInput)
+  readManyByUserId = async (userId: string): Promise<Result<TopUpHistory[]>> => {
+    const args: RepositoryArgument = new RepositoryArgument(
+      { userId },
+      undefined,
+      undefined
+    )
+
+    const foundTopUpHistories: TopUpHistory[] = await this.topUpHistoryRepository.readMany(args)
     return new Result<TopUpHistory[]>(
       200,
       'TopUpHistory read many by user id succeed.',
@@ -50,7 +70,9 @@ export default class TopUpHistoryManagement {
   createOne = async (request: TopUpHistoryManagementCreateRequest): Promise<Result<TopUpHistory | null>> => {
     const topUpHistoryToCreate: TopUpHistory = {
       id: randomUUID(),
-      ...request,
+      userId: request.userId,
+      amount: request.amount,
+      media: request.media,
       updatedAt: new Date(),
       createdAt: new Date(),
       deletedAt: null
@@ -71,13 +93,19 @@ export default class TopUpHistoryManagement {
       return new Result<null>(404, 'TopUpHistory create one failed, user is not found.', null)
     }
 
-    const createdTopUpHistory: TopUpHistory | null = await this.topUpHistoryRepository.createOne(topUpHistory)
+    const args: RepositoryArgument = new RepositoryArgument(
+      undefined,
+      undefined,
+      undefined,
+      topUpHistory
+    )
+    const createdTopUpHistory: TopUpHistory | null = await this.topUpHistoryRepository.createOne(args)
 
     return new Result<TopUpHistory | null>(201, 'TopUpHistory create one succeed.', createdTopUpHistory)
   }
 
   patchOneById = async (id: string, request: TopUpHistoryManagementPatchRequest): Promise<Result<TopUpHistory | null>> => {
-    const patchedTopUpHistory: Result<TopUpHistory | null> = await this.patchOneByIdRaw(id, request)
+    const patchedTopUpHistory: Result<TopUpHistory | null> = await this.patchOneRawById(id, request)
 
     if (patchedTopUpHistory.status !== 200 || patchedTopUpHistory.data === null) {
       return new Result<null>(patchedTopUpHistory.status, `TopUpHistory patch one by id failed, ${patchedTopUpHistory.message}`, null)
@@ -86,21 +114,34 @@ export default class TopUpHistoryManagement {
     return new Result<TopUpHistory>(200, 'TopUpHistory patch one by id succeed.', patchedTopUpHistory.data)
   }
 
-  patchOneByIdRaw = async (id: string, request: TopUpHistoryManagementPatchRequest): Promise<Result<TopUpHistory | null>> => {
+  patchOneRawById = async (id: string, request: any): Promise<Result<TopUpHistory | null>> => {
     const foundTopUpHistory: Result<TopUpHistory | null> = await this.readOneById(id)
     if (foundTopUpHistory.status !== 200 || foundTopUpHistory.data === null) {
       return new Result<null>(404, 'TopUpHistory patch one by id failed, topup history is not found.', null)
     }
 
     this.objectUtility.patch(foundTopUpHistory.data, request)
+    const args: RepositoryArgument = new RepositoryArgument(
+      { id },
+      undefined,
+      undefined,
+      foundTopUpHistory.data
+    )
 
-    const patchedTopUpHistory: TopUpHistory | null = await this.topUpHistoryRepository.patchOneById(id, foundTopUpHistory.data)
+    const patchedTopUpHistory: TopUpHistory | null = await this.topUpHistoryRepository.patchOne(args)
 
     return new Result<TopUpHistory | null>(200, 'TopUpHistory patch one by id succeed.', patchedTopUpHistory)
   }
 
   deleteOneById = async (id: string): Promise<Result<TopUpHistory | null>> => {
-    const deletedTopUpHistory: any = await this.topUpHistoryRepository.deleteOneById(id)
+    const args: RepositoryArgument = new RepositoryArgument(
+      { id },
+      undefined,
+      undefined,
+      undefined
+    )
+    const deletedTopUpHistory: TopUpHistory | TopUpHistoryAggregate = await this.topUpHistoryRepository.deleteOne(args)
+
     return new Result<TopUpHistory>(
       200, 'TopUpHistory delete one by id succeed.', deletedTopUpHistory
     )

@@ -7,10 +7,15 @@ import ResponseBody from '../../../inners/models/value_objects/responses/Respons
 import validateAuthenticationMiddleware from '../../middlewares/ValidateAuthenticationMiddleware'
 import type CategoryManagement from '../../../inners/use_cases/managements/CategoryManagement'
 import type AuthenticationValidation from '../../../inners/use_cases/authentications/AuthenticationValidation'
-import CategoryManagementReadManyResponse from '../../../inners/models/value_objects/responses/category_managements/CategoryManagementReadManyResponse'
-import CategoryManagementReadOneResponse from '../../../inners/models/value_objects/responses/category_managements/CategoryManagementReadOneResponse'
-import CategoryManagementCreateResponse from '../../../inners/models/value_objects/responses/category_managements/CategoryManagementCreateResponse'
-import CategoryManagementPatchResponse from '../../../inners/models/value_objects/responses/category_managements/CategoryManagementPatchResponse'
+import CategoryManagementReadManyResponse
+  from '../../../inners/models/value_objects/responses/managements/category_managements/CategoryManagementReadManyResponse'
+import CategoryManagementReadOneResponse
+  from '../../../inners/models/value_objects/responses/managements/category_managements/CategoryManagementReadOneResponse'
+import CategoryManagementCreateResponse
+  from '../../../inners/models/value_objects/responses/managements/category_managements/CategoryManagementCreateResponse'
+import CategoryManagementPatchResponse
+  from '../../../inners/models/value_objects/responses/managements/category_managements/CategoryManagementPatchResponse'
+import type CategoryAggregate from '../../../inners/models/aggregates/CategoryAggregate'
 
 export default class CategoryControllerRest {
   router: Router
@@ -33,23 +38,33 @@ export default class CategoryControllerRest {
   }
 
   readMany = (request: Request, response: Response): void => {
-    const { pageNumber, pageSize } = request.query
+    const {
+      pageNumber,
+      pageSize,
+      where,
+      include
+    } = request.query
     const pagination: Pagination = new Pagination(
       pageNumber === undefined ? 1 : Number(pageNumber),
       pageSize === undefined ? 10 : Number(pageSize)
     )
+    const whereInput: any = where === undefined ? {} : JSON.parse(decodeURIComponent(where as string))
+    const includeInput: any = include === undefined ? {} : JSON.parse(decodeURIComponent(include as string))
     this.categoryManagement
-      .readMany(pagination)
-      .then((result: Result<Category[]>) => {
+      .readMany(pagination, whereInput, includeInput)
+      .then((result: Result<Category[] | CategoryAggregate[]>) => {
         const data: CategoryManagementReadManyResponse = new CategoryManagementReadManyResponse(
           result.data.length,
           result.data.map((category: Category) =>
             new CategoryManagementReadOneResponse(
               category.id,
-              category.categoryName,
+              category.name,
               category.iconUrl,
               category.createdAt,
-              category.updatedAt
+              category.updatedAt,
+              (category as CategoryAggregate).jajanItems,
+              (category as CategoryAggregate).jajanItemSnapshots,
+              (category as CategoryAggregate).userSubscriptions
             )
           )
         )
@@ -73,7 +88,7 @@ export default class CategoryControllerRest {
         if (result.status === 200 && result.data !== null) {
           data = new CategoryManagementReadOneResponse(
             result.data.id,
-            result.data.categoryName,
+            result.data.name,
             result.data.iconUrl,
             result.data.createdAt,
             result.data.updatedAt
@@ -100,7 +115,7 @@ export default class CategoryControllerRest {
         if (result.status === 201 && result.data !== null) {
           data = new CategoryManagementCreateResponse(
             result.data.id,
-            result.data.categoryName,
+            result.data.name,
             result.data.iconUrl,
             result.data.createdAt,
             result.data.updatedAt
@@ -128,7 +143,7 @@ export default class CategoryControllerRest {
         if (result.status === 200 && result.data !== null) {
           data = new CategoryManagementPatchResponse(
             result.data.id,
-            result.data.categoryName,
+            result.data.name,
             result.data.iconUrl,
             result.data.createdAt,
             result.data.updatedAt

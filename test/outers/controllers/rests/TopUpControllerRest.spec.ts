@@ -9,7 +9,8 @@ import { type User } from '@prisma/client'
 import fetchMock from 'fetch-mock'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
 import TopUpResponseMock from '../../../mocks/TopUpResponseMock'
-import UserLoginByEmailAndPasswordRequest from '../../../../src/inners/models/value_objects/requests/authentications/users/UserLoginByEmailAndPasswordRequest'
+import UserLoginByEmailAndPasswordRequest
+  from '../../../../src/inners/models/value_objects/requests/authentications/users/UserLoginByEmailAndPasswordRequest'
 import TopUpCreateRequest from '../../../../src/inners/models/value_objects/requests/top_ups/TopUpCreateRequest'
 
 chai.use(chaiHttp)
@@ -67,7 +68,7 @@ describe('TopUpControllerRest', () => {
     await oneDatastore.disconnect()
   })
 
-  describe('POST /api/v1/topup', () => {
+  describe('POST /api/v1/top-ups', () => {
     it('should return 201', async () => {
       const requestBody = new TopUpCreateRequest(
         userMock.data[0].id,

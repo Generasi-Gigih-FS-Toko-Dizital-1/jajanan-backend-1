@@ -8,7 +8,7 @@ export default class CategoryMock {
     this.data = [
       {
         id: randomUUID(),
-        categoryName: 'categoryName0',
+        name: 'name0',
         iconUrl: 'https://placehold.co/400x400?text=iconUrl0',
         updatedAt: new Date(),
         createdAt: new Date(),
@@ -16,7 +16,7 @@ export default class CategoryMock {
       },
       {
         id: randomUUID(),
-        categoryName: 'categoryName0',
+        name: 'name0',
         iconUrl: 'https://placehold.co/400x400?text=iconUrl0',
         updatedAt: new Date(),
         createdAt: new Date(),

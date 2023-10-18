@@ -4,8 +4,11 @@ import type Pagination from '../../models/value_objects/Pagination'
 import Result from '../../models/value_objects/Result'
 import { randomUUID } from 'crypto'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
-import type UserLevelManagementPatchRequest from '../../models/value_objects/requests/user_level_managements/UserLevelManagementCreateRequest'
-import type UserLevelManagementCreateRequest from '../../models/value_objects/requests/user_level_managements/UserLevelManagementPatchRequest'
+import type UserLevelManagementPatchRequest
+  from '../../models/value_objects/requests/managements/user_level_managements/UserLevelManagementCreateRequest'
+import type UserLevelManagementCreateRequest
+  from '../../models/value_objects/requests/managements/user_level_managements/UserLevelManagementPatchRequest'
+import RepositoryArgument from '../../models/value_objects/RepositoryArgument'
 
 export default class UserLevelManagement {
   userLevelRepository: UserLevelRepository
@@ -17,7 +20,12 @@ export default class UserLevelManagement {
   }
 
   readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Result<UserLevel[]>> => {
-    const foundUserLevels: UserLevel[] = await this.userLevelRepository.readMany(pagination, whereInput, includeInput)
+    const args: RepositoryArgument = new RepositoryArgument(
+      whereInput,
+      includeInput,
+      pagination
+    )
+    const foundUserLevels: UserLevel[] = await this.userLevelRepository.readMany(args)
     return new Result<UserLevel[]>(
       200,
       'User levels read many succeed.',
@@ -28,7 +36,12 @@ export default class UserLevelManagement {
   readOneById = async (id: string): Promise<Result<UserLevel | null>> => {
     let foundUserLevel: UserLevel
     try {
-      foundUserLevel = await this.userLevelRepository.readOneById(id)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined
+      )
+      foundUserLevel = await this.userLevelRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
@@ -71,7 +84,13 @@ export default class UserLevelManagement {
   createOneRaw = async (userLevel: UserLevel): Promise<Result<UserLevel | null>> => {
     let createdUserLevel: UserLevel
     try {
-      createdUserLevel = await this.userLevelRepository.createOne(userLevel)
+      const args: RepositoryArgument = new RepositoryArgument(
+        undefined,
+        undefined,
+        undefined,
+        userLevel
+      )
+      createdUserLevel = await this.userLevelRepository.createOne(args)
     } catch (error) {
       return new Result<null>(
         500,
@@ -102,7 +121,7 @@ export default class UserLevelManagement {
     )
   }
 
-  patchOneRawById = async (id: string, request: UserLevelManagementPatchRequest): Promise<Result<UserLevel | null>> => {
+  patchOneRawById = async (id: string, request: any): Promise<Result<UserLevel | null>> => {
     const foundUserLevel: Result<UserLevel | null> = await this.readOneById(id)
     if (foundUserLevel.status !== 200 || foundUserLevel.data === null) {
       return new Result<null>(
@@ -112,7 +131,13 @@ export default class UserLevelManagement {
       )
     }
     this.objectUtility.patch(foundUserLevel.data, request)
-    const patchedUserLevel: UserLevel = await this.userLevelRepository.patchOneById(id, foundUserLevel.data)
+    const args: RepositoryArgument = new RepositoryArgument(
+      { id },
+      undefined,
+      undefined,
+      foundUserLevel.data
+    )
+    const patchedUserLevel: UserLevel = await this.userLevelRepository.patchOne(args)
     return new Result<UserLevel>(
       200,
       'User level patch one raw by id succeed.',
@@ -123,7 +148,13 @@ export default class UserLevelManagement {
   deleteOneById = async (id: string): Promise<Result<UserLevel | null>> => {
     let deletedUserLevel: UserLevel
     try {
-      deletedUserLevel = await this.userLevelRepository.deleteOneById(id)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        undefined
+      )
+      deletedUserLevel = await this.userLevelRepository.deleteOne(args)
     } catch (error) {
       return new Result<null>(
         500,

@@ -10,6 +10,7 @@ import type UserManagementPatchRequest
   from '../../models/value_objects/requests/managements/user_managements/UserManagementPatchRequest'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
 import type UserAggregate from '../../models/aggregates/UserAggregate'
+import RepositoryArgument from '../../models/value_objects/RepositoryArgument'
 
 export default class UserManagement {
   userRepository: UserRepository
@@ -21,7 +22,12 @@ export default class UserManagement {
   }
 
   readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Result<User[] | UserAggregate[]>> => {
-    const foundUsers: User[] = await this.userRepository.readMany(pagination, whereInput, includeInput)
+    const args: RepositoryArgument = new RepositoryArgument(
+      whereInput,
+      includeInput,
+      pagination
+    )
+    const foundUsers: User[] = await this.userRepository.readMany(args)
     return new Result<User[]>(
       200,
       'User read many succeed.',
@@ -32,7 +38,12 @@ export default class UserManagement {
   readOneById = async (id: string): Promise<Result<User | null>> => {
     let foundUser: User
     try {
-      foundUser = await this.userRepository.readOneById(id)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined
+      )
+      foundUser = await this.userRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
@@ -50,7 +61,13 @@ export default class UserManagement {
   readOneByUsername = async (username: string): Promise<Result<User | null>> => {
     let foundUser: User
     try {
-      foundUser = await this.userRepository.readOneByUsername(username)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { username },
+        undefined,
+        undefined,
+        undefined
+      )
+      foundUser = await this.userRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
@@ -68,7 +85,13 @@ export default class UserManagement {
   readOneByEmail = async (email: string): Promise<Result<User | null>> => {
     let foundUser: User
     try {
-      foundUser = await this.userRepository.readOneByEmail(email)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { email },
+        undefined,
+        undefined,
+        undefined
+      )
+      foundUser = await this.userRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
@@ -86,7 +109,13 @@ export default class UserManagement {
   readOneByUsernameAndPassword = async (username: string, password: string): Promise<Result<User | null>> => {
     let foundUser: User
     try {
-      foundUser = await this.userRepository.readOneByUsernameAndPassword(username, password)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { username, password },
+        undefined,
+        undefined,
+        undefined
+      )
+      foundUser = await this.userRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
@@ -104,7 +133,13 @@ export default class UserManagement {
   readOneByEmailAndPassword = async (email: string, password: string): Promise<Result<User | null>> => {
     let foundUser: User
     try {
-      foundUser = await this.userRepository.readOneByEmailAndPassword(email, password)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { email, password },
+        undefined,
+        undefined,
+        undefined
+      )
+      foundUser = await this.userRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
@@ -157,12 +192,13 @@ export default class UserManagement {
   }
 
   createOneRaw = async (user: User): Promise<Result<User>> => {
-    const salt: string | undefined = process.env.BCRYPT_SALT
-    if (salt === undefined) {
-      throw new Error('Salt is undefined.')
-    }
-
-    const createdUser: any = await this.userRepository.createOne(user)
+    const args: RepositoryArgument = new RepositoryArgument(
+      undefined,
+      undefined,
+      undefined,
+      user
+    )
+    const createdUser: any = await this.userRepository.createOne(args)
     return new Result<User>(
       201,
       'User create one raw succeed.',
@@ -193,7 +229,7 @@ export default class UserManagement {
     )
   }
 
-  patchOneRawById = async (id: string, request: UserManagementPatchRequest): Promise<Result<User | null>> => {
+  patchOneRawById = async (id: string, request: any): Promise<Result<User | null>> => {
     const foundUser: Result<User | null> = await this.readOneById(id)
     if (foundUser.status !== 200 || foundUser.data === null) {
       return new Result<null>(
@@ -203,7 +239,13 @@ export default class UserManagement {
       )
     }
     this.objectUtility.patch(foundUser.data, request)
-    const patchedUser: User = await this.userRepository.patchOneById(id, foundUser.data)
+    const args: RepositoryArgument = new RepositoryArgument(
+      { id },
+      undefined,
+      undefined,
+      foundUser.data
+    )
+    const patchedUser: User = await this.userRepository.patchOne(args)
     return new Result<User>(
       200,
       'User patch one by id succeed.',
@@ -214,7 +256,13 @@ export default class UserManagement {
   deleteOneById = async (id: string): Promise<Result<User | null>> => {
     let deletedUser: User
     try {
-      deletedUser = await this.userRepository.deleteOneById(id)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        undefined
+      )
+      deletedUser = await this.userRepository.deleteOne(args)
     } catch (error) {
       return new Result<null>(
         500,

@@ -3,9 +3,12 @@ import type Pagination from '../../models/value_objects/Pagination'
 import Result from '../../models/value_objects/Result'
 import { randomUUID } from 'crypto'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
-import type VendorLevelManagementPatchRequest from '../../models/value_objects/requests/managements/vendor_level_managements/VendorLevelManagementCreateRequest'
-import type VendorLevelManagementCreateRequest from '../../models/value_objects/requests/managements/vendor_level_managements/VendorLevelManagementPatchRequest'
+import type VendorLevelManagementPatchRequest
+  from '../../models/value_objects/requests/managements/vendor_level_managements/VendorLevelManagementCreateRequest'
+import type VendorLevelManagementCreateRequest
+  from '../../models/value_objects/requests/managements/vendor_level_managements/VendorLevelManagementPatchRequest'
 import type VendorLevelRepository from '../../../outers/repositories/VendorLevelRepository'
+import RepositoryArgument from '../../models/value_objects/RepositoryArgument'
 
 export default class VendorLevelManagement {
   vendorLevelRepository: VendorLevelRepository
@@ -17,7 +20,12 @@ export default class VendorLevelManagement {
   }
 
   readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Result<VendorLevel[]>> => {
-    const foundVendorLevels: VendorLevel[] = await this.vendorLevelRepository.readMany(pagination, whereInput, includeInput)
+    const args: RepositoryArgument = new RepositoryArgument(
+      whereInput,
+      includeInput,
+      pagination
+    )
+    const foundVendorLevels: VendorLevel[] = await this.vendorLevelRepository.readMany(args)
     return new Result<VendorLevel[]>(
       200,
       'Vendor levels read many succeed.',
@@ -28,7 +36,12 @@ export default class VendorLevelManagement {
   readOneById = async (id: string): Promise<Result<VendorLevel | null>> => {
     let foundVendorLevel: VendorLevel
     try {
-      foundVendorLevel = await this.vendorLevelRepository.readOneById(id)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined
+      )
+      foundVendorLevel = await this.vendorLevelRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
@@ -71,7 +84,13 @@ export default class VendorLevelManagement {
   createOneRaw = async (vendorLevel: VendorLevel): Promise<Result<VendorLevel | null>> => {
     let createdVendorLevel: VendorLevel
     try {
-      createdVendorLevel = await this.vendorLevelRepository.createOne(vendorLevel)
+      const args: RepositoryArgument = new RepositoryArgument(
+        undefined,
+        undefined,
+        undefined,
+        vendorLevel
+      )
+      createdVendorLevel = await this.vendorLevelRepository.createOne(args)
     } catch (error) {
       return new Result<null>(
         500,
@@ -102,7 +121,7 @@ export default class VendorLevelManagement {
     )
   }
 
-  patchOneRawById = async (id: string, request: VendorLevelManagementPatchRequest): Promise<Result<VendorLevel | null>> => {
+  patchOneRawById = async (id: string, request: any): Promise<Result<VendorLevel | null>> => {
     const foundVendorLevel: Result<VendorLevel | null> = await this.readOneById(id)
     if (foundVendorLevel.status !== 200 || foundVendorLevel.data === null) {
       return new Result<null>(
@@ -112,7 +131,13 @@ export default class VendorLevelManagement {
       )
     }
     this.objectUtility.patch(foundVendorLevel.data, request)
-    const patchedVendorLevel: VendorLevel = await this.vendorLevelRepository.patchOneById(id, foundVendorLevel.data)
+    const args: RepositoryArgument = new RepositoryArgument(
+      { id },
+      undefined,
+      undefined,
+      foundVendorLevel.data
+    )
+    const patchedVendorLevel: VendorLevel = await this.vendorLevelRepository.patchOne(args)
     return new Result<VendorLevel>(
       200,
       'Vendor level patch one raw by id succeed.',
@@ -123,7 +148,13 @@ export default class VendorLevelManagement {
   deleteOneById = async (id: string): Promise<Result<VendorLevel | null>> => {
     let deletedVendorLevel: VendorLevel
     try {
-      deletedVendorLevel = await this.vendorLevelRepository.deleteOneById(id)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        undefined
+      )
+      deletedVendorLevel = await this.vendorLevelRepository.deleteOne(args)
     } catch (error) {
       return new Result<null>(
         500,

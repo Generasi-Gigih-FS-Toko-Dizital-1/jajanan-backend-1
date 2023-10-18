@@ -1,7 +1,7 @@
 import { type Category } from '@prisma/client'
 import type OneDatastore from '../datastores/OneDatastore'
 import type CategoryAggregate from '../../inners/models/aggregates/CategoryAggregate'
-import type Pagination from '../../inners/models/value_objects/Pagination'
+import type RepositoryArgument from '../../inners/models/value_objects/RepositoryArgument'
 
 export default class CategoryRepository {
   oneDatastore: OneDatastore
@@ -11,23 +11,10 @@ export default class CategoryRepository {
     oneDatastore: OneDatastore
   ) {
     this.oneDatastore = oneDatastore
-    this.aggregatedArgs = {
-      include: {
-        jajanItems: true,
-        userSubscriptions: true
-      }
-    }
   }
 
-  readMany = async (pagination: Pagination, isAggregated?: boolean): Promise<Category[] | CategoryAggregate[]> => {
-    const offset: number = (pagination.pageNumber - 1) * pagination.pageSize
-    const args: any = {
-      take: pagination.pageSize,
-      skip: offset
-    }
-    if (isAggregated === true) {
-      args.include = this.aggregatedArgs.include
-    }
+  readMany = async (repositoryArgument: RepositoryArgument): Promise<Category[] | CategoryAggregate[]> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -35,19 +22,14 @@ export default class CategoryRepository {
 
     const foundCategories: Category[] | CategoryAggregate[] = await this.oneDatastore.client.category.findMany(args)
     if (foundCategories === null) {
-      throw new Error('Found category is undefined.')
+      throw new Error('Found categories is undefined.')
     }
+
     return foundCategories
   }
 
-  createOne = async (category: Category, isAggregated?: boolean): Promise<Category | CategoryAggregate> => {
-    const args: any = {
-      data: category
-    }
-
-    if (isAggregated === true) {
-      args.include = this.aggregatedArgs.include
-    }
+  createOne = async (repositoryArgument: RepositoryArgument): Promise<Category | CategoryAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -58,15 +40,8 @@ export default class CategoryRepository {
     return createdCategory
   }
 
-  readOneById = async (id: string, isAggregated?: boolean): Promise<Category | CategoryAggregate> => {
-    const args: any = {
-      where: {
-        id
-      }
-    }
-    if (isAggregated === true) {
-      args.include = this.aggregatedArgs.include
-    }
+  readOne = async (repositoryArgument: RepositoryArgument): Promise<Category | CategoryAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -76,19 +51,12 @@ export default class CategoryRepository {
     if (foundCategory === null) {
       throw new Error('Found category is null.')
     }
+
     return foundCategory
   }
 
-  patchOneById = async (id: string, jajanItem: Category, isAggregated?: boolean): Promise<Category | CategoryAggregate> => {
-    const args: any = {
-      where: {
-        id
-      },
-      data: jajanItem
-    }
-    if (isAggregated === true) {
-      args.include = this.aggregatedArgs.include
-    }
+  patchOne = async (repositoryArgument: RepositoryArgument): Promise<Category | CategoryAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -96,20 +64,14 @@ export default class CategoryRepository {
 
     const patchedUser: Category | CategoryAggregate = await this.oneDatastore.client.category.update(args)
     if (patchedUser === null) {
-      throw new Error('Patched category item is undefined.')
+      throw new Error('Patched category is undefined.')
     }
+
     return patchedUser
   }
 
-  deleteOneById = async (id: string, isAggregated?: boolean): Promise<Category | CategoryAggregate> => {
-    const args: any = {
-      where: {
-        id
-      }
-    }
-    if (isAggregated === true) {
-      args.include = this.aggregatedArgs.include
-    }
+  deleteOne = async (repositoryArgument: RepositoryArgument): Promise<Category | CategoryAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')

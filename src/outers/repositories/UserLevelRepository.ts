@@ -1,6 +1,6 @@
 import { type UserLevel } from '@prisma/client'
-import type Pagination from '../../inners/models/value_objects/Pagination'
 import type OneDatastore from '../datastores/OneDatastore'
+import type RepositoryArgument from '../../inners/models/value_objects/RepositoryArgument'
 
 export default class UserLevelRepository {
   oneDatastore: OneDatastore
@@ -11,14 +11,8 @@ export default class UserLevelRepository {
     this.oneDatastore = oneDatastore
   }
 
-  readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<UserLevel[]> => {
-    const offset: number = (pagination.pageNumber - 1) * pagination.pageSize
-    const args: any = {
-      take: pagination.pageSize,
-      skip: offset,
-      where: whereInput,
-      include: includeInput
-    }
+  readMany = async (repositoryArgument: RepositoryArgument): Promise<UserLevel[]> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -26,31 +20,26 @@ export default class UserLevelRepository {
 
     const foundUserLevels: UserLevel[] = await this.oneDatastore.client.userLevel.findMany(args)
     if (foundUserLevels === null) {
-      throw new Error('Found user level is undefined.')
+      throw new Error('Found userLevels is undefined.')
     }
+
     return foundUserLevels
   }
 
-  createOne = async (userLevel: UserLevel): Promise<UserLevel> => {
-    const args: any = {
-      data: userLevel
-    }
+  createOne = async (repositoryArgument: RepositoryArgument): Promise<UserLevel> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
     }
 
-    const createdItem: UserLevel = await this.oneDatastore.client.userLevel.create(args)
+    const createdUserLevel: UserLevel = await this.oneDatastore.client.userLevel.create(args)
 
-    return createdItem
+    return createdUserLevel
   }
 
-  readOneById = async (id: string): Promise<UserLevel> => {
-    const args: any = {
-      where: {
-        id
-      }
-    }
+  readOne = async (repositoryArgument: RepositoryArgument): Promise<UserLevel> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -58,18 +47,14 @@ export default class UserLevelRepository {
 
     const foundUserLevel: UserLevel | null = await this.oneDatastore.client.userLevel.findFirst(args)
     if (foundUserLevel === null) {
-      throw new Error('Found user level is null.')
+      throw new Error('Found userLevel is null.')
     }
+
     return foundUserLevel
   }
 
-  patchOneById = async (id: string, userLevel: UserLevel): Promise<UserLevel> => {
-    const args: any = {
-      where: {
-        id
-      },
-      data: userLevel
-    }
+  patchOne = async (repositoryArgument: RepositoryArgument): Promise<UserLevel> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
@@ -77,18 +62,14 @@ export default class UserLevelRepository {
 
     const patchedUser: UserLevel = await this.oneDatastore.client.userLevel.update(args)
     if (patchedUser === null) {
-      throw new Error('Patched user level is undefined.')
+      throw new Error('Patched userLevel is undefined.')
     }
+
     return patchedUser
   }
 
-  deleteOneById = async (id: string): Promise<UserLevel> => {
-    const args: any = {
-      where: {
-        id
-      }
-
-    }
+  deleteOne = async (repositoryArgument: RepositoryArgument): Promise<UserLevel> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')

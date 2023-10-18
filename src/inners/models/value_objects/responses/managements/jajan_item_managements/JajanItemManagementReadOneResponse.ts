@@ -1,4 +1,4 @@
-import { type Category, type TransactionHistory, type Vendor } from '@prisma/client'
+import { type Category, type JajanItemSnapshot, type Vendor } from '@prisma/client'
 
 export default class JajanItemManagementReadOneResponse {
   id: string
@@ -11,9 +11,9 @@ export default class JajanItemManagementReadOneResponse {
   updatedAt: Date
   vendor?: Vendor
   category?: Category
-  transactionHistories?: TransactionHistory[]
+  snapshots?: JajanItemSnapshot[]
 
-  constructor (id: string, vendorId: string, categoryId: string, name: string, price: number, imageUrl: string, createdAt: Date, updatedAt: Date, vendor?: Vendor, category?: Category, transactionHistories?: TransactionHistory[]) {
+  constructor (id: string, vendorId: string, categoryId: string, name: string, price: number, imageUrl: string, createdAt: Date, updatedAt: Date, vendor?: Vendor, category?: Category, snapshots?: JajanItemSnapshot[]) {
     this.id = id
     this.vendorId = vendorId
     this.categoryId = categoryId
@@ -24,6 +24,6 @@ export default class JajanItemManagementReadOneResponse {
     this.updatedAt = updatedAt
     this.vendor = vendor
     this.category = category
-    this.transactionHistories = transactionHistories
+    this.snapshots = snapshots
   }
 }
