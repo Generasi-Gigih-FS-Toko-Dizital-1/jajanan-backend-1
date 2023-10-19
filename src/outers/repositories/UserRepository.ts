@@ -20,8 +20,8 @@ export default class UserRepository {
     from (select v.id  as v_id,
                  u.id  as u_id,
                  st_distance(
-                         st_makepoint(v."lastLatitude"::double precision, v."lastLongitude"::double precision),
-                         st_makepoint(u."lastLatitude"::double precision, u."lastLongitude"::double precision)
+                         st_makepoint(v."lastLatitude"::float, v."lastLongitude"::float),
+                         st_makepoint(u."lastLatitude"::float, u."lastLongitude"::float)
                      ) as vu_distance
           from "Vendor" v
                    inner join "JajanItem" ji on v."id" = ji."vendorId"
