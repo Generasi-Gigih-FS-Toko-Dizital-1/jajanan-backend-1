@@ -9,6 +9,7 @@ services:
     entrypoint: [ "/bin/sh", "-c" ]
     command:
       - |
+        export GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS} && \
         export DS_1_HOST=ds-1 && \
         export DS_2_HOST=ds-2 && \
         yarn build && \
