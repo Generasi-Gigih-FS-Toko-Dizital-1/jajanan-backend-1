@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        GOOGLE_APPLICATION_CREDENTIALS = credentials('gg-fs-td-1-1-firebase-adminsdk-yzbci-a46d681a7a.json')
+        GOOGLE_APPLICATION_CREDENTIALS = credentials('0c66305b-eacb-4ad5-bad3-317b7cebcaba')
     }
     stages {
         stage('stage') {
