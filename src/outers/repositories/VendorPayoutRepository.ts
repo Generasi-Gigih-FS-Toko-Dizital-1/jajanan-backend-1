@@ -1,6 +1,6 @@
-import { type VendorPayout } from '@prisma/client'
 import type OneDatastore from '../datastores/OneDatastore'
 import type RepositoryArgument from '../../inners/models/value_objects/RepositoryArgument'
+import { type VendorPayout } from '@prisma/client'
 
 export default class VendorPayoutRepository {
   oneDatastore: OneDatastore

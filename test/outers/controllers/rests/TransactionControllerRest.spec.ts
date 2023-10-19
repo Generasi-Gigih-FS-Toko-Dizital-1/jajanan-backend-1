@@ -18,7 +18,7 @@ import TransactionCheckoutRequest
 chai.use(chaiHttp)
 chai.should()
 
-describe('TransactionHistoryControllerRest', () => {
+describe('TransactionControllerRest', () => {
   const oneDatastore: OneDatastore = new OneDatastore()
   const authAdminMock: AdminMock = new AdminMock()
   let oneSeeder: OneSeeder

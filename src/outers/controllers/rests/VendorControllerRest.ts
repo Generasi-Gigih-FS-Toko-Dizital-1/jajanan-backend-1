@@ -74,7 +74,9 @@ export default class VendorControllerRest {
               vendor.createdAt,
               vendor.updatedAt,
               (vendor as VendorAggregate).notificationHistories,
-              (vendor as VendorAggregate).jajanItems
+              (vendor as VendorAggregate).jajanItems,
+              (vendor as VendorAggregate).jajanItemSnapshots,
+              (vendor as VendorAggregate).payoutHistories
             )
           )
         )
