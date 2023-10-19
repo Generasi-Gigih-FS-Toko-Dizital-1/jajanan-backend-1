@@ -59,6 +59,8 @@ import JajanItemSnapshotRepository from '../repositories/JajanItemSnapshotReposi
 import PayoutControllerRest from '../controllers/rests/PayoutControllerRest'
 import Payout from '../../inners/use_cases/payouts/Payout'
 import VendorPayoutRepository from '../repositories/VendorPayoutRepository'
+import PayoutHistoryRepository from '../repositories/PayoutHistoryRepository'
+import PayoutWebhook from '../../inners/use_cases/payouts/PayoutWebhook'
 
 export default class RootRoute {
   app: Application
@@ -92,6 +94,7 @@ export default class RootRoute {
     const topUpHistoryRepository = new TopUpHistoryRepository(this.datastoreOne)
     const jajanItemSnashotRepository = new JajanItemSnapshotRepository(this.datastoreOne)
     const vendorPayoutRepository = new VendorPayoutRepository(this.datastoreOne)
+    const payoutHistoryRepository = new PayoutHistoryRepository(this.datastoreOne)
 
     const sessionManagement: SessionManagement = new SessionManagement(sessionRepository, objectUtility)
     const authenticationValidation: AuthenticationValidation = new AuthenticationValidation(sessionManagement)
@@ -124,6 +127,7 @@ export default class RootRoute {
     const topUpWebhook: TopUpWebhook = new TopUpWebhook(topUpHistoryRepository, userRepository)
     const topUp: TopUp = new TopUp(paymentGateway, userManagement)
 
+    const payoutWebhook: PayoutWebhook = new PayoutWebhook(payoutHistoryRepository, vendorRepository)
     const payout: Payout = new Payout(vendorPayoutRepository, paymentGateway, vendorManagement)
 
     const checkoutTransaction: CheckoutTransaction = new CheckoutTransaction(userManagement, vendorManagement, jajanItemManagement, jajanItemSnapshotManagement, transactionHistoryManagement, objectUtility)
@@ -232,7 +236,7 @@ export default class RootRoute {
     topUpControllerRest.registerRoutes()
     routerVersionOne.use('/top-ups', topUpControllerRest.router)
 
-    const webhookControllerRest: WebhookControllerRest = new WebhookControllerRest(Router(), topUpWebhook)
+    const webhookControllerRest: WebhookControllerRest = new WebhookControllerRest(Router(), topUpWebhook, payoutWebhook)
     webhookControllerRest.registerRoutes()
     routerVersionOne.use('/webhooks', webhookControllerRest.router)
 

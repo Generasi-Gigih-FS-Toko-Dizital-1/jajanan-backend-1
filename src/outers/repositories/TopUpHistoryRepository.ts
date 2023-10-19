@@ -5,7 +5,6 @@ import type RepositoryArgument from '../../inners/models/value_objects/Repositor
 
 export default class TopUpHistoryRepository {
   oneDatastore: OneDatastore
-  aggregatedArgs?: any
 
   constructor (
     oneDatastore: OneDatastore
