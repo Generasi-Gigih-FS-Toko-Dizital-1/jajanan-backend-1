@@ -50,19 +50,6 @@ export default class TopUpHistoryManagement {
     return new Result<TopUpHistory>(200, 'TopUpHistory read one by id succeed.', foundTopUpHistory)
   }
 
-  readManyByUserId = async (userId: string): Promise<Result<TopUpHistory[]>> => {
-    const args: RepositoryArgument = new RepositoryArgument(
-      { userId }
-    )
-
-    const foundTopUpHistories: TopUpHistory[] = await this.topUpHistoryRepository.readMany(args)
-    return new Result<TopUpHistory[]>(
-      200,
-      'TopUpHistory read many by user id succeed.',
-      foundTopUpHistories
-    )
-  }
-
   createOne = async (request: TopUpHistoryManagementCreateRequest): Promise<Result<TopUpHistory | null>> => {
     const topUpHistoryToCreate: TopUpHistory = {
       id: randomUUID(),

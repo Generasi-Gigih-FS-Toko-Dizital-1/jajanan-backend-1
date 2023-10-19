@@ -5,10 +5,22 @@ import type RepositoryArgument from '../../inners/models/value_objects/Repositor
 import type PayoutHistoryAggregate from '../../inners/models/aggregates/PayoutHistoryAggregate'
 
 export default class PayoutHistoryRepository {
-  oneDatastore: OneDatastore
+  constructor (private readonly oneDatastore: OneDatastore) {
+  }
 
-  constructor (oneDatastore: OneDatastore) {
-    this.oneDatastore = oneDatastore
+  readMany = async (repositoryArgument: RepositoryArgument): Promise<PayoutHistory[] | PayoutHistoryAggregate[]> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
+
+    if (this.oneDatastore.client === undefined) {
+      throw new Error('oneDatastore client is undefined.')
+    }
+
+    const foundPayoutHistories: PayoutHistory[] | PayoutHistoryAggregate[] = await this.oneDatastore.client.payoutHistory.findMany(args)
+    if (foundPayoutHistories === null) {
+      throw new Error('Found payoutHistories is undefined.')
+    }
+
+    return foundPayoutHistories
   }
 
   readOne = async (repositoryArgument: RepositoryArgument): Promise<PayoutHistory | PayoutHistoryAggregate> => {
@@ -25,6 +37,42 @@ export default class PayoutHistoryRepository {
     }
 
     return foundPayoutHistory
+  }
+
+  createOne = async (repositoryArgument: RepositoryArgument): Promise<PayoutHistory | PayoutHistoryAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
+
+    if (this.oneDatastore.client === undefined) {
+      throw new Error('oneDatastore client is undefined.')
+    }
+
+    const createdPayoutHistory: PayoutHistory | PayoutHistoryAggregate = await this.oneDatastore.client.payoutHistory.create(args)
+
+    return createdPayoutHistory
+  }
+
+  patchOne = async (repositoryArgument: RepositoryArgument): Promise<PayoutHistory | PayoutHistoryAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
+
+    if (this.oneDatastore.client === undefined) {
+      throw new Error('oneDatastore client is undefined.')
+    }
+
+    const patchedPayoutHistory: PayoutHistory | PayoutHistoryAggregate = await this.oneDatastore.client.payoutHistory.update(args)
+
+    return patchedPayoutHistory
+  }
+
+  deleteOne = async (repositoryArgument: RepositoryArgument): Promise<PayoutHistory | PayoutHistoryAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
+
+    if (this.oneDatastore.client === undefined) {
+      throw new Error('oneDatastore client is undefined.')
+    }
+
+    const deletedPayoutHistory: PayoutHistory | PayoutHistoryAggregate = await this.oneDatastore.client.payoutHistory.delete(args)
+
+    return deletedPayoutHistory
   }
 
   createByWebhook = async (request: any): Promise<PayoutHistory> => {
