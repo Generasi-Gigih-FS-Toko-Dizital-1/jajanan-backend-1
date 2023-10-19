@@ -2,3 +2,5 @@
 **/.nyc_output
 **/dist
 **/coverage
+firebase-admin-key.json
+

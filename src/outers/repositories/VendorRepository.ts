@@ -1,14 +1,47 @@
 import type OneDatastore from '../datastores/OneDatastore'
-import { type Vendor } from '@prisma/client'
+import { Prisma, type Vendor } from '@prisma/client'
 import type VendorAggregate from '../../inners/models/aggregates/VendorAggregate'
-import type RepositoryArgument from '../../inners/models/value_objects/RepositoryArgument'
+import RepositoryArgument from '../../inners/models/value_objects/RepositoryArgument'
 
 export default class VendorRepository {
   oneDatastore: OneDatastore
-  aggregatedArgs: any
 
   constructor (oneDatastore: OneDatastore) {
     this.oneDatastore = oneDatastore
+  }
+
+  readManyByDistanceAndSubscribedUserIds = async (distance: number, userIds: string[], include: any): Promise<Vendor[] | VendorAggregate[]> => {
+    if (this.oneDatastore.client === undefined) {
+      throw new Error('oneDatastore client is undefined.')
+    }
+
+    const query: string = `
+    select s1.v_id
+    from (select v.id  as v_id,
+                 u.id  as u_id,
+                 st_distance(
+                         st_makepoint(v."lastLatitude", v."lastLongitude"),
+                         st_makepoint(u."lastLatitude", u."lastLongitude")
+                     ) as vu_distance
+          from "Vendor" v
+                   inner join "JajanItem" ji on v."id" = ji."vendorId"
+                   inner join "Category" C on C.id = ji."categoryId"
+                   inner join "UserSubscription" us on us."categoryId" = C.id
+                   inner join "User" u on u.id = us."userId") as s1
+    where s1.vu_distance <= ${distance}
+      and s1.u_id in (${userIds.map((userId: string) => `'${userId}'`).join(', ')});
+    `
+    const foundVendorIds: any[] = await this.oneDatastore.client.$queryRaw`${Prisma.raw(query)}`
+
+    const repositoryArgument: RepositoryArgument = new RepositoryArgument(
+      { id: { in: foundVendorIds.map((row: any) => row.v_id) } },
+      include,
+      undefined,
+      undefined
+    )
+    const foundVendors: Vendor[] | VendorAggregate[] = await this.readMany(repositoryArgument)
+
+    return foundVendors
   }
 
   readMany = async (repositoryArgument: RepositoryArgument): Promise<Vendor[] | VendorAggregate[]> => {

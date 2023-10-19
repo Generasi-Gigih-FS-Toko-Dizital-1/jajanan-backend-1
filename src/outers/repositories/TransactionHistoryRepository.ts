@@ -5,31 +5,9 @@ import type RepositoryArgument from '../../inners/models/value_objects/Repositor
 
 export default class TransactionHistoryRepository {
   oneDatastore: OneDatastore
-  aggregatedArgs: any
 
   constructor (oneDatastore: OneDatastore) {
     this.oneDatastore = oneDatastore
-  }
-
-  readOneByUserId = async (userId: string, isAggregated?: boolean): Promise<TransactionHistory | TransactionHistoryAggregate> => {
-    const args: any = {
-      where: {
-        userId
-      }
-    }
-    if (isAggregated === true) {
-      args.include = this.aggregatedArgs.include
-    }
-
-    if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined.')
-    }
-
-    const foundTransactionHistory: TransactionHistory | TransactionHistoryAggregate | null = await this.oneDatastore.client.transactionHistory.findFirst(args)
-    if (foundTransactionHistory === null) {
-      throw new Error('Found transactionHistory is null.')
-    }
-    return foundTransactionHistory
   }
 
   readMany = async (repositoryArgument: RepositoryArgument): Promise<TransactionHistory[] | TransactionHistoryAggregate[]> => {

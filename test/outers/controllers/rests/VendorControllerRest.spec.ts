@@ -11,6 +11,7 @@ import {
   type JajanItem,
   type JajanItemSnapshot,
   type NotificationHistory,
+  type PayoutHistory,
   type Prisma,
   type TransactionItemHistory,
   type Vendor
@@ -147,6 +148,8 @@ describe('VendorControllerRest', () => {
       const requestVendor: Vendor = oneSeeder.vendorMock.data[0]
       const requestNotificationHistories: NotificationHistory[] = oneSeeder.notificationHistoryMock.data.filter(notificationHistory => notificationHistory.vendorId === requestVendor.id)
       const requestJajanItems: JajanItem[] = oneSeeder.jajanItemMock.data.filter(jajanItem => jajanItem.vendorId === requestVendor.id)
+      const requestJajanItemSnapshots: JajanItemSnapshot[] = oneSeeder.jajanItemSnapshotMock.data.filter(jajanItemSnapshot => jajanItemSnapshot.vendorId === requestVendor.id)
+      const requestPayoutHistories: PayoutHistory[] = oneSeeder.payoutHistoryMock.data.filter(payoutHistory => payoutHistory.vendorId === requestVendor.id)
       const pageNumber: number = 1
       const pageSize: number = oneSeeder.vendorMock.data.length
       const whereInput: any = {
@@ -155,7 +158,9 @@ describe('VendorControllerRest', () => {
       const where: string = encodeURIComponent(JSON.stringify(whereInput))
       const includeInput: any = {
         notificationHistories: true,
-        jajanItems: true
+        jajanItems: true,
+        jajanItemSnapshots: true,
+        payoutHistories: true
       }
       const include: string = encodeURIComponent(JSON.stringify(includeInput))
       const response = await agent
@@ -194,6 +199,12 @@ describe('VendorControllerRest', () => {
         )
         vendor.should.has.property('jajan_items').deep.members(
           requestJajanItems.map((jajanItem: JajanItem) => humps.decamelizeKeys(JSON.parse(JSON.stringify(jajanItem))))
+        )
+        vendor.should.has.property('jajan_item_snapshots').deep.members(
+          requestJajanItemSnapshots.map((jajanItemSnapshot: JajanItemSnapshot) => humps.decamelizeKeys(JSON.parse(JSON.stringify(jajanItemSnapshot))))
+        )
+        vendor.should.has.property('payout_histories').deep.members(
+          requestPayoutHistories.map((payoutHistory: PayoutHistory) => humps.decamelizeKeys(JSON.parse(JSON.stringify(payoutHistory))))
         )
       })
     })
@@ -340,10 +351,18 @@ describe('VendorControllerRest', () => {
       const requestJajanItems: JajanItem[] = oneSeeder.jajanItemMock.data.filter((jajanItem: JajanItem) => jajanItem.vendorId === requestVendor.id)
       const requestJajanItemSnapshots: JajanItemSnapshot[] = oneSeeder.jajanItemSnapshotMock.data.filter((jajanItemSnapshot: JajanItemSnapshot) => requestJajanItems.map((jajanItem: JajanItem) => jajanItem.id).includes(jajanItemSnapshot.originId))
       const requestTransactionItemHistories: TransactionItemHistory[] = oneSeeder.transactionItemHistoryMock.data.filter((transactionItemHistory: TransactionItemHistory) => requestJajanItemSnapshots.map((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.id).includes(transactionItemHistory.jajanItemSnapshotId))
+      const payoutHistories: PayoutHistory[] = oneSeeder.payoutHistoryMock.data.filter((payoutHistory: PayoutHistory) => payoutHistory.vendorId === requestVendor.id)
 
       if (oneDatastore.client === undefined) {
         throw new Error('oneDatastore client is undefined')
       }
+      await oneDatastore.client.payoutHistory.deleteMany({
+        where: {
+          id: {
+            in: payoutHistories.map((payoutHistory: PayoutHistory) => payoutHistory.id)
+          }
+        }
+      })
       await oneDatastore.client.transactionItemHistory.deleteMany({
         where: {
           id: {

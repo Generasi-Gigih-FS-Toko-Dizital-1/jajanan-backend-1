@@ -64,9 +64,9 @@ model Vendor {
   deletedAt             DateTime?             @db.Timestamptz
   notificationHistories NotificationHistory[]
   jajanItems            JajanItem[]
-  payoutHistory         PayoutHistory[]
-  jajanItemSnapshot     JajanItemSnapshot[]
-  VendorPayout          VendorPayout[]
+  payoutHistories       PayoutHistory[]
+  jajanItemSnapshots    JajanItemSnapshot[]
+  payouts               VendorPayout[]
 }
 
 model Admin {
