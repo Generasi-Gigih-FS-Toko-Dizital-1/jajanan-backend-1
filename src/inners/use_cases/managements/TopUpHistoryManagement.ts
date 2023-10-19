@@ -41,22 +41,18 @@ export default class TopUpHistoryManagement {
     let foundTopUpHistory: TopUpHistory | null
     try {
       const args: RepositoryArgument = new RepositoryArgument(
-        { id },
-        undefined,
-        undefined
+        { id }
       )
       foundTopUpHistory = await this.topUpHistoryRepository.readOne(args)
     } catch (error) {
-      return new Result<TopUpHistory | null>(400, 'TopUpHistory read one by id failed, topup history not found', null)
+      return new Result<null>(404, 'TopUpHistory read one by id failed, topup history not found', null)
     }
-    return new Result<TopUpHistory | null>(200, 'TopUpHistory read one by id succeed.', foundTopUpHistory)
+    return new Result<TopUpHistory>(200, 'TopUpHistory read one by id succeed.', foundTopUpHistory)
   }
 
   readManyByUserId = async (userId: string): Promise<Result<TopUpHistory[]>> => {
     const args: RepositoryArgument = new RepositoryArgument(
-      { userId },
-      undefined,
-      undefined
+      { userId }
     )
 
     const foundTopUpHistories: TopUpHistory[] = await this.topUpHistoryRepository.readMany(args)
@@ -135,10 +131,7 @@ export default class TopUpHistoryManagement {
 
   deleteOneById = async (id: string): Promise<Result<TopUpHistory | null>> => {
     const args: RepositoryArgument = new RepositoryArgument(
-      { id },
-      undefined,
-      undefined,
-      undefined
+      { id }
     )
     const deletedTopUpHistory: TopUpHistory | TopUpHistoryAggregate = await this.topUpHistoryRepository.deleteOne(args)
 

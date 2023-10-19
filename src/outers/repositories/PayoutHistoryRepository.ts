@@ -33,9 +33,9 @@ export default class PayoutHistoryRepository {
       amount: request.amount,
       xenditPayoutId: request.id,
       vendorId: request.externalId,
-      media: request.bank_code,
-      createdAt: new Date(request.paidAt),
-      updatedAt: new Date(request.paidAt),
+      media: request.bankCode,
+      createdAt: new Date(request.created),
+      updatedAt: new Date(request.updated),
       deletedAt: null
     }
     const args: any = {

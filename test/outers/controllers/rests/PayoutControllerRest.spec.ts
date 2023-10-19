@@ -88,8 +88,6 @@ describe('PayoutControllerRest', () => {
         .set('Authorization', authorization.convertToString())
         .send(requestBody)
 
-      console.log(response.body)
-
       response.should.have.status(201)
       response.body.should.be.a('object')
       response.body.should.have.property('data')

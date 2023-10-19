@@ -24,7 +24,6 @@ export default class WebhookControllerRest {
   }
 
   handleTopUpCallback = (req: Request, res: Response): void => {
-    console.log(req.body)
     const { status } = req.body
     if (status !== 'PAID') {
       res.status(200).send('notification processed')
@@ -51,7 +50,6 @@ export default class WebhookControllerRest {
   }
 
   handlePayoutCallback = (req: Request, res: Response): void => {
-    console.log(req.body)
     const { status } = req.body
     if (status !== 'COMPLETED') {
       res.status(200).send('notification processed')

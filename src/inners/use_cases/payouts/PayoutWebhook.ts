@@ -11,31 +11,26 @@ export default class PayoutWebhook {
   ) {}
 
   execute = async (data: any): Promise<Result<PayoutHistory | null>> => {
-    const { externalId: vendorId } = data
+    const { externalId: vendorId, id: xenditPayoutId, amount } = data
     const getVendorArgs: RepositoryArgument = new RepositoryArgument(
-      { id: vendorId },
-      undefined,
-      undefined
+      { id: vendorId }
     )
     const vendor: Vendor = await this.vendorRepository.readOne(getVendorArgs)
     try {
       const vendorArgs: RepositoryArgument = new RepositoryArgument(
-        { xenditPayoutId: data.id },
-        undefined,
-        undefined,
-        undefined
+        { xenditPayoutId }
       )
       await this.payoutHistoryRepository.readOne(vendorArgs)
       return new Result(
-        400,
-        'This request already processed',
+        200,
+        'This request already processed before',
         null)
     } catch (error: any) {
       const payoutHistory: PayoutHistory = await this.payoutHistoryRepository.createByWebhook(data)
 
       const updatedBalanceVendor: Vendor = {
         ...vendor,
-        balance: vendor.balance - payoutHistory.amount,
+        balance: vendor.balance - amount,
         updatedAt: new Date()
       }
 
