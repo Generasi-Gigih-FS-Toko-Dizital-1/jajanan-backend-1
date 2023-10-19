@@ -22,7 +22,7 @@ services:
   ds-1:
     image: postgis/postgis:latest
     volumes:
-      - db.sql:/docker-entrypoint-initdb.d/db.sql
+      - ./db.sql:/docker-entrypoint-initdb.d/db.sql
     ports:
       - "${DS_1_PORT}:5432"
     environment:
