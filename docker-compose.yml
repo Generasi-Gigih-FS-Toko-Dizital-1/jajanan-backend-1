@@ -6,10 +6,10 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
+      - ${FIREBASE_ADMIN_KEY}:/firebase-admin-key.json
     entrypoint: [ "/bin/sh", "-c" ]
     command:
       - |
-        export GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS} && \
         export DS_1_HOST=ds-1 && \
         export DS_2_HOST=ds-2 && \
         yarn build && \
