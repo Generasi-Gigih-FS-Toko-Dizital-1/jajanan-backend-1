@@ -6,7 +6,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
-      - ${FIREBASE_ADMIN_KEY}:/app/firebase-admin-key.json
+      - ${GOOGLE_APPLICATION_CREDENTIALS}:/app/firebase-admin-key.json
     entrypoint: [ "/bin/sh", "-c" ]
     command:
       - |
