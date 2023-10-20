@@ -116,7 +116,7 @@ export default class RootRoute {
     const userRegisterAuthentication: UserRegisterAuthentication = new UserRegisterAuthentication(userManagement)
     const vendorRegisterAuthentication: VendorRegisterAuthentication = new VendorRegisterAuthentication(vendorManagement)
 
-    const userLoginAuthentication: UserLoginAuthentication = new UserLoginAuthentication(userManagement, sessionManagement)
+    const userLoginAuthentication: UserLoginAuthentication = new UserLoginAuthentication(userManagement, sessionManagement, firebaseGateway)
     const vendorLoginAuthentication: VendorLoginAuthentication = new VendorLoginAuthentication(vendorManagement, sessionManagement)
     const adminLoginAuthentication: AdminLoginAuthentication = new AdminLoginAuthentication(adminManagement, sessionManagement)
 
@@ -135,7 +135,7 @@ export default class RootRoute {
     const payoutWebhook: PayoutWebhook = new PayoutWebhook(payoutHistoryRepository, vendorRepository)
     const payout: Payout = new Payout(vendorPayoutRepository, paymentGateway, vendorManagement)
 
-    const locationSync: LocationSync = new LocationSync(userManagement, vendorManagement, categoryManagement, firebaseGateway, objectUtility)
+    const locationSync: LocationSync = new LocationSync(userManagement, vendorManagement, sessionManagement, firebaseGateway, objectUtility)
 
     const userControllerRest: UserControllerRest = new UserControllerRest(
       Router(),
