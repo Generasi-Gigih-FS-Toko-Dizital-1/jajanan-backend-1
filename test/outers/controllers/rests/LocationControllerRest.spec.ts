@@ -111,10 +111,12 @@ describe('LocationControllerRest', () => {
         payoutHistories: true
       }
       const include: string = encodeURIComponent(JSON.stringify(includeInput))
+      console.log(JSON.stringify(requestBody, null, 4))
       const response = await agent.post(`/api/v1/locations/sync-user?include=${include}`)
         .set('Authorization', authorization.convertToString())
         .send(requestBody)
 
+      console.log(JSON.stringify(response.body, null, 4))
       response.should.have.status(200)
       response.body.should.be.an('object')
       response.body.should.have.property('message')
@@ -132,7 +134,7 @@ describe('LocationControllerRest', () => {
         1,
         1,
         25,
-        true
+        false
       )
       const includeInput: any = {
         notificationHistories: true,
@@ -141,10 +143,12 @@ describe('LocationControllerRest', () => {
         userSubscriptions: true
       }
       const include: string = encodeURIComponent(JSON.stringify(includeInput))
+      console.log(JSON.stringify(requestBody, null, 4))
       const response = await agent.post(`/api/v1/locations/sync-vendor?include=${include}`)
         .set('Authorization', authorization.convertToString())
         .send(requestBody)
 
+      console.log(JSON.stringify(response.body, null, 4))
       response.should.have.status(200)
       response.body.should.be.an('object')
       response.body.should.have.property('message')
