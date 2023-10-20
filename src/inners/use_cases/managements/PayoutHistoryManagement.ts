@@ -78,7 +78,7 @@ export default class PayoutHistoryManagement {
 
     const createdPayoutHistory: PayoutHistory | null = await this.payoutHistoryRepository.createOne(args)
 
-    return new Result<PayoutHistory | null>(200, 'PayoutHistory create one succeed.', createdPayoutHistory)
+    return new Result<PayoutHistory | null>(201, 'PayoutHistory create one succeed.', createdPayoutHistory)
   }
 
   patchOneById = async (id: string, request: PayoutHistoryManagementPatchRequest): Promise<Result<PayoutHistory | null>> => {

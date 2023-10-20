@@ -7,6 +7,7 @@ import waitUntil from 'async-wait-until'
 import VendorManagementCreateRequest
   from '../../../../src/inners/models/value_objects/requests/managements/vendor_managements/VendorManagementCreateRequest'
 import {
+  type PayoutHistory,
   type Admin,
   type JajanItem,
   type JajanItemSnapshot,
@@ -340,6 +341,7 @@ describe('VendorControllerRest', () => {
       const requestJajanItems: JajanItem[] = oneSeeder.jajanItemMock.data.filter((jajanItem: JajanItem) => jajanItem.vendorId === requestVendor.id)
       const requestJajanItemSnapshots: JajanItemSnapshot[] = oneSeeder.jajanItemSnapshotMock.data.filter((jajanItemSnapshot: JajanItemSnapshot) => requestJajanItems.map((jajanItem: JajanItem) => jajanItem.id).includes(jajanItemSnapshot.originId))
       const requestTransactionItemHistories: TransactionItemHistory[] = oneSeeder.transactionItemHistoryMock.data.filter((transactionItemHistory: TransactionItemHistory) => requestJajanItemSnapshots.map((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.id).includes(transactionItemHistory.jajanItemSnapshotId))
+      const requestPayoutHistory: PayoutHistory[] = oneSeeder.payoutHistoryMock.data.filter((payoutHistory: PayoutHistory) => payoutHistory.vendorId === requestVendor.id)
 
       if (oneDatastore.client === undefined) {
         throw new Error('oneDatastore client is undefined')
@@ -369,6 +371,13 @@ describe('VendorControllerRest', () => {
         where: {
           id: {
             in: requestNotificationHistories.map((notificationHistory: NotificationHistory) => notificationHistory.id)
+          }
+        }
+      })
+      await oneDatastore.client.payoutHistory.deleteMany({
+        where: {
+          id: {
+            in: requestPayoutHistory.map((payoutHistory: PayoutHistory) => payoutHistory.id)
           }
         }
       })
