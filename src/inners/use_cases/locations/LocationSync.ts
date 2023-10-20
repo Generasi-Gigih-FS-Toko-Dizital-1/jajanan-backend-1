@@ -90,21 +90,14 @@ export default class LocationSync {
       for (const user of foundUsers.data) {
         const foundUserSession: Result<Session | null> = await this.sessionManagement.readOneById(user.id)
         if (foundUserSession.status !== 200 || foundUserSession.data === null) {
-          return new Result<null>(
-            500,
-            'Session read one by account id failed, some user session is unknown.',
-            null
-          )
+          console.log(`Session read one by account id failed, user id: ${user.id}`)
+        } else {
+          if (foundUserSession.data.firebaseToken === undefined) {
+            console.log(`Session firebase token is undefined, user id: ${user.id}`)
+          } else {
+            foundUserFirebaseTokens.push(foundUserSession.data.firebaseToken)
+          }
         }
-        if (foundUserSession.data.firebaseToken === undefined) {
-          return new Result<null>(
-            500,
-            'Session read one by account id failed, some user firebase token is undefined.',
-            null
-          )
-        }
-
-        foundUserFirebaseTokens.push(foundUserSession.data.firebaseToken)
       }
 
       if (foundUserFirebaseTokens.length >= 1) {
