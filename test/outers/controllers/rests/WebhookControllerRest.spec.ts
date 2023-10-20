@@ -6,7 +6,7 @@ import { server } from '../../../../src/App'
 import { randomUUID } from 'crypto'
 import OneSeeder from '../../../../src/outers/seeders/OneSeeder'
 import { beforeEach } from 'mocha'
-import { type Vendor, type User } from '@prisma/client'
+import { type User, type Vendor } from '@prisma/client'
 
 chai.use(chaiHttp)
 chai.should()

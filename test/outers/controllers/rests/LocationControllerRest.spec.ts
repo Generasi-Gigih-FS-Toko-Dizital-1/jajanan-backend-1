@@ -131,7 +131,8 @@ describe('LocationControllerRest', () => {
         requestVendor.id,
         1,
         1,
-        25
+        25,
+        true
       )
       const includeInput: any = {
         notificationHistories: true,
