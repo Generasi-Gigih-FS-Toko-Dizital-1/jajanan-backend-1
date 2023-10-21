@@ -12,6 +12,7 @@ import TopUpResponseMock from '../../../mocks/TopUpResponseMock'
 import UserLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/users/UserLoginByEmailAndPasswordRequest'
 import TopUpCreateRequest from '../../../../src/inners/models/value_objects/requests/top_ups/TopUpCreateRequest'
+import { randomUUID } from 'crypto'
 
 chai.use(chaiHttp)
 chai.should()
@@ -42,8 +43,10 @@ describe('TopUpControllerRest', () => {
     const requestAuthUser: User = userMock.data[0]
     const requestBodyLogin: UserLoginByEmailAndPasswordRequest = new UserLoginByEmailAndPasswordRequest(
       requestAuthUser.email,
-      requestAuthUser.password
+      requestAuthUser.password,
+      randomUUID()
     )
+
     const response = await agent
       .post('/api/v1/authentications/users/login?method=email_and_password')
       .send(requestBodyLogin)

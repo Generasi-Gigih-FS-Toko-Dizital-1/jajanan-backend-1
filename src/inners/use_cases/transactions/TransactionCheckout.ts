@@ -15,7 +15,7 @@ import TransactionItemCheckoutResponse
   from '../../models/value_objects/responses/transactions/TransactionItemCheckoutResponse'
 import type VendorManagement from '../managements/VendorManagement'
 
-export default class CheckoutTransaction {
+export default class TransactionCheckout {
   userManagement: UserManagement
   vendorManagement: VendorManagement
   jajanItemManagement: JajanItemManagement

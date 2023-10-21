@@ -19,6 +19,7 @@ import {
   type JajanItem,
   type JajanItemSnapshot,
   type NotificationHistory,
+  type PayoutHistory,
   type TopUpHistory,
   type TransactionHistory,
   type TransactionItemHistory,
@@ -45,6 +46,7 @@ export default class OneSeeder {
   transactionItemHistoryMock: TransactionItemHistoryMock
   notificationHistoryMock: NotificationHistoryMock
   userSubscriptionMock: UserSubscriptionMock
+  payoutHistoryMock: PayoutHistoryMock
   userLevelMock: UserLevelMock
   vendorLevelMock: VendorLevelMock
 
@@ -62,6 +64,7 @@ export default class OneSeeder {
     this.transactionItemHistoryMock = new TransactionItemHistoryMock(this.transactionHistoryMock, this.jajanItemSnapshotMock)
     this.notificationHistoryMock = new NotificationHistoryMock(this.userMock, this.vendorMock)
     this.userSubscriptionMock = new UserSubscriptionMock(this.userMock, this.categoryMock)
+    this.payoutHistoryMock = new PayoutHistoryMock(this.vendorMock)
     this.userLevelMock = new UserLevelMock()
     this.vendorLevelMock = new VendorLevelMock()
 
@@ -119,6 +122,9 @@ export default class OneSeeder {
     await this.oneDatastore.client.userSubscription.createMany({
       data: this.userSubscriptionMock.data
     })
+    await this.oneDatastore.client.payoutHistory.createMany({
+      data: this.payoutHistoryMock.data
+    })
     await this.oneDatastore.client.userLevel.createMany({
       data: this.userLevelMock.data
     })
@@ -143,6 +149,13 @@ export default class OneSeeder {
       where: {
         id: {
           in: this.userLevelMock.data.map((userLevel: UserLevel) => userLevel.id)
+        }
+      }
+    })
+    await this.oneDatastore.client.payoutHistory.deleteMany({
+      where: {
+        id: {
+          in: this.payoutHistoryMock.data.map((payoutHistory: PayoutHistory) => payoutHistory.id)
         }
       }
     })

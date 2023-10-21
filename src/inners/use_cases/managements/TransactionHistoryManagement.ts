@@ -65,7 +65,12 @@ export default class TransactionHistoryManagement {
   readOneByUserId = async (userId: string): Promise<Result<TransactionHistory | null>> => {
     let foundTransactionHistory: TransactionHistory
     try {
-      foundTransactionHistory = await this.transactionHistoryRepository.readOneByUserId(userId)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { userId },
+        undefined,
+        undefined
+      )
+      foundTransactionHistory = await this.transactionHistoryRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,

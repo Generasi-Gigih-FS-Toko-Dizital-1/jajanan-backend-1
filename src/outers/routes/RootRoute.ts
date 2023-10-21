@@ -51,11 +51,14 @@ import UserLevelManagement from '../../inners/use_cases/managements/UserLevelMan
 import UserLevelControllerRest from '../controllers/rests/UserLevelControllerRest'
 import CategoryControllerRest from '../controllers/rests/CategoryControllerRest'
 import TransactionControllerRest from '../controllers/rests/TransactionControllerRest'
-import CheckoutTransaction from '../../inners/use_cases/transactions/CheckoutTransaction'
+import TransactionCheckout from '../../inners/use_cases/transactions/TransactionCheckout'
 import TopUpHistoryManagement from '../../inners/use_cases/managements/TopUpHistoryManagement'
 import TopUpHistoryController from '../controllers/rests/TopUpHistoryControllerRest'
 import JajanItemSnapshotManagement from '../../inners/use_cases/managements/JajanItemSnapshotManagement'
 import JajanItemSnapshotRepository from '../repositories/JajanItemSnapshotRepository'
+import FirebaseGateway from '../gateways/FirebaseGateway'
+import LocationSync from '../../inners/use_cases/locations/LocationSync'
+import LocationControllerRest from '../controllers/rests/LocationControllerRest'
 import PayoutControllerRest from '../controllers/rests/PayoutControllerRest'
 import Payout from '../../inners/use_cases/payouts/Payout'
 import VendorPayoutRepository from '../repositories/VendorPayoutRepository'
@@ -83,6 +86,7 @@ export default class RootRoute {
     const objectUtility: ObjectUtility = new ObjectUtility()
 
     const paymentGateway: PaymentGateway = new PaymentGateway()
+    const firebaseGateway: FirebaseGateway = new FirebaseGateway()
 
     const sessionRepository: SessionRepository = new SessionRepository(this.twoDatastore)
     const userRepository: UserRepository = new UserRepository(this.datastoreOne)
@@ -115,7 +119,7 @@ export default class RootRoute {
     const userRegisterAuthentication: UserRegisterAuthentication = new UserRegisterAuthentication(userManagement)
     const vendorRegisterAuthentication: VendorRegisterAuthentication = new VendorRegisterAuthentication(vendorManagement)
 
-    const userLoginAuthentication: UserLoginAuthentication = new UserLoginAuthentication(userManagement, sessionManagement)
+    const userLoginAuthentication: UserLoginAuthentication = new UserLoginAuthentication(userManagement, sessionManagement, firebaseGateway)
     const vendorLoginAuthentication: VendorLoginAuthentication = new VendorLoginAuthentication(vendorManagement, sessionManagement)
     const adminLoginAuthentication: AdminLoginAuthentication = new AdminLoginAuthentication(adminManagement, sessionManagement)
 
@@ -130,10 +134,11 @@ export default class RootRoute {
     const topUpWebhook: TopUpWebhook = new TopUpWebhook(topUpHistoryRepository, userRepository)
     const topUp: TopUp = new TopUp(paymentGateway, userManagement)
 
+    const transactionCheckout: TransactionCheckout = new TransactionCheckout(userManagement, vendorManagement, jajanItemManagement, jajanItemSnapshotManagement, transactionHistoryManagement, objectUtility)
     const payoutWebhook: PayoutWebhook = new PayoutWebhook(payoutHistoryRepository, vendorRepository)
     const payout: Payout = new Payout(vendorPayoutRepository, paymentGateway, vendorManagement)
 
-    const checkoutTransaction: CheckoutTransaction = new CheckoutTransaction(userManagement, vendorManagement, jajanItemManagement, jajanItemSnapshotManagement, transactionHistoryManagement, objectUtility)
+    const locationSync: LocationSync = new LocationSync(userManagement, vendorManagement, sessionManagement, firebaseGateway, objectUtility)
 
     const userControllerRest: UserControllerRest = new UserControllerRest(
       Router(),
@@ -192,7 +197,7 @@ export default class RootRoute {
 
     const transactionControllerRest: TransactionControllerRest = new TransactionControllerRest(
       Router(),
-      checkoutTransaction,
+      transactionCheckout,
       authenticationValidation
     )
     transactionControllerRest.registerRoutes()
@@ -246,6 +251,10 @@ export default class RootRoute {
     const topUpHistoryControllerRest: TopUpHistoryController = new TopUpHistoryController(Router(), topUpHistoryManagement, authenticationValidation)
     topUpHistoryControllerRest.registerRoutes()
     routerVersionOne.use('/top-up-histories', topUpHistoryControllerRest.router)
+
+    const locationControllerRest: LocationControllerRest = new LocationControllerRest(Router(), locationSync, authenticationValidation)
+    locationControllerRest.registerRoutes()
+    routerVersionOne.use('/locations', locationControllerRest.router)
 
     const payoutControllerRest: PayoutControllerRest = new PayoutControllerRest(Router(), payout, authenticationValidation)
     payoutControllerRest.registerRoutes()

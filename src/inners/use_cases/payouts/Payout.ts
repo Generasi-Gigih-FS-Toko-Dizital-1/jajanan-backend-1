@@ -1,4 +1,4 @@
-import { type VendorPayout, type Vendor } from '@prisma/client'
+import { type Vendor, type VendorPayout } from '@prisma/client'
 import type PaymentGateway from '../../../outers/gateways/PaymentGateway'
 import Result from '../../models/value_objects/Result'
 import type PayoutCreateRequest from '../../models/value_objects/requests/payouts/PayoutCreateRequest'

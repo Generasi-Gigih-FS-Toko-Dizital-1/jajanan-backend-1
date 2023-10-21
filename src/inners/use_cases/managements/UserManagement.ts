@@ -21,6 +21,16 @@ export default class UserManagement {
     this.objectUtility = objectUtility
   }
 
+  readManyByDistanceAndSubscribedVendorIds = async (distance: number, vendorIds: string[], include: any): Promise<Result<User[] | UserAggregate[]>> => {
+    const foundUsers: User[] | UserAggregate[] = await this.userRepository.readManyByDistanceAndSubscribedVendorIds(distance, vendorIds, include)
+
+    return new Result<User[] | UserAggregate[] >(
+      200,
+      'User read many by distance and subscribed vendor ids succeed.',
+      foundUsers
+    )
+  }
+
   readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Result<User[] | UserAggregate[]>> => {
     const args: RepositoryArgument = new RepositoryArgument(
       whereInput,

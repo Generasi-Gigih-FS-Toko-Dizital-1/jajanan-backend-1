@@ -4,7 +4,6 @@ import type RepositoryArgument from '../../inners/models/value_objects/Repositor
 
 export default class AdminRepository {
   oneDatastore: OneDatastore
-  aggregatedArgs: any
 
   constructor (oneDatastore: OneDatastore) {
     this.oneDatastore = oneDatastore

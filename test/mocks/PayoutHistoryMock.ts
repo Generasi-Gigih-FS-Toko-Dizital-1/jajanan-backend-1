@@ -13,8 +13,8 @@ export default class PayoutHistoryMock {
     this.data = [
       {
         id: randomUUID(),
+        xenditPayoutId: 'xenditPayoutId0',
         vendorId: this.vendorMock.data[0].id,
-        xenditPayoutId: randomUUID(),
         amount: 0.0,
         media: 'media0',
         updatedAt: new Date(),
@@ -23,8 +23,8 @@ export default class PayoutHistoryMock {
       },
       {
         id: randomUUID(),
+        xenditPayoutId: 'xenditPayoutId1',
         vendorId: this.vendorMock.data[1].id,
-        xenditPayoutId: randomUUID(),
         amount: 1.0,
         media: 'media0',
         updatedAt: new Date(),
