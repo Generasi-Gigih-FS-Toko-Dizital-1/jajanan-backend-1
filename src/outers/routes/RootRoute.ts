@@ -64,6 +64,8 @@ import Payout from '../../inners/use_cases/payouts/Payout'
 import VendorPayoutRepository from '../repositories/VendorPayoutRepository'
 import PayoutHistoryRepository from '../repositories/PayoutHistoryRepository'
 import PayoutWebhook from '../../inners/use_cases/payouts/PayoutWebhook'
+import PayoutHistoryManagement from '../../inners/use_cases/managements/PayoutHistoryManagement'
+import PayoutHistoryController from '../controllers/rests/PayoutHistoryControllerRest'
 
 export default class RootRoute {
   app: Application
@@ -112,6 +114,7 @@ export default class RootRoute {
     const userLevelManagement: UserLevelManagement = new UserLevelManagement(userLevelRepository, objectUtility)
     const categoryManagement: CategoryManagement = new CategoryManagement(categoryRepository, objectUtility)
     const topUpHistoryManagement: TopUpHistoryManagement = new TopUpHistoryManagement(topUpHistoryRepository, userManagement, objectUtility)
+    const payoutHistoryManagement: PayoutHistoryManagement = new PayoutHistoryManagement(payoutHistoryRepository, vendorManagement, objectUtility)
 
     const userRegisterAuthentication: UserRegisterAuthentication = new UserRegisterAuthentication(userManagement)
     const vendorRegisterAuthentication: VendorRegisterAuthentication = new VendorRegisterAuthentication(vendorManagement)
@@ -256,6 +259,10 @@ export default class RootRoute {
     const payoutControllerRest: PayoutControllerRest = new PayoutControllerRest(Router(), payout, authenticationValidation)
     payoutControllerRest.registerRoutes()
     routerVersionOne.use('/payouts', payoutControllerRest.router)
+
+    const payoutHistoryControllerRest: PayoutHistoryController = new PayoutHistoryController(Router(), payoutHistoryManagement, authenticationValidation)
+    payoutHistoryControllerRest.registerRoutes()
+    routerVersionOne.use('/payout-histories', payoutHistoryControllerRest.router)
 
     this.app.use('/api/v1', routerVersionOne)
   }
