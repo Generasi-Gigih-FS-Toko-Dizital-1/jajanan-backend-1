@@ -3,30 +3,30 @@ import { type Request, type Response, type Router } from 'express'
 import type Result from '../../../inners/models/value_objects/Result'
 import { type UserSubscription } from '@prisma/client'
 import ResponseBody from '../../../inners/models/value_objects/responses/ResponseBody'
-import type UserSubscriptionManagement from '../../../inners/use_cases/subscriptions/UserSubscriptionManagement'
+import type SubscriptionUser from '../../../inners/use_cases/subscriptions/SubscriptionUser'
 import type AuthenticationValidation from '../../../inners/use_cases/authentications/AuthenticationValidation'
 import validateAuthenticationMiddleware from '../../middlewares/ValidateAuthenticationMiddleware'
 import UserSubscriptionManagementCreateResponse from '../../../inners/models/value_objects/responses/managements/user_subscription_managements/UserSubscriptionManagementCreateResponse'
 
 export default class UserSubscriptionControllerRest {
   router: Router
-  userSubscriptionManagement: UserSubscriptionManagement
+  subscriptionUser: SubscriptionUser
   authenticationValidation: AuthenticationValidation
 
-  constructor (router: Router, userSubscriptionManagement: UserSubscriptionManagement, authenticationValidation: AuthenticationValidation) {
+  constructor (router: Router, subscriptionUser: SubscriptionUser, authenticationValidation: AuthenticationValidation) {
     this.router = router
-    this.userSubscriptionManagement = userSubscriptionManagement
+    this.subscriptionUser = subscriptionUser
     this.authenticationValidation = authenticationValidation
   }
 
   registerRoutes = (): void => {
     this.router.use(validateAuthenticationMiddleware(this.authenticationValidation))
-    this.router.post('', this.createOne)
-    this.router.delete('/:id', this.deleteOneById)
+    this.router.post('/subscribe', this.createOne)
+    this.router.post('/unsubscribe/:id', this.deleteOneById)
   }
 
   createOne = (request: Request, response: Response): void => {
-    this.userSubscriptionManagement
+    this.subscriptionUser
       .createOne(request.body)
       .then((result: Result<UserSubscription | null>) => {
         let data: UserSubscriptionManagementCreateResponse | null
@@ -54,7 +54,7 @@ export default class UserSubscriptionControllerRest {
 
   deleteOneById = (request: Request, response: Response): void => {
     const { id } = request.params
-    this.userSubscriptionManagement
+    this.subscriptionUser
       .deleteOneById(id)
       .then((result: Result<UserSubscription | null>) => {
         const responseBody: ResponseBody<null> = new ResponseBody<null>(

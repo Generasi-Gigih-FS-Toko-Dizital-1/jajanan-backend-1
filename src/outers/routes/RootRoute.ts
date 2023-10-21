@@ -55,10 +55,11 @@ import CheckoutTransaction from '../../inners/use_cases/transactions/CheckoutTra
 import TopUpHistoryManagement from '../../inners/use_cases/managements/TopUpHistoryManagement'
 import TopUpHistoryController from '../controllers/rests/TopUpHistoryControllerRest'
 import UserSubscriptionRepository from '../repositories/UserSubscriptionRepository'
-import UserSubscriptionManagement from '../../inners/use_cases/subscriptions/UserSubscriptionManagement'
+import SubscriptionUser from '../../inners/use_cases/subscriptions/SubscriptionUser'
 import UserSubscriptionControllerRest from '../controllers/rests/UserSubscriptionControllerRest'
 import JajanItemSnapshotManagement from '../../inners/use_cases/managements/JajanItemSnapshotManagement'
 import JajanItemSnapshotRepository from '../repositories/JajanItemSnapshotRepository'
+import UserSubscriptionManagement from '../../inners/use_cases/managements/UserSubscriptionManagement'
 
 export default class RootRoute {
   app: Application
@@ -107,6 +108,8 @@ export default class RootRoute {
     const topUpHistoryManagement: TopUpHistoryManagement = new TopUpHistoryManagement(topUpHistoryRepository, userManagement, objectUtility)
     const userSubscriptionManagement: UserSubscriptionManagement = new UserSubscriptionManagement(userSubscriptionRepository, objectUtility)
 
+    const subscriptionUser: SubscriptionUser = new SubscriptionUser(userSubscriptionManagement)
+
     const userRegisterAuthentication: UserRegisterAuthentication = new UserRegisterAuthentication(userManagement)
     const vendorRegisterAuthentication: VendorRegisterAuthentication = new VendorRegisterAuthentication(vendorManagement)
 
@@ -153,7 +156,7 @@ export default class RootRoute {
 
     const userSubscriptionControllerRest: UserSubscriptionControllerRest = new UserSubscriptionControllerRest(
       Router(),
-      userSubscriptionManagement,
+      subscriptionUser,
       authenticationValidation
     )
     userSubscriptionControllerRest.registerRoutes()

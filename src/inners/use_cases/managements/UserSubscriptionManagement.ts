@@ -2,10 +2,13 @@ import { type UserSubscription } from '@prisma/client'
 import type UserSubscriptionRepository from '../../../outers/repositories/UserSubscriptionRepository'
 import type Pagination from '../../models/value_objects/Pagination'
 import Result from '../../models/value_objects/Result'
+import type UserSubscriptionManagementCreateRequest
+  from '../../models/value_objects/requests/managements/user_subscription_managements/UserSubscriptionManagementCreateRequest'
 import { randomUUID } from 'crypto'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
-import type UserSubscriptionManagementCreateRequest from '../../models/value_objects/requests/managements/user_subscription_managements/UserSubscriptionManagementCreateRequest'
-import type UserSubscriptionManagementPatchRequest from '../../models/value_objects/requests/managements/user_subscription_managements/UserSubscriptionManagementPatchRequest'
+import type UserSubscriptionManagementPatchRequest
+  from '../../models/value_objects/requests/managements/user_subscription_managements/UserSubscriptionManagementPatchRequest'
+import RepositoryArgument from '../../models/value_objects/RepositoryArgument'
 
 export default class UserSubscriptionManagement {
   userSubscriptionRepository: UserSubscriptionRepository
@@ -17,7 +20,12 @@ export default class UserSubscriptionManagement {
   }
 
   readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Result<UserSubscription[]>> => {
-    const foundUserSubscriptions: UserSubscription[] = await this.userSubscriptionRepository.readMany(pagination, whereInput, includeInput)
+    const args: RepositoryArgument = new RepositoryArgument(
+      whereInput,
+      includeInput,
+      pagination
+    )
+    const foundUserSubscriptions: UserSubscription[] = await this.userSubscriptionRepository.readMany(args)
     return new Result<UserSubscription[]>(
       200,
       'User Subscriptions read many succeed.',
@@ -25,10 +33,38 @@ export default class UserSubscriptionManagement {
     )
   }
 
+  readManyByIds = async (ids: string[]): Promise<Result<UserSubscription[]>> => {
+    const args: RepositoryArgument = new RepositoryArgument(
+      { id: { in: ids } },
+      undefined,
+      undefined
+    )
+    const foundUserSubscriptions: UserSubscription[] = await this.userSubscriptionRepository.readMany(args)
+
+    if (foundUserSubscriptions.length !== ids.length) {
+      return new Result<UserSubscription[]>(
+        404,
+        'User Subscriptions read many by ids failed, some user subscription ids is not found.',
+        foundUserSubscriptions
+      )
+    }
+
+    return new Result<UserSubscription[]>(
+      200,
+      'User Subscriptions read many by ids succeed.',
+      foundUserSubscriptions
+    )
+  }
+
   readOneById = async (id: string): Promise<Result<UserSubscription | null>> => {
     let foundUserSubscription: UserSubscription
     try {
-      foundUserSubscription = await this.userSubscriptionRepository.readOneById(id)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined
+      )
+      foundUserSubscription = await this.userSubscriptionRepository.readOne(args)
     } catch (error) {
       return new Result<null>(
         404,
@@ -70,7 +106,13 @@ export default class UserSubscriptionManagement {
   createOneRaw = async (userSubscription: UserSubscription): Promise<Result<UserSubscription | null>> => {
     let createdUserSubscription: UserSubscription
     try {
-      createdUserSubscription = await this.userSubscriptionRepository.createOne(userSubscription)
+      const args: RepositoryArgument = new RepositoryArgument(
+        undefined,
+        undefined,
+        undefined,
+        userSubscription
+      )
+      createdUserSubscription = await this.userSubscriptionRepository.createOne(args)
     } catch (error) {
       return new Result<null>(
         500,
@@ -101,7 +143,7 @@ export default class UserSubscriptionManagement {
     )
   }
 
-  patchOneRawById = async (id: string, request: UserSubscriptionManagementPatchRequest): Promise<Result<UserSubscription | null>> => {
+  patchOneRawById = async (id: string, request: any): Promise<Result<UserSubscription | null>> => {
     const foundUserSubscription: Result<UserSubscription | null> = await this.readOneById(id)
     if (foundUserSubscription.status !== 200 || foundUserSubscription.data === null) {
       return new Result<null>(
@@ -111,7 +153,13 @@ export default class UserSubscriptionManagement {
       )
     }
     this.objectUtility.patch(foundUserSubscription.data, request)
-    const patchedUserSubscription: UserSubscription = await this.userSubscriptionRepository.patchOneById(id, foundUserSubscription.data)
+    const args: RepositoryArgument = new RepositoryArgument(
+      { id },
+      undefined,
+      undefined,
+      foundUserSubscription.data
+    )
+    const patchedUserSubscription: UserSubscription = await this.userSubscriptionRepository.patchOne(args)
     return new Result<UserSubscription>(
       200,
       'User Subscription patch one raw by id succeed.',
@@ -122,7 +170,13 @@ export default class UserSubscriptionManagement {
   deleteOneById = async (id: string): Promise<Result<UserSubscription | null>> => {
     let deletedUserSubscription: UserSubscription
     try {
-      deletedUserSubscription = await this.userSubscriptionRepository.deleteOneById(id)
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        undefined
+      )
+      deletedUserSubscription = await this.userSubscriptionRepository.deleteOne(args)
     } catch (error) {
       return new Result<null>(
         500,
@@ -133,6 +187,30 @@ export default class UserSubscriptionManagement {
     return new Result<UserSubscription>(
       200,
       'User Subscription delete one by id succeed.',
+      deletedUserSubscription
+    )
+  }
+
+  deleteOneByUserIdandCategoryId = async (userId: string, categoryId: string): Promise<Result<UserSubscription | null>> => {
+    let deletedUserSubscription: UserSubscription
+    try {
+      const args: RepositoryArgument = new RepositoryArgument(
+        { userId, categoryId },
+        undefined,
+        undefined,
+        undefined
+      )
+      deletedUserSubscription = await this.userSubscriptionRepository.deleteOne(args)
+    } catch (error) {
+      return new Result<null>(
+        500,
+        'UserSubscription delete one by UserId and CategoryId failed',
+        null
+      )
+    }
+    return new Result<UserSubscription>(
+      200,
+      'User Subscription delete one by UserId and CategoryId succeed.',
       deletedUserSubscription
     )
   }

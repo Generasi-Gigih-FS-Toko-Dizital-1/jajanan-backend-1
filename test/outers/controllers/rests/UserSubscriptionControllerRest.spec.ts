@@ -96,7 +96,7 @@ describe('UserSubscriptionControllerRest', () => {
     await oneDatastore.disconnect()
   })
 
-  describe('POST /api/v1/user-subscriptions', () => {
+  describe('POST /api/v1/user-subscriptions/subscribe', () => {
     it('should return 201 CREATED', async () => {
       const requestBody: UserSubscriptionManagementCreateRequest = new UserSubscriptionManagementCreateRequest(
         oneSeeder.userSubscriptionMock.data[0].userId,
@@ -104,7 +104,7 @@ describe('UserSubscriptionControllerRest', () => {
       )
 
       const response = await agent
-        .post('/api/v1/user-subscriptions')
+        .post('/api/v1/user-subscriptions/subscribe')
         .set('Authorization', authorization.convertToString())
         .send(requestBody)
 
@@ -131,15 +131,17 @@ describe('UserSubscriptionControllerRest', () => {
     })
   })
 
-  describe('DELETE /api/v1/user-subscriptions/:id', () => {
+  describe('POST /api/v1/user-subscriptions/unsubscribe', () => {
     it('should return 200 OK', async () => {
       const requestUserSubscription: UserSubscription = oneSeeder.userSubscriptionMock.data[0]
+      const requestUserSubscriptionId: string = requestUserSubscription.id
+
       if (oneDatastore.client === undefined) {
         throw new Error('oneDatastore client is undefined')
       }
 
       const response = await agent
-        .delete(`/api/v1/user-subscriptions/${requestUserSubscription.id}`)
+        .post(`/api/v1/user-subscriptions/unsubscribe/${requestUserSubscriptionId}`)
         .set('Authorization', authorization.convertToString())
         .send()
 
