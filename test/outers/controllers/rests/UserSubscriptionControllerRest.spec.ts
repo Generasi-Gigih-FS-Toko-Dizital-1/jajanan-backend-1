@@ -15,6 +15,7 @@ import AdminLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
 import OneSeeder from '../../../../src/outers/seeders/OneSeeder'
 import UserSubscriptionManagementCreateRequest from '../../../../src/inners/models/value_objects/requests/managements/user_subscription_managements/UserSubscriptionManagementCreateRequest'
+import type UserSubscriptionDeleteOneRequest from '../../../../src/inners/models/value_objects/requests/subscriptions/UserSubscriptionDeleteOneRequest'
 
 chai.use(chaiHttp)
 chai.should()
@@ -131,19 +132,51 @@ describe('UserSubscriptionControllerRest', () => {
     })
   })
 
+  // describe('POST /api/v1/user-subscriptions/unsubscribe', () => {
+  //   it('should return 200 OK', async () => {
+  //     const requestUserSubscription: UserSubscription = oneSeeder.userSubscriptionMock.data[0]
+  //     const requestUserSubscriptionId: string = requestUserSubscription.id
+
+  //     if (oneDatastore.client === undefined) {
+  //       throw new Error('oneDatastore client is undefined')
+  //     }
+
+  //     const response = await agent
+  //       .post(`/api/v1/user-subscriptions/unsubscribe/${requestUserSubscriptionId}`)
+  //       .set('Authorization', authorization.convertToString())
+  //       .send()
+
+  //     response.should.has.status(200)
+  //     response.body.should.be.an('object')
+  //     response.body.should.has.property('message')
+  //     response.body.should.has.property('data')
+  //     assert.isNull(response.body.data)
+
+  //     const result: UserSubscription | null = await oneDatastore.client.userSubscription.findFirst({
+  //       where: {
+  //         id: requestUserSubscription.id
+  //       }
+  //     })
+  //     assert.isNull(result)
+  //   })
+  // })
+
   describe('POST /api/v1/user-subscriptions/unsubscribe', () => {
     it('should return 200 OK', async () => {
       const requestUserSubscription: UserSubscription = oneSeeder.userSubscriptionMock.data[0]
-      const requestUserSubscriptionId: string = requestUserSubscription.id
+      const requestBody: UserSubscriptionDeleteOneRequest = {
+        userId: requestUserSubscription.userId,
+        categoryId: requestUserSubscription.categoryId
+      }
 
       if (oneDatastore.client === undefined) {
         throw new Error('oneDatastore client is undefined')
       }
 
       const response = await agent
-        .post(`/api/v1/user-subscriptions/unsubscribe/${requestUserSubscriptionId}`)
+        .post('/api/v1/user-subscriptions/unsubscribe')
         .set('Authorization', authorization.convertToString())
-        .send()
+        .send(requestBody)
 
       response.should.has.status(200)
       response.body.should.be.an('object')

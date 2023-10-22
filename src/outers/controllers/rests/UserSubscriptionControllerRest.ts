@@ -22,7 +22,7 @@ export default class UserSubscriptionControllerRest {
   registerRoutes = (): void => {
     this.router.use(validateAuthenticationMiddleware(this.authenticationValidation))
     this.router.post('/subscribe', this.createOne)
-    this.router.post('/unsubscribe/:id', this.deleteOneById)
+    this.router.post('/unsubscribe', this.deleteOneByUserIdandCategoryId)
   }
 
   createOne = (request: Request, response: Response): void => {
@@ -52,10 +52,28 @@ export default class UserSubscriptionControllerRest {
       })
   }
 
-  deleteOneById = (request: Request, response: Response): void => {
-    const { id } = request.params
+  // deleteOneById = (request: Request, response: Response): void => {
+  //   const { id } = request.params
+  //   this.subscriptionUser
+  //     .deleteOneById(id)
+  //     .then((result: Result<UserSubscription | null>) => {
+  //       const responseBody: ResponseBody<null> = new ResponseBody<null>(
+  //         result.message,
+  //         null
+  //       )
+  //       response
+  //         .status(result.status)
+  //         .send(responseBody)
+  //       response.status(result.status).send()
+  //     })
+  //     .catch((error: Error) => {
+  //       response.status(500).send(error.message)
+  //     })
+  // }
+
+  deleteOneByUserIdandCategoryId = (request: Request, response: Response): void => {
     this.subscriptionUser
-      .deleteOneById(id)
+      .deleteOneByUserIdandCategoryId(request.body)
       .then((result: Result<UserSubscription | null>) => {
         const responseBody: ResponseBody<null> = new ResponseBody<null>(
           result.message,

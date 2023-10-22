@@ -79,6 +79,29 @@ export default class UserSubscriptionManagement {
     )
   }
 
+  readOneByUserIdAndCategoryId = async (userId: string, categoryId: string): Promise<Result<UserSubscription | null>> => {
+    let foundUserSubscription: UserSubscription
+    try {
+      const args: RepositoryArgument = new RepositoryArgument(
+        { userId, categoryId },
+        undefined,
+        undefined
+      )
+      foundUserSubscription = await this.userSubscriptionRepository.readOne(args)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'User Subscription read one by user id and category id failed, user subscription is not found.',
+        null
+      )
+    }
+    return new Result<UserSubscription>(
+      200,
+      'User Subscription read one by user id and category id succeed.',
+      foundUserSubscription
+    )
+  }
+
   createOne = async (request: UserSubscriptionManagementCreateRequest): Promise<Result<UserSubscription | null>> => {
     const userSubscriptionToCreate: UserSubscription = {
       id: randomUUID(),
@@ -194,13 +217,24 @@ export default class UserSubscriptionManagement {
   deleteOneByUserIdandCategoryId = async (userId: string, categoryId: string): Promise<Result<UserSubscription | null>> => {
     let deletedUserSubscription: UserSubscription
     try {
-      const args: RepositoryArgument = new RepositoryArgument(
-        { userId, categoryId },
+      const foundUserSubscription: Result<UserSubscription | null> = await this.readOneByUserIdAndCategoryId(userId, categoryId)
+      if (foundUserSubscription.status !== 200 || foundUserSubscription.data === null) {
+        return new Result<null>(
+          404,
+          'User Subscription delete one raw by user id and category id failed, user subscription is not found.',
+          null
+        )
+      }
+      const foundUserSubscriptionId: string = foundUserSubscription.data.id
+
+      const deleteOneArgs: RepositoryArgument = new RepositoryArgument(
+        { id: foundUserSubscriptionId },
         undefined,
         undefined,
         undefined
       )
-      deletedUserSubscription = await this.userSubscriptionRepository.deleteOne(args)
+
+      deletedUserSubscription = await this.userSubscriptionRepository.deleteOne(deleteOneArgs)
     } catch (error) {
       return new Result<null>(
         500,
