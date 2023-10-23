@@ -136,14 +136,15 @@ model NotificationHistory {
 }
 
 model TopUpHistory {
-  id        String    @id
-  userId    String
-  amount    Float
-  media     String    @db.VarChar(255)
-  updatedAt DateTime  @db.Timestamptz
-  createdAt DateTime  @db.Timestamptz
-  deletedAt DateTime? @db.Timestamptz
-  user      User      @relation(fields: [userId], references: [id])
+  id              String    @id
+  xenditInvoiceId String
+  userId          String
+  amount          Float
+  media           String    @db.VarChar(255)
+  updatedAt       DateTime  @db.Timestamptz
+  createdAt       DateTime  @db.Timestamptz
+  deletedAt       DateTime? @db.Timestamptz
+  user            User      @relation(fields: [userId], references: [id])
 }
 
 model PayoutHistory {

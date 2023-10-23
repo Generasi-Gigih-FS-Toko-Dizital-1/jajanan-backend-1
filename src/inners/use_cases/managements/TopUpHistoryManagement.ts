@@ -54,6 +54,7 @@ export default class TopUpHistoryManagement {
     const topUpHistoryToCreate: TopUpHistory = {
       id: randomUUID(),
       userId: request.userId,
+      xenditInvoiceId: request.xenditInvoiceId,
       amount: request.amount,
       media: request.media,
       updatedAt: new Date(),
