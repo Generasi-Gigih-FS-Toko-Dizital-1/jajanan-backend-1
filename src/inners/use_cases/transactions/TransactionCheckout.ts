@@ -80,8 +80,6 @@ export default class TransactionCheckout {
       }
     })
 
-    foundUser.data.experience += totalPrice
-
     if (request.paymentMethod === 'BALANCE') {
       foundUser.data.balance -= totalPrice
       if (foundUser.data.balance < 0) {
