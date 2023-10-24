@@ -7,11 +7,11 @@ import waitUntil from 'async-wait-until'
 import VendorManagementCreateRequest
   from '../../../../src/inners/models/value_objects/requests/managements/vendor_managements/VendorManagementCreateRequest'
 import {
-  type PayoutHistory,
   type Admin,
   type JajanItem,
   type JajanItemSnapshot,
   type NotificationHistory,
+  type PayoutHistory,
   type Prisma,
   type TransactionItemHistory,
   type Vendor
