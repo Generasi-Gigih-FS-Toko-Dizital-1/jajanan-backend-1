@@ -100,8 +100,6 @@ export default class VendorControllerRest {
     const {
       pageNumber,
       pageSize,
-      where,
-      include,
       distance,
       latitude,
       longitude
@@ -113,10 +111,8 @@ export default class VendorControllerRest {
     const distanceInput: number = distance === undefined ? 0 : Number(distance)
     const latitudeInput: number = latitude === undefined ? 0 : Number(latitude)
     const longitudeInput: number = longitude === undefined ? 0 : Number(longitude)
-    const whereInput: any = where === undefined ? {} : JSON.parse(decodeURIComponent(where as string))
-    const includeInput: any = include === undefined ? {} : JSON.parse(decodeURIComponent(include as string))
     this.vendorManagement
-      .readManyByDistanceAndLocation(distanceInput, latitudeInput, longitudeInput, pagination, whereInput, includeInput)
+      .readManyByDistanceAndLocation(distanceInput, latitudeInput, longitudeInput, pagination)
       .then((result: Result<VendorManagementReadManyByDistanceAndLocationResponse>) => {
         const responseBody: ResponseBody<VendorManagementReadManyByDistanceAndLocationResponse> = new ResponseBody<VendorManagementReadManyByDistanceAndLocationResponse>(
           result.message,

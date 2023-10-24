@@ -49,41 +49,40 @@ export default class VendorRepository {
     return foundVendors
   }
 
-  readManyByDistanceAndLocation = async (distance: number, latitude: number, longitude: number, pagination: Pagination, where: any, include: any): Promise<VendorManagementReadManyByDistanceAndLocationResponse> => {
+  readManyByDistanceAndLocation = async (distance: number, latitude: number, longitude: number, pagination: Pagination): Promise<VendorManagementReadManyByDistanceAndLocationResponse> => {
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
     }
 
+    const limit: number = pagination.pageSize
+    const offset: number = (pagination.pageNumber - 1) * pagination.pageSize
+
     const query: string = `
     select 
-        s1.v_id,
-        s1.v_distance
+        v.*,
+        s1.distance
     from (
-        select 
-            v.id  as v_id,
+        select
+            v.id as v_id,
             st_distance(
                 st_makepoint(v."lastLatitude", v."lastLongitude"),
                 st_makepoint(${latitude}, ${longitude})
-            ) as v_distance
+            ) as distance
         from "Vendor" v
     ) as s1
-    where s1.v_distance <= ${distance}
-    order by s1.v_distance asc;
+    inner join "Vendor" v on v.id = s1.v_id
+    where s1.distance <= ${distance}
+    order by s1.distance asc
+    limit ${limit}
+    offset ${offset};
     `
-    const foundVendorIdsAndDistance: any[] = await this.oneDatastore.client.$queryRaw`${Prisma.raw(query)}`
+    const foundVendorsWithDistance: any[] = await this.oneDatastore.client.$queryRaw`${Prisma.raw(query)}`
 
-    const repositoryArgument: RepositoryArgument = new RepositoryArgument(
-      { ...where, id: { in: foundVendorIdsAndDistance.map((row: any) => row.v_id) } },
-      include,
-      pagination,
-      undefined
-    )
-    const foundVendors: Vendor[] | VendorAggregate[] = await this.readMany(repositoryArgument)
-
-    const nearbyVendors: VendorManagementReadOneByDistanceAndLocationResponse[] = foundVendors.map((foundVendor: Vendor | VendorAggregate) => {
+    const nearbyVendors: VendorManagementReadOneByDistanceAndLocationResponse[] = foundVendorsWithDistance.map((foundVendorWithDistance: any) => {
+      const { distance, ...vendor } = foundVendorWithDistance
       return new VendorManagementReadOneByDistanceAndLocationResponse(
-        foundVendor,
-        foundVendorIdsAndDistance.find((row: any) => row.v_id === foundVendor.id).v_distance
+        vendor,
+        distance
       )
     })
 
