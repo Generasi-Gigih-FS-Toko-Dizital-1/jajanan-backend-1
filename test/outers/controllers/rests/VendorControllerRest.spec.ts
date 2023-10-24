@@ -178,7 +178,7 @@ describe('VendorControllerRest', () => {
       response.body.data.should.has.property('vendors')
       response.body.data.vendors.should.be.a('array')
       response.body.data.vendors.length.should.be.equal(1)
-      response.body.data.vendors.forEach((vendor: Vendor) => {
+      response.body.data.vendors.forEach((vendor: any) => {
         vendor.should.has.property('id').equal(requestVendor.id)
         vendor.should.has.property('username').equal(requestVendor.username)
         vendor.should.has.property('full_name').equal(requestVendor.fullName)
@@ -245,36 +245,39 @@ describe('VendorControllerRest', () => {
       response.body.should.has.property('data')
       response.body.data.should.be.an('object')
       response.body.data.should.has.property('total_vendors')
-      response.body.data.should.has.property('vendors')
-      response.body.data.vendors.should.be.a('array')
-      response.body.data.vendors.length.should.be.equal(1)
-      response.body.data.vendors.forEach((vendor: Vendor) => {
-        vendor.should.has.property('id').equal(requestVendor.id)
-        vendor.should.has.property('username').equal(requestVendor.username)
-        vendor.should.has.property('full_name').equal(requestVendor.fullName)
-        vendor.should.has.property('address').equal(requestVendor.address)
-        vendor.should.has.property('email').equal(requestVendor.email)
-        vendor.should.has.property('gender').equal(requestVendor.gender)
-        vendor.should.has.property('balance').equal(requestVendor.balance)
-        vendor.should.has.property('experience').equal(requestVendor.experience)
-        vendor.should.has.property('jajan_image_url').equal(requestVendor.jajanImageUrl)
-        vendor.should.has.property('jajan_name').equal(requestVendor.jajanName)
-        vendor.should.has.property('jajan_description').equal(requestVendor.jajanDescription)
-        vendor.should.has.property('status').equal(requestVendor.status)
-        vendor.should.has.property('last_latitude').equal(requestVendor.lastLatitude)
-        vendor.should.has.property('last_longitude').equal(requestVendor.lastLongitude)
-        vendor.should.has.property('created_at').equal(requestVendor.createdAt.toISOString())
-        vendor.should.has.property('updated_at').equal(requestVendor.updatedAt.toISOString())
-        vendor.should.has.property('notification_histories').deep.members(
+      response.body.data.should.has.property('nearby_vendors')
+      response.body.data.nearby_vendors.should.be.a('array')
+      response.body.data.nearby_vendors.length.should.be.equal(1)
+      response.body.data.nearby_vendors.forEach((nearbyVendor: any) => {
+        nearbyVendor.should.has.property('distance')
+        nearbyVendor.distance.should.be.lessThanOrEqual(distance)
+        nearbyVendor.should.has.property('vendor')
+        nearbyVendor.vendor.should.has.property('id').equal(requestVendor.id)
+        nearbyVendor.vendor.should.has.property('username').equal(requestVendor.username)
+        nearbyVendor.vendor.should.has.property('full_name').equal(requestVendor.fullName)
+        nearbyVendor.vendor.should.has.property('address').equal(requestVendor.address)
+        nearbyVendor.vendor.should.has.property('email').equal(requestVendor.email)
+        nearbyVendor.vendor.should.has.property('gender').equal(requestVendor.gender)
+        nearbyVendor.vendor.should.has.property('balance').equal(requestVendor.balance)
+        nearbyVendor.vendor.should.has.property('experience').equal(requestVendor.experience)
+        nearbyVendor.vendor.should.has.property('jajan_image_url').equal(requestVendor.jajanImageUrl)
+        nearbyVendor.vendor.should.has.property('jajan_name').equal(requestVendor.jajanName)
+        nearbyVendor.vendor.should.has.property('jajan_description').equal(requestVendor.jajanDescription)
+        nearbyVendor.vendor.should.has.property('status').equal(requestVendor.status)
+        nearbyVendor.vendor.should.has.property('last_latitude').equal(requestVendor.lastLatitude)
+        nearbyVendor.vendor.should.has.property('last_longitude').equal(requestVendor.lastLongitude)
+        nearbyVendor.vendor.should.has.property('created_at').equal(requestVendor.createdAt.toISOString())
+        nearbyVendor.vendor.should.has.property('updated_at').equal(requestVendor.updatedAt.toISOString())
+        nearbyVendor.vendor.should.has.property('notification_histories').deep.members(
           requestNotificationHistories.map((notificationHistory: NotificationHistory) => humps.decamelizeKeys(JSON.parse(JSON.stringify(notificationHistory))))
         )
-        vendor.should.has.property('jajan_items').deep.members(
+        nearbyVendor.vendor.should.has.property('jajan_items').deep.members(
           requestJajanItems.map((jajanItem: JajanItem) => humps.decamelizeKeys(JSON.parse(JSON.stringify(jajanItem))))
         )
-        vendor.should.has.property('jajan_item_snapshots').deep.members(
+        nearbyVendor.vendor.should.has.property('jajan_item_snapshots').deep.members(
           requestJajanItemSnapshots.map((jajanItemSnapshot: JajanItemSnapshot) => humps.decamelizeKeys(JSON.parse(JSON.stringify(jajanItemSnapshot))))
         )
-        vendor.should.has.property('payout_histories').deep.members(
+        nearbyVendor.vendor.should.has.property('payout_histories').deep.members(
           requestPayoutHistories.map((payoutHistory: PayoutHistory) => humps.decamelizeKeys(JSON.parse(JSON.stringify(payoutHistory))))
         )
       })
