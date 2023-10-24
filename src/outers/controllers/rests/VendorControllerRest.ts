@@ -16,6 +16,8 @@ import ResponseBody from '../../../inners/models/value_objects/responses/Respons
 import type AuthenticationValidation from '../../../inners/use_cases/authentications/AuthenticationValidation'
 import validateAuthenticationMiddleware from '../../middlewares/ValidateAuthenticationMiddleware'
 import type VendorAggregate from '../../../inners/models/aggregates/VendorAggregate'
+import type VendorManagementReadManyByDistanceAndLocationResponse
+  from '../../../inners/models/value_objects/responses/managements/vendor_managements/VendorManagementReadManyByDistanceAndLocationResponse'
 
 export default class VendorControllerRest {
   router: Router
@@ -115,37 +117,10 @@ export default class VendorControllerRest {
     const includeInput: any = include === undefined ? {} : JSON.parse(decodeURIComponent(include as string))
     this.vendorManagement
       .readManyByDistanceAndLocation(distanceInput, latitudeInput, longitudeInput, pagination, whereInput, includeInput)
-      .then((result: Result<Vendor[] | VendorAggregate[]>) => {
-        const data: VendorManagementReadManyResponse = new VendorManagementReadManyResponse(
-          result.data.length,
-          result.data.map((vendor: Vendor | VendorAggregate) =>
-            new VendorManagementReadOneResponse(
-              vendor.id,
-              vendor.fullName,
-              vendor.gender,
-              vendor.address,
-              vendor.username,
-              vendor.email,
-              vendor.balance,
-              vendor.experience,
-              vendor.jajanImageUrl,
-              vendor.jajanName,
-              vendor.jajanDescription,
-              vendor.status,
-              vendor.lastLatitude,
-              vendor.lastLongitude,
-              vendor.createdAt,
-              vendor.updatedAt,
-              (vendor as VendorAggregate).notificationHistories,
-              (vendor as VendorAggregate).jajanItems,
-              (vendor as VendorAggregate).jajanItemSnapshots,
-              (vendor as VendorAggregate).payoutHistories
-            )
-          )
-        )
-        const responseBody: ResponseBody<VendorManagementReadManyResponse> = new ResponseBody<VendorManagementReadManyResponse>(
+      .then((result: Result<VendorManagementReadManyByDistanceAndLocationResponse>) => {
+        const responseBody: ResponseBody<VendorManagementReadManyByDistanceAndLocationResponse> = new ResponseBody<VendorManagementReadManyByDistanceAndLocationResponse>(
           result.message,
-          data
+          result.data
         )
         response
           .status(result.status)

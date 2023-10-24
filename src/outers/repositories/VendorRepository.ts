@@ -3,6 +3,10 @@ import { Prisma, type Vendor } from '@prisma/client'
 import type VendorAggregate from '../../inners/models/aggregates/VendorAggregate'
 import RepositoryArgument from '../../inners/models/value_objects/RepositoryArgument'
 import type Pagination from '../../inners/models/value_objects/Pagination'
+import VendorManagementReadOneByDistanceAndLocationResponse
+  from '../../inners/models/value_objects/responses/managements/vendor_managements/VendorManagementReadOneByDistanceAndLocationResponse'
+import VendorManagementReadManyByDistanceAndLocationResponse
+  from '../../inners/models/value_objects/responses/managements/vendor_managements/VendorManagementReadManyByDistanceAndLocationResponse'
 
 export default class VendorRepository {
   oneDatastore: OneDatastore
@@ -45,32 +49,50 @@ export default class VendorRepository {
     return foundVendors
   }
 
-  readManyByDistanceAndLocation = async (distance: number, latitude: number, longitude: number, pagination: Pagination, where: any, include: any): Promise<Vendor[] | VendorAggregate[]> => {
+  readManyByDistanceAndLocation = async (distance: number, latitude: number, longitude: number, pagination: Pagination, where: any, include: any): Promise<VendorManagementReadManyByDistanceAndLocationResponse> => {
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
     }
 
     const query: string = `
-    select s1.v_id
-    from (select v.id  as v_id,
-                 st_distance(
-                         st_makepoint(v."lastLatitude", v."lastLongitude"),
-                         st_makepoint(${latitude}, ${longitude})
-                     ) as vu_distance
-          from "Vendor" v) as s1
-    where s1.vu_distance <= ${distance};
+    select 
+        s1.v_id,
+        s1.v_distance
+    from (
+        select 
+            v.id  as v_id,
+            st_distance(
+                st_makepoint(v."lastLatitude", v."lastLongitude"),
+                st_makepoint(${latitude}, ${longitude})
+            ) as v_distance
+        from "Vendor" v
+    ) as s1
+    where s1.v_distance <= ${distance}
+    order by s1.v_distance asc;
     `
-    const foundVendorIds: any[] = await this.oneDatastore.client.$queryRaw`${Prisma.raw(query)}`
+    const foundVendorIdsAndDistance: any[] = await this.oneDatastore.client.$queryRaw`${Prisma.raw(query)}`
 
     const repositoryArgument: RepositoryArgument = new RepositoryArgument(
-      { ...where, id: { in: foundVendorIds.map((row: any) => row.v_id) } },
+      { ...where, id: { in: foundVendorIdsAndDistance.map((row: any) => row.v_id) } },
       include,
       pagination,
       undefined
     )
     const foundVendors: Vendor[] | VendorAggregate[] = await this.readMany(repositoryArgument)
 
-    return foundVendors
+    const nearbyVendors: VendorManagementReadOneByDistanceAndLocationResponse[] = foundVendors.map((foundVendor: Vendor | VendorAggregate) => {
+      return new VendorManagementReadOneByDistanceAndLocationResponse(
+        foundVendor,
+        foundVendorIdsAndDistance.find((row: any) => row.v_id === foundVendor.id).v_distance
+      )
+    })
+
+    const response: VendorManagementReadManyByDistanceAndLocationResponse = new VendorManagementReadManyByDistanceAndLocationResponse(
+      nearbyVendors.length,
+      nearbyVendors
+    )
+
+    return response
   }
 
   readMany = async (repositoryArgument: RepositoryArgument): Promise<Vendor[] | VendorAggregate[]> => {
