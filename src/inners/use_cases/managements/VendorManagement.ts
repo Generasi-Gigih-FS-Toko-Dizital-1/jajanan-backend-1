@@ -13,9 +13,6 @@ import type VendorAggregate from '../../models/aggregates/VendorAggregate'
 import RepositoryArgument from '../../models/value_objects/RepositoryArgument'
 import type VendorManagementReadManyByDistanceAndLocationResponse
   from '../../models/value_objects/responses/managements/vendor_managements/VendorManagementReadManyByDistanceAndLocationResponse'
-import VendorManagementReadOneByDistanceAndLocationResponse
-  from '../../models/value_objects/responses/managements/vendor_managements/VendorManagementReadOneByDistanceAndLocationResponse'
-
 export default class VendorManagement {
   vendorRepository: VendorRepository
   objectUtility: ObjectUtility
@@ -35,8 +32,8 @@ export default class VendorManagement {
     )
   }
 
-  readManyByDistanceAndLocation = async (distance: number, latitude: number, longitude: number, pagination: Pagination, where: any, include: any): Promise<Result<VendorManagementReadManyByDistanceAndLocationResponse>> => {
-    const foundVendors: VendorManagementReadManyByDistanceAndLocationResponse = await this.vendorRepository.readManyByDistanceAndLocation(distance, latitude, longitude, pagination, where, include)
+  readManyByDistanceAndLocation = async (distance: number, latitude: number, longitude: number, pagination: Pagination): Promise<Result<VendorManagementReadManyByDistanceAndLocationResponse>> => {
+    const foundVendors: VendorManagementReadManyByDistanceAndLocationResponse = await this.vendorRepository.readManyByDistanceAndLocation(distance, latitude, longitude, pagination)
     return new Result<VendorManagementReadManyByDistanceAndLocationResponse>(
       200,
       'Vendor read many by distance and location succeed.',

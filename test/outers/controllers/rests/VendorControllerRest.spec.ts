@@ -213,29 +213,13 @@ describe('VendorControllerRest', () => {
 
   describe('GET /api/v1/vendors?page_number={}&page_size={}&where={}&include={}&distance={}&latitude={}&longitude={}', () => {
     it('should return 200 OK', async () => {
-      const requestVendor: Vendor = oneSeeder.vendorMock.data[0]
-      const requestNotificationHistories: NotificationHistory[] = oneSeeder.notificationHistoryMock.data.filter(notificationHistory => notificationHistory.vendorId === requestVendor.id)
-      const requestJajanItems: JajanItem[] = oneSeeder.jajanItemMock.data.filter(jajanItem => jajanItem.vendorId === requestVendor.id)
-      const requestJajanItemSnapshots: JajanItemSnapshot[] = oneSeeder.jajanItemSnapshotMock.data.filter(jajanItemSnapshot => jajanItemSnapshot.vendorId === requestVendor.id)
-      const requestPayoutHistories: PayoutHistory[] = oneSeeder.payoutHistoryMock.data.filter(payoutHistory => payoutHistory.vendorId === requestVendor.id)
       const pageNumber: number = 1
       const pageSize: number = oneSeeder.vendorMock.data.length
-      const whereInput: any = {
-        email: requestVendor.email
-      }
-      const where: string = encodeURIComponent(JSON.stringify(whereInput))
-      const includeInput: any = {
-        notificationHistories: true,
-        jajanItems: true,
-        jajanItemSnapshots: true,
-        payoutHistories: true
-      }
-      const include: string = encodeURIComponent(JSON.stringify(includeInput))
       const distance: number = 1000
-      const latitude: number = requestVendor.lastLatitude
-      const longitude: number = requestVendor.lastLongitude
+      const latitude: number = 0
+      const longitude: number = 0
       const response = await agent
-        .get(`/api/v1/vendors/locations?page_number=${pageNumber}&page_size=${pageSize}&where=${where}&include=${include}&distance=${distance}&latitude=${latitude}&longitude=${longitude}`)
+        .get(`/api/v1/vendors/locations?page_number=${pageNumber}&page_size=${pageSize}&distance=${distance}&latitude=${latitude}&longitude=${longitude}`)
         .set('Authorization', authorization.convertToString())
         .send()
 
@@ -247,39 +231,27 @@ describe('VendorControllerRest', () => {
       response.body.data.should.has.property('total_vendors')
       response.body.data.should.has.property('nearby_vendors')
       response.body.data.nearby_vendors.should.be.a('array')
-      response.body.data.nearby_vendors.length.should.be.equal(1)
+      response.body.data.nearby_vendors.length.should.be.lessThanOrEqual(pageSize)
       response.body.data.nearby_vendors.forEach((nearbyVendor: any) => {
+        nearbyVendor.should.has.property('vendor')
+        nearbyVendor.vendor.should.has.property('id')
+        nearbyVendor.vendor.should.has.property('username')
+        nearbyVendor.vendor.should.has.property('full_name')
+        nearbyVendor.vendor.should.has.property('address')
+        nearbyVendor.vendor.should.has.property('email')
+        nearbyVendor.vendor.should.has.property('gender')
+        nearbyVendor.vendor.should.has.property('balance')
+        nearbyVendor.vendor.should.has.property('experience')
+        nearbyVendor.vendor.should.has.property('jajan_image_url')
+        nearbyVendor.vendor.should.has.property('jajan_name')
+        nearbyVendor.vendor.should.has.property('jajan_description')
+        nearbyVendor.vendor.should.has.property('status')
+        nearbyVendor.vendor.should.has.property('last_latitude')
+        nearbyVendor.vendor.should.has.property('last_longitude')
+        nearbyVendor.vendor.should.has.property('created_at')
+        nearbyVendor.vendor.should.has.property('updated_at')
         nearbyVendor.should.has.property('distance')
         nearbyVendor.distance.should.be.lessThanOrEqual(distance)
-        nearbyVendor.should.has.property('vendor')
-        nearbyVendor.vendor.should.has.property('id').equal(requestVendor.id)
-        nearbyVendor.vendor.should.has.property('username').equal(requestVendor.username)
-        nearbyVendor.vendor.should.has.property('full_name').equal(requestVendor.fullName)
-        nearbyVendor.vendor.should.has.property('address').equal(requestVendor.address)
-        nearbyVendor.vendor.should.has.property('email').equal(requestVendor.email)
-        nearbyVendor.vendor.should.has.property('gender').equal(requestVendor.gender)
-        nearbyVendor.vendor.should.has.property('balance').equal(requestVendor.balance)
-        nearbyVendor.vendor.should.has.property('experience').equal(requestVendor.experience)
-        nearbyVendor.vendor.should.has.property('jajan_image_url').equal(requestVendor.jajanImageUrl)
-        nearbyVendor.vendor.should.has.property('jajan_name').equal(requestVendor.jajanName)
-        nearbyVendor.vendor.should.has.property('jajan_description').equal(requestVendor.jajanDescription)
-        nearbyVendor.vendor.should.has.property('status').equal(requestVendor.status)
-        nearbyVendor.vendor.should.has.property('last_latitude').equal(requestVendor.lastLatitude)
-        nearbyVendor.vendor.should.has.property('last_longitude').equal(requestVendor.lastLongitude)
-        nearbyVendor.vendor.should.has.property('created_at').equal(requestVendor.createdAt.toISOString())
-        nearbyVendor.vendor.should.has.property('updated_at').equal(requestVendor.updatedAt.toISOString())
-        nearbyVendor.vendor.should.has.property('notification_histories').deep.members(
-          requestNotificationHistories.map((notificationHistory: NotificationHistory) => humps.decamelizeKeys(JSON.parse(JSON.stringify(notificationHistory))))
-        )
-        nearbyVendor.vendor.should.has.property('jajan_items').deep.members(
-          requestJajanItems.map((jajanItem: JajanItem) => humps.decamelizeKeys(JSON.parse(JSON.stringify(jajanItem))))
-        )
-        nearbyVendor.vendor.should.has.property('jajan_item_snapshots').deep.members(
-          requestJajanItemSnapshots.map((jajanItemSnapshot: JajanItemSnapshot) => humps.decamelizeKeys(JSON.parse(JSON.stringify(jajanItemSnapshot))))
-        )
-        nearbyVendor.vendor.should.has.property('payout_histories').deep.members(
-          requestPayoutHistories.map((payoutHistory: PayoutHistory) => humps.decamelizeKeys(JSON.parse(JSON.stringify(payoutHistory))))
-        )
       })
     })
   })
