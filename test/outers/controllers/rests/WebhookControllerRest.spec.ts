@@ -3,24 +3,19 @@ import chai from 'chai'
 import OneDatastore from '../../../../src/outers/datastores/OneDatastore'
 import waitUntil from 'async-wait-until'
 import { server } from '../../../../src/App'
-import { type Admin } from '@prisma/client'
 import { randomUUID } from 'crypto'
-import AdminMock from '../../../mocks/AdminMock'
 import OneSeeder from '../../../../src/outers/seeders/OneSeeder'
-import Authorization from '../../../../src/inners/models/value_objects/Authorization'
-import AdminLoginByEmailAndPasswordRequest
-  from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
 import { beforeEach } from 'mocha'
+import { type User, type Vendor } from '@prisma/client'
 
 chai.use(chaiHttp)
 chai.should()
 
 describe('WebhookControllerRest', () => {
   const oneDatastore: OneDatastore = new OneDatastore()
-  const authAdminMock: AdminMock = new AdminMock()
   let oneSeeder: OneSeeder
   let agent: ChaiHttp.Agent
-  let authorization: Authorization
+  const callbackToken = process.env.XENDIT_CALLBACK_TOKEN
 
   before(async () => {
     await waitUntil(() => server !== undefined)
@@ -30,36 +25,8 @@ describe('WebhookControllerRest', () => {
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-    await oneDatastore.client.admin.createMany({
-      data: authAdminMock.data
-    })
 
     agent = chai.request.agent(server)
-    const requestAuthAdmin: Admin = authAdminMock.data[0]
-    const requestBodyLogin: AdminLoginByEmailAndPasswordRequest = new AdminLoginByEmailAndPasswordRequest(
-      requestAuthAdmin.email,
-      requestAuthAdmin.password
-    )
-    const response = await agent
-      .post('/api/v1/authentications/admins/login?method=email_and_password')
-      .send(requestBodyLogin)
-
-    response.should.has.status(200)
-    response.body.should.be.an('object')
-    response.body.should.has.property('message')
-    response.body.should.has.property('data')
-    response.body.data.should.has.property('session')
-    response.body.data.session.should.be.an('object')
-    response.body.data.session.should.has.property('account_id').equal(requestAuthAdmin.id)
-    response.body.data.session.should.has.property('account_type').equal('ADMIN')
-    response.body.data.session.should.has.property('access_token')
-    response.body.data.session.should.has.property('refresh_token')
-    response.body.data.session.should.has.property('expired_at')
-
-    authorization = new Authorization(
-      response.body.data.session.access_token,
-      'Bearer'
-    )
   })
 
   beforeEach(async () => {
@@ -80,15 +47,6 @@ describe('WebhookControllerRest', () => {
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-    await oneDatastore.client.admin.deleteMany(
-      {
-        where: {
-          id: {
-            in: authAdminMock.data.map((admin: Admin) => admin.id)
-          }
-        }
-      }
-    )
     await oneDatastore.disconnect()
   })
 
@@ -117,11 +75,9 @@ describe('WebhookControllerRest', () => {
         payment_destination: '888888888888'
       }
 
-      const callbackToken = process.env.XENDIT_CALLBACK_TOKEN
       const response = await agent
         .post('/api/v1/webhooks/top-ups')
         .set('x-callback-token', String(callbackToken))
-        .set('Authorization', authorization.convertToString())
         .send(requestBody)
 
       response.should.have.status(200)
@@ -139,7 +95,70 @@ describe('WebhookControllerRest', () => {
       if (oneDatastore.client === undefined) {
         throw new Error('Client is undefined.')
       }
+
+      const user: User | null = await oneDatastore.client.user.findUnique({
+        where: {
+          id: response.body.data.user_id
+        }
+      })
+
+      user?.balance.should.equal(Number(requestBody.amount) + oneSeeder.userMock.data[0].balance)
+
       await oneDatastore.client.topUpHistory.deleteMany({
+        where: {
+          id: response.body.data.id
+        }
+      })
+    })
+  })
+
+  describe('POST /api/v1/webhooks/payouts', () => {
+    it('should return 200 OK', async () => {
+      const requestBody: any = {
+        id: randomUUID(),
+        amount: 35000,
+        status: 'COMPLETED',
+        created: '2023-10-19T02:32:35.649Z',
+        updated: '2023-10-19T02:32:39.014Z',
+        user_id: '623d6fab71d1135c3eb173e5',
+        bank_code: 'OVO',
+        is_instant: true,
+        external_id: oneSeeder.vendorMock.data[0].id,
+        account_holder_name: 'FI** DI*****',
+        disbursement_description: 'testuid'
+      }
+
+      const response = await agent
+        .post('/api/v1/webhooks/payouts')
+        .set('x-callback-token', String(callbackToken))
+        .send(requestBody)
+
+      response.should.have.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      response.body.data.should.be.an('object')
+      response.body.data.should.has.property('id')
+      response.body.data.should.has.property('vendor_id')
+      response.body.data.should.has.property('xendit_payout_id')
+      response.body.data.should.has.property('amount')
+      response.body.data.should.has.property('media')
+      response.body.data.should.has.property('updated_at')
+      response.body.data.should.has.property('created_at')
+
+      if (oneDatastore.client === undefined) {
+        throw new Error('Client is undefined.')
+      }
+
+      const vendor: Vendor | null = await oneDatastore.client.vendor.findUnique({
+        where: {
+          id: response.body.data.vendor_id
+        }
+      })
+
+      vendor?.balance.should.equal(oneSeeder.vendorMock.data[0].balance - Number(requestBody.amount))
+
+      await oneDatastore.client.payoutHistory.deleteMany({
         where: {
           id: response.body.data.id
         }

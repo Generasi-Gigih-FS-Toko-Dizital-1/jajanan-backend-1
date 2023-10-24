@@ -160,7 +160,8 @@ describe('TopUpHistoryControllerRest', () => {
       const requestBody: TopUpHistoryManagementCreateRequest = new TopUpHistoryManagementCreateRequest(
         oneSeeder.userMock.data[0].id,
         oneSeeder.topUpHistoryMock.data[0].amount,
-        oneSeeder.topUpHistoryMock.data[0].media
+        oneSeeder.topUpHistoryMock.data[0].media,
+        oneSeeder.topUpHistoryMock.data[0].xenditInvoiceId
       )
 
       const response = await agent
@@ -198,7 +199,8 @@ describe('TopUpHistoryControllerRest', () => {
       const requestBody: TopUpHistoryManagementPatchRequest = new TopUpHistoryManagementPatchRequest(
         oneSeeder.userMock.data[0].id,
         oneSeeder.topUpHistoryMock.data[1].amount,
-        oneSeeder.topUpHistoryMock.data[1].media
+        oneSeeder.topUpHistoryMock.data[1].media,
+        oneSeeder.topUpHistoryMock.data[0].xenditInvoiceId
       )
 
       const response = await agent

@@ -14,6 +14,7 @@ export default class TopUpHistoryMock {
       {
         id: randomUUID(),
         userId: this.userMock.data[0].id,
+        xenditInvoiceId: 'xenditInvoiceId0',
         amount: 0.0,
         media: 'media0',
         updatedAt: new Date(),
@@ -23,6 +24,7 @@ export default class TopUpHistoryMock {
       {
         id: randomUUID(),
         userId: this.userMock.data[1].id,
+        xenditInvoiceId: 'xenditInvoiceId1',
         amount: 1.0,
         media: 'media0',
         updatedAt: new Date(),

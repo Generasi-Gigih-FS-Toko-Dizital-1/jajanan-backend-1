@@ -21,6 +21,25 @@ export default class VendorManagement {
     this.objectUtility = objectUtility
   }
 
+  readManyByDistanceAndSubscribedUserIds = async (distance: number, userIds: string[], include: any): Promise<Result<Vendor[] | VendorAggregate[]>> => {
+    const foundVendors: Vendor[] | VendorAggregate[] = await this.vendorRepository.readManyByDistanceAndSubscribedUserIds(distance, userIds, include)
+
+    return new Result<Vendor[] | VendorAggregate[]>(
+      200,
+      'Vendor read many by distance and subscribed user ids succeed.',
+      foundVendors
+    )
+  }
+
+  readManyByDistanceAndLocation = async (distance: number, latitude: number, longitude: number, pagination: Pagination, where: any, include: any): Promise<Result<Vendor[] | VendorAggregate[]>> => {
+    const foundVendors: Vendor[] = await this.vendorRepository.readManyByDistanceAndLocation(distance, latitude, longitude, pagination, where, include)
+    return new Result<Vendor[]>(
+      200,
+      'Vendor read many by distance and location succeed.',
+      foundVendors
+    )
+  }
+
   readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Result<Vendor[] | VendorAggregate[]>> => {
     const args: RepositoryArgument = new RepositoryArgument(
       whereInput,

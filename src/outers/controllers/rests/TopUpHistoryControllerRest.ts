@@ -58,6 +58,7 @@ export default class TopUpHistoryController {
             new TopUpHistoryManagementReadOneResponse(
               topUpHistory.id,
               topUpHistory.userId,
+              topUpHistory.xenditInvoiceId,
               topUpHistory.amount,
               topUpHistory.media,
               topUpHistory.updatedAt,
@@ -87,6 +88,7 @@ export default class TopUpHistoryController {
           data = new TopUpHistoryManagementReadOneResponse(
             result.data.id,
             result.data.userId,
+            result.data.xenditInvoiceId,
             result.data.amount,
             result.data.media,
             result.data.updatedAt,
@@ -116,6 +118,7 @@ export default class TopUpHistoryController {
           data = new TopUpHistoryManagementCreateResponse(
             result.data.id,
             result.data.userId,
+            result.data.xenditInvoiceId,
             result.data.amount,
             result.data.media,
             result.data.updatedAt,
@@ -146,6 +149,7 @@ export default class TopUpHistoryController {
           data = new TopUpHistoryManagementPatchResponse(
             result.data.id,
             result.data.userId,
+            result.data.xenditInvoiceId,
             result.data.amount,
             result.data.media,
             result.data.updatedAt,

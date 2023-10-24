@@ -14,6 +14,8 @@ export default class SessionRepository {
     }
     const sessionString: string = JSON.stringify(session)
     await this.twoDatastore.client.set(id, sessionString)
+    await this.twoDatastore.client.set(session.accountId, sessionString)
+    await this.twoDatastore.client.expireAt(id, session.expiredAt.getTime())
   }
 
   readOneById = async (id: string): Promise<Session> => {
@@ -24,7 +26,7 @@ export default class SessionRepository {
     if (session === null) {
       throw new Error('Session is not saved.')
     }
-    return Session.parseFromJsonString(session)
+    return Session.convertFromJsonString(session)
   }
 
   deleteOneById = async (id: string): Promise<void> => {

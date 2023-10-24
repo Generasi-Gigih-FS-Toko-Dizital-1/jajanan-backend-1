@@ -2,10 +2,10 @@ import { type TopUpHistory } from '@prisma/client'
 import type OneDatastore from '../datastores/OneDatastore'
 import type TopUpHistoryAggregate from '../../inners/models/aggregates/TopUpHistoryAggregate'
 import type RepositoryArgument from '../../inners/models/value_objects/RepositoryArgument'
+import { randomUUID } from 'crypto'
 
 export default class TopUpHistoryRepository {
   oneDatastore: OneDatastore
-  aggregatedArgs?: any
 
   constructor (
     oneDatastore: OneDatastore
@@ -84,8 +84,9 @@ export default class TopUpHistoryRepository {
 
   createByWebhook = async (request: any): Promise<TopUpHistory> => {
     const topUpHistory: TopUpHistory = {
-      id: request.id,
+      id: randomUUID(),
       userId: request.externalId,
+      xenditInvoiceId: request.id,
       amount: request.amount,
       media: request.paymentChannel,
       createdAt: new Date(request.paidAt),

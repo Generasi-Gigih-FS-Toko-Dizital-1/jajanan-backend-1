@@ -6,6 +6,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
+      - ${GOOGLE_APPLICATION_CREDENTIALS}:/app/firebase-admin-key.json
     entrypoint: [ "/bin/sh", "-c" ]
     command:
       - |
@@ -19,7 +20,7 @@ services:
     healthcheck:
       test: "netstat -ltn | grep -c 3000"
   ds-1:
-    image: postgres:latest
+    image: postgis/postgis:latest
     ports:
       - "${DS_1_PORT}:5432"
     environment:

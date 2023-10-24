@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    environment {
+        GOOGLE_APPLICATION_CREDENTIALS = credentials('0c66305b-eacb-4ad5-bad3-317b7cebcaba')
+    }
     stages {
         stage('stage') {
             steps {
