@@ -1,4 +1,4 @@
-export default class UserSubscriptionCreateRequest {
+export default class UserSubscriptionSubscribeRequest {
   userId: string
   categoryId: string
 

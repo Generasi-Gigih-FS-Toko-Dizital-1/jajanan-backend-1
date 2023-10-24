@@ -4,18 +4,16 @@ import { beforeEach, describe, it } from 'mocha'
 import OneDatastore from '../../../../src/outers/datastores/OneDatastore'
 import { server } from '../../../../src/App'
 import waitUntil from 'async-wait-until'
-import {
-  type Admin,
-  type UserSubscription,
-  type Prisma
-} from '@prisma/client'
+import { type Admin, type Category, type Prisma, type User, type UserSubscription } from '@prisma/client'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
 import AdminMock from '../../../mocks/AdminMock'
 import AdminLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
 import OneSeeder from '../../../../src/outers/seeders/OneSeeder'
-import UserSubscriptionManagementCreateRequest from '../../../../src/inners/models/value_objects/requests/managements/user_subscription_managements/UserSubscriptionManagementCreateRequest'
-import type UserSubscriptionDeleteOneRequest from '../../../../src/inners/models/value_objects/requests/subscriptions/UserSubscriptionDeleteOneRequest'
+import UserSubscriptionManagementCreateRequest
+  from '../../../../src/inners/models/value_objects/requests/managements/user_subscription_managements/UserSubscriptionManagementCreateRequest'
+import type UserSubscriptionUnsubscribeRequest
+  from '../../../../src/inners/models/value_objects/requests/subscriptions/UserSubscriptionUnsubscribeRequest'
 
 chai.use(chaiHttp)
 chai.should()
@@ -99,11 +97,12 @@ describe('UserSubscriptionControllerRest', () => {
 
   describe('POST /api/v1/user-subscriptions/subscribe', () => {
     it('should return 201 CREATED', async () => {
+      const requestUser: User = oneSeeder.userMock.data[0]
+      const requestCategory: Category = oneSeeder.categoryMock.data[0]
       const requestBody: UserSubscriptionManagementCreateRequest = new UserSubscriptionManagementCreateRequest(
-        oneSeeder.userSubscriptionMock.data[0].userId,
-        oneSeeder.userSubscriptionMock.data[0].categoryId
+        requestUser.id,
+        requestCategory.id
       )
-
       const response = await agent
         .post('/api/v1/user-subscriptions/subscribe')
         .set('Authorization', authorization.convertToString())
@@ -113,66 +112,28 @@ describe('UserSubscriptionControllerRest', () => {
       response.body.should.be.an('object')
       response.body.should.has.property('message')
       response.body.should.has.property('data')
-      response.body.data.should.be.an('object')
-      response.body.data.should.has.property('id')
-      response.body.data.should.has.property('user_id').equal(requestBody.userId)
-      response.body.data.should.has.property('category_id').equal(requestBody.categoryId)
-      response.body.data.should.has.property('updated_at')
-      response.body.data.should.has.property('created_at')
+      assert.isNull(response.body.data)
 
       if (oneDatastore.client === undefined) {
         throw new Error('oneDatastore client is undefined')
       }
       const deleteResult: Prisma.BatchPayload = await oneDatastore.client.userSubscription.deleteMany({
         where: {
-          id: response.body.data.id
+          userId: requestUser.id,
+          categoryId: requestCategory.id
         }
       })
       deleteResult.should.has.property('count').greaterThanOrEqual(1)
     })
   })
 
-  // describe('POST /api/v1/user-subscriptions/unsubscribe', () => {
-  //   it('should return 200 OK', async () => {
-  //     const requestUserSubscription: UserSubscription = oneSeeder.userSubscriptionMock.data[0]
-  //     const requestUserSubscriptionId: string = requestUserSubscription.id
-
-  //     if (oneDatastore.client === undefined) {
-  //       throw new Error('oneDatastore client is undefined')
-  //     }
-
-  //     const response = await agent
-  //       .post(`/api/v1/user-subscriptions/unsubscribe/${requestUserSubscriptionId}`)
-  //       .set('Authorization', authorization.convertToString())
-  //       .send()
-
-  //     response.should.has.status(200)
-  //     response.body.should.be.an('object')
-  //     response.body.should.has.property('message')
-  //     response.body.should.has.property('data')
-  //     assert.isNull(response.body.data)
-
-  //     const result: UserSubscription | null = await oneDatastore.client.userSubscription.findFirst({
-  //       where: {
-  //         id: requestUserSubscription.id
-  //       }
-  //     })
-  //     assert.isNull(result)
-  //   })
-  // })
-
   describe('POST /api/v1/user-subscriptions/unsubscribe', () => {
     it('should return 200 OK', async () => {
       const requestUserSubscription: UserSubscription = oneSeeder.userSubscriptionMock.data[0]
-      const requestBody: UserSubscriptionDeleteOneRequest = {
+      const requestBody: UserSubscriptionUnsubscribeRequest = {
         userId: requestUserSubscription.userId,
         categoryId: requestUserSubscription.categoryId
       }
-
-      if (oneDatastore.client === undefined) {
-        throw new Error('oneDatastore client is undefined')
-      }
-
       const response = await agent
         .post('/api/v1/user-subscriptions/unsubscribe')
         .set('Authorization', authorization.convertToString())
@@ -184,9 +145,14 @@ describe('UserSubscriptionControllerRest', () => {
       response.body.should.has.property('data')
       assert.isNull(response.body.data)
 
+      if (oneDatastore.client === undefined) {
+        throw new Error('oneDatastore client is undefined')
+      }
+
       const result: UserSubscription | null = await oneDatastore.client.userSubscription.findFirst({
         where: {
-          id: requestUserSubscription.id
+          userId: requestUserSubscription.userId,
+          categoryId: requestUserSubscription.categoryId
         }
       })
       assert.isNull(result)

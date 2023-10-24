@@ -6,11 +6,14 @@ import AdminMock from '../../../mocks/AdminMock'
 import OneSeeder from '../../../../src/outers/seeders/OneSeeder'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
 import waitUntil from 'async-wait-until'
-import AdminLoginByEmailAndPasswordRequest from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
-import { type PayoutHistory, type Admin, type Vendor, type Prisma } from '@prisma/client'
+import AdminLoginByEmailAndPasswordRequest
+  from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
+import { type Admin, type PayoutHistory, type Prisma, type Vendor } from '@prisma/client'
 import humps from 'humps'
-import PayoutHistoryManagementCreateRequest from '../../../../src/inners/models/value_objects/requests/managements/payout_history_management/PayoutHistoryManagementCreateRequest'
-import PayoutHistoryManagementPatchRequest from '../../../../src/inners/models/value_objects/requests/managements/payout_history_management/PayoutHistoryManagementPatchRequest'
+import PayoutHistoryManagementCreateRequest
+  from '../../../../src/inners/models/value_objects/requests/managements/payout_history_management/PayoutHistoryManagementCreateRequest'
+import PayoutHistoryManagementPatchRequest
+  from '../../../../src/inners/models/value_objects/requests/managements/payout_history_management/PayoutHistoryManagementPatchRequest'
 
 chai.use(chaiHttp)
 chai.should()

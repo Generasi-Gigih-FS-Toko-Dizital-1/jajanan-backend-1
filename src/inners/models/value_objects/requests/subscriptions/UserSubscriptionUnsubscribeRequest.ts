@@ -1,4 +1,4 @@
-export default class UserSubscriptionDeleteOneRequest {
+export default class UserSubscriptionUnsubscribeRequest {
   userId: string
   categoryId: string
 
