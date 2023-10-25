@@ -249,6 +249,7 @@ describe('UserAuthenticationControllerRest', () => {
       responseLogin.body.data.session.should.has.property('access_token')
       responseLogin.body.data.session.should.has.property('refresh_token')
       responseLogin.body.data.session.should.has.property('expired_at')
+      responseLogin.body.data.session.should.has.property('firebase_token').equal(firebaseToken)
 
       const requestBodyRefreshAccessToken: UserRefreshAccessTokenRequest = new UserRefreshAccessTokenRequest(
         responseLogin.body.data.session
@@ -269,6 +270,7 @@ describe('UserAuthenticationControllerRest', () => {
       response.body.data.session.should.has.property('access_token')
       response.body.data.session.should.has.property('refresh_token').equal(responseLogin.body.data.session.refresh_token)
       response.body.data.session.should.has.property('expired_at')
+      response.body.data.session.should.has.property('firebase_token').equal(firebaseToken)
     })
   })
 
@@ -297,6 +299,7 @@ describe('UserAuthenticationControllerRest', () => {
       responseLogin.body.data.session.should.has.property('access_token')
       responseLogin.body.data.session.should.has.property('refresh_token')
       responseLogin.body.data.session.should.has.property('expired_at')
+      responseLogin.body.data.session.should.has.property('firebase_token').equal(firebaseToken)
 
       const requestBodyRefreshAccessToken: UserRefreshAccessTokenRequest = new UserRefreshAccessTokenRequest(
         responseLogin.body.data.session

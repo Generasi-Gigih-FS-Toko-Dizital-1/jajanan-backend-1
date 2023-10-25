@@ -117,7 +117,8 @@ export default class UserRefreshAuthentication {
       oldSession.data.accountType,
       newAccessToken,
       oldSession.data.refreshToken,
-      oldSession.data.expiredAt
+      oldSession.data.expiredAt,
+      oldSession.data.firebaseToken
     )
 
     const newAuthorization: Authorization = new Authorization(
