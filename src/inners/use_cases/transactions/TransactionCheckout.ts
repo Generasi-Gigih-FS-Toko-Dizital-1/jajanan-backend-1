@@ -65,7 +65,9 @@ export default class TransactionCheckout {
 
     const jajanItemSnapshots: JajanItemSnapshot[] = foundJajanItems.data.map((jajanItem: JajanItem) => {
       totalPrice += jajanItem.price
-      vendorIds.push(jajanItem.vendorId)
+      if (!vendorIds.includes(jajanItem.vendorId)) {
+        vendorIds.push(jajanItem.vendorId)
+      }
       return {
         id: randomUUID(),
         originId: jajanItem.id,
@@ -80,6 +82,21 @@ export default class TransactionCheckout {
       }
     })
 
+    const foundVendors: Result<Vendor[] | null> = await this.vendorManagement.readManyByIds(vendorIds)
+    if (foundVendors.status !== 200 || foundVendors.data === null) {
+      return new Result<null>(
+        foundVendors.status,
+          `Transaction checkout failed, ${foundVendors.message}`,
+          null
+      )
+    }
+
+    foundUser.data.experience += totalPrice
+
+    foundVendors.data.forEach((vendor: Vendor) => {
+      vendor.experience += totalPrice
+    })
+
     if (request.paymentMethod === 'BALANCE') {
       foundUser.data.balance -= totalPrice
       if (foundUser.data.balance < 0) {
@@ -90,27 +107,18 @@ export default class TransactionCheckout {
         )
       }
 
-      const foundVendors: Result<Vendor[] | null> = await this.vendorManagement.readManyByIds(vendorIds)
-      if (foundVendors.status !== 200 || foundVendors.data === null) {
-        return new Result<null>(
-          foundVendors.status,
-            `Transaction checkout failed, ${foundVendors.message}`,
-            null
-        )
-      }
-
       foundVendors.data.forEach((vendor: Vendor) => {
         vendor.balance += totalPrice
       })
+    }
 
-      const patchedVendors: Result<Vendor[] | null> = await this.vendorManagement.patchManyRawByIds(vendorIds, foundVendors.data)
-      if (patchedVendors.status !== 200 || patchedVendors.data === null) {
-        return new Result<null>(
-          patchedVendors.status,
-            `Transaction checkout failed, ${patchedVendors.message}`,
-            null
-        )
-      }
+    const patchedVendors: Result<Vendor[] | null> = await this.vendorManagement.patchManyRawByIds(vendorIds, foundVendors.data)
+    if (patchedVendors.status !== 200 || patchedVendors.data === null) {
+      return new Result<null>(
+        patchedVendors.status,
+          `Transaction checkout failed, ${patchedVendors.message}`,
+          null
+      )
     }
 
     const patchedUser: Result<User | null> = await this.userManagement.patchOneRawById(request.userId, foundUser.data)
