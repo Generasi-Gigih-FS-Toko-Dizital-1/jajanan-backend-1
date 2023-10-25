@@ -69,7 +69,7 @@ export default class AdminRefreshAuthentication {
     if (moment().isAfter(moment(oldSession.data.expiredAt))) {
       return new Result<null>(
         404,
-        'Admin refresh access token failed, refresh token is expired.',
+        'Admin refresh access token failed, session is expired.',
         null
       )
     }
