@@ -69,7 +69,7 @@ export default class UserRefreshAuthentication {
     if (moment().isAfter(moment(oldSession.data.expiredAt))) {
       return new Result<null>(
         404,
-        'User refresh access token failed, refresh token is expired.',
+        'User refresh access token failed, session is expired.',
         null
       )
     }

@@ -69,7 +69,7 @@ export default class VendorRefreshAuthentication {
     if (moment().isAfter(moment(oldSession.data.expiredAt))) {
       return new Result<null>(
         404,
-        'Vendor refresh access token failed, refresh token is expired.',
+        'Vendor refresh access token failed, session is expired.',
         null
       )
     }

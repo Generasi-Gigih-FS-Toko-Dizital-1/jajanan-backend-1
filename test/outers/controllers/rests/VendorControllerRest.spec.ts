@@ -11,6 +11,7 @@ import {
   type JajanItem,
   type JajanItemSnapshot,
   type NotificationHistory,
+  type PayoutHistory,
   type Prisma,
   type TransactionItemHistory,
   type Vendor
@@ -142,11 +143,14 @@ describe('VendorControllerRest', () => {
       })
     })
   })
+
   describe('GET /api/v1/vendors?page_number={}&page_size={}&where={}&include={}', () => {
     it('should return 200 OK', async () => {
       const requestVendor: Vendor = oneSeeder.vendorMock.data[0]
       const requestNotificationHistories: NotificationHistory[] = oneSeeder.notificationHistoryMock.data.filter(notificationHistory => notificationHistory.vendorId === requestVendor.id)
       const requestJajanItems: JajanItem[] = oneSeeder.jajanItemMock.data.filter(jajanItem => jajanItem.vendorId === requestVendor.id)
+      const requestJajanItemSnapshots: JajanItemSnapshot[] = oneSeeder.jajanItemSnapshotMock.data.filter(jajanItemSnapshot => jajanItemSnapshot.vendorId === requestVendor.id)
+      const requestPayoutHistories: PayoutHistory[] = oneSeeder.payoutHistoryMock.data.filter(payoutHistory => payoutHistory.vendorId === requestVendor.id)
       const pageNumber: number = 1
       const pageSize: number = oneSeeder.vendorMock.data.length
       const whereInput: any = {
@@ -155,7 +159,9 @@ describe('VendorControllerRest', () => {
       const where: string = encodeURIComponent(JSON.stringify(whereInput))
       const includeInput: any = {
         notificationHistories: true,
-        jajanItems: true
+        jajanItems: true,
+        jajanItemSnapshots: true,
+        payoutHistories: true
       }
       const include: string = encodeURIComponent(JSON.stringify(includeInput))
       const response = await agent
@@ -172,7 +178,7 @@ describe('VendorControllerRest', () => {
       response.body.data.should.has.property('vendors')
       response.body.data.vendors.should.be.a('array')
       response.body.data.vendors.length.should.be.equal(1)
-      response.body.data.vendors.forEach((vendor: Vendor) => {
+      response.body.data.vendors.forEach((vendor: any) => {
         vendor.should.has.property('id').equal(requestVendor.id)
         vendor.should.has.property('username').equal(requestVendor.username)
         vendor.should.has.property('full_name').equal(requestVendor.fullName)
@@ -195,6 +201,57 @@ describe('VendorControllerRest', () => {
         vendor.should.has.property('jajan_items').deep.members(
           requestJajanItems.map((jajanItem: JajanItem) => humps.decamelizeKeys(JSON.parse(JSON.stringify(jajanItem))))
         )
+        vendor.should.has.property('jajan_item_snapshots').deep.members(
+          requestJajanItemSnapshots.map((jajanItemSnapshot: JajanItemSnapshot) => humps.decamelizeKeys(JSON.parse(JSON.stringify(jajanItemSnapshot))))
+        )
+        vendor.should.has.property('payout_histories').deep.members(
+          requestPayoutHistories.map((payoutHistory: PayoutHistory) => humps.decamelizeKeys(JSON.parse(JSON.stringify(payoutHistory))))
+        )
+      })
+    })
+  })
+
+  describe('GET /api/v1/vendors?page_number={}&page_size={}&where={}&include={}&distance={}&latitude={}&longitude={}', () => {
+    it('should return 200 OK', async () => {
+      const pageNumber: number = 1
+      const pageSize: number = oneSeeder.vendorMock.data.length
+      const distance: number = 1000
+      const latitude: number = 0
+      const longitude: number = 0
+      const response = await agent
+        .get(`/api/v1/vendors/locations?page_number=${pageNumber}&page_size=${pageSize}&distance=${distance}&latitude=${latitude}&longitude=${longitude}`)
+        .set('Authorization', authorization.convertToString())
+        .send()
+
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      response.body.data.should.be.an('object')
+      response.body.data.should.has.property('total_vendors')
+      response.body.data.should.has.property('nearby_vendors')
+      response.body.data.nearby_vendors.should.be.a('array')
+      response.body.data.nearby_vendors.length.should.be.lessThanOrEqual(pageSize)
+      response.body.data.nearby_vendors.forEach((nearbyVendor: any) => {
+        nearbyVendor.should.has.property('vendor')
+        nearbyVendor.vendor.should.has.property('id')
+        nearbyVendor.vendor.should.has.property('username')
+        nearbyVendor.vendor.should.has.property('full_name')
+        nearbyVendor.vendor.should.has.property('address')
+        nearbyVendor.vendor.should.has.property('email')
+        nearbyVendor.vendor.should.has.property('gender')
+        nearbyVendor.vendor.should.has.property('balance')
+        nearbyVendor.vendor.should.has.property('experience')
+        nearbyVendor.vendor.should.has.property('jajan_image_url')
+        nearbyVendor.vendor.should.has.property('jajan_name')
+        nearbyVendor.vendor.should.has.property('jajan_description')
+        nearbyVendor.vendor.should.has.property('status')
+        nearbyVendor.vendor.should.has.property('last_latitude')
+        nearbyVendor.vendor.should.has.property('last_longitude')
+        nearbyVendor.vendor.should.has.property('created_at')
+        nearbyVendor.vendor.should.has.property('updated_at')
+        nearbyVendor.should.has.property('distance')
+        nearbyVendor.distance.should.be.lessThanOrEqual(distance)
       })
     })
   })
@@ -340,10 +397,18 @@ describe('VendorControllerRest', () => {
       const requestJajanItems: JajanItem[] = oneSeeder.jajanItemMock.data.filter((jajanItem: JajanItem) => jajanItem.vendorId === requestVendor.id)
       const requestJajanItemSnapshots: JajanItemSnapshot[] = oneSeeder.jajanItemSnapshotMock.data.filter((jajanItemSnapshot: JajanItemSnapshot) => requestJajanItems.map((jajanItem: JajanItem) => jajanItem.id).includes(jajanItemSnapshot.originId))
       const requestTransactionItemHistories: TransactionItemHistory[] = oneSeeder.transactionItemHistoryMock.data.filter((transactionItemHistory: TransactionItemHistory) => requestJajanItemSnapshots.map((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.id).includes(transactionItemHistory.jajanItemSnapshotId))
+      const requestPayoutHistories: PayoutHistory[] = oneSeeder.payoutHistoryMock.data.filter((payoutHistory: PayoutHistory) => payoutHistory.vendorId === requestVendor.id)
 
       if (oneDatastore.client === undefined) {
         throw new Error('oneDatastore client is undefined')
       }
+      await oneDatastore.client.payoutHistory.deleteMany({
+        where: {
+          id: {
+            in: requestPayoutHistories.map((payoutHistory: PayoutHistory) => payoutHistory.id)
+          }
+        }
+      })
       await oneDatastore.client.transactionItemHistory.deleteMany({
         where: {
           id: {

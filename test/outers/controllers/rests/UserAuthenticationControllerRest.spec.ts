@@ -21,10 +21,24 @@ describe('UserAuthenticationControllerRest', () => {
   const oneDatastore: OneDatastore = new OneDatastore()
   let oneSeeder: OneSeeder
 
+  // const firebaseConfig: any = {
+  //   apiKey: process.env.FIREBASE_API_KEY,
+  //   authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  //   projectId: process.env.FIREBASE_PROJECT_ID,
+  //   storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  //   messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  //   appId: process.env.FIREBASE_APP_ID,
+  //   measurementId: process.env.FIREBASE_MEASUREMENT_ID
+  // }
+  // const app: firebaseApp.FirebaseApp = firebaseApp.initializeApp(firebaseConfig)
+  // const messaging: firebaseMessaging.Messaging = firebaseMessaging.getMessaging(app)
+  const firebaseToken: string = randomUUID()
+
   before(async () => {
     await waitUntil(() => server !== undefined)
     await oneDatastore.connect()
     oneSeeder = new OneSeeder(oneDatastore)
+    // firebaseToken = await firebaseMessaging.getToken(messaging)
   })
 
   beforeEach(async () => {
@@ -44,8 +58,10 @@ describe('UserAuthenticationControllerRest', () => {
       const requestUser = oneSeeder.userMock.data[0]
       const requestBodyLogin: UserLoginByEmailAndPasswordRequest = new UserLoginByEmailAndPasswordRequest(
         requestUser.email,
-        requestUser.password
+        requestUser.password,
+        firebaseToken
       )
+
       const response = await chai
         .request(server)
         .post('/api/v1/authentications/users/login?method=email_and_password')
@@ -68,8 +84,10 @@ describe('UserAuthenticationControllerRest', () => {
       const requestUser = oneSeeder.userMock.data[0]
       const requestBodyLogin: UserLoginByEmailAndPasswordRequest = new UserLoginByEmailAndPasswordRequest(
         'unknown_email',
-        requestUser.password
+        requestUser.password,
+        firebaseToken
       )
+
       const response = await chai
         .request(server)
         .post('/api/v1/authentications/users/login?method=email_and_password')
@@ -85,8 +103,10 @@ describe('UserAuthenticationControllerRest', () => {
       const requestUser = oneSeeder.userMock.data[0]
       const requestBodyLogin: UserLoginByEmailAndPasswordRequest = new UserLoginByEmailAndPasswordRequest(
         requestUser.email,
-        'unknown_password'
+        'unknown_password',
+        firebaseToken
       )
+
       const response = await chai
         .request(server)
         .post('/api/v1/authentications/users/login?method=email_and_password')
@@ -209,8 +229,10 @@ describe('UserAuthenticationControllerRest', () => {
       const requestUser = oneSeeder.userMock.data[0]
       const requestBodyLogin: UserLoginByEmailAndPasswordRequest = new UserLoginByEmailAndPasswordRequest(
         requestUser.email,
-        requestUser.password
+        requestUser.password,
+        firebaseToken
       )
+
       const responseLogin = await chai
         .request(server)
         .post('/api/v1/authentications/users/login?method=email_and_password')
@@ -255,8 +277,10 @@ describe('UserAuthenticationControllerRest', () => {
       const requestUser = oneSeeder.userMock.data[0]
       const requestBodyLogin: UserLoginByEmailAndPasswordRequest = new UserLoginByEmailAndPasswordRequest(
         requestUser.email,
-        requestUser.password
+        requestUser.password,
+        firebaseToken
       )
+
       const responseLogin = await chai
         .request(server)
         .post('/api/v1/authentications/users/login?method=email_and_password')

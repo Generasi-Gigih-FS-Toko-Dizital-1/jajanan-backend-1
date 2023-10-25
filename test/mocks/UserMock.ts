@@ -17,7 +17,7 @@ export default class UserMock {
         gender: 'MALE',
         experience: 0,
         lastLatitude: 0.0,
-        lastLongitude: 0.0,
+        lastLongitude: 10.0,
         updatedAt: new Date(),
         createdAt: new Date(),
         deletedAt: null
@@ -33,7 +33,7 @@ export default class UserMock {
         gender: 'FEMALE',
         experience: 1,
         lastLatitude: 1.0,
-        lastLongitude: 1.0,
+        lastLongitude: 100.0,
         updatedAt: new Date(),
         createdAt: new Date(),
         deletedAt: null

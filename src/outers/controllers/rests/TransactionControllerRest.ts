@@ -6,14 +6,14 @@ import type AuthenticationValidation from '../../../inners/use_cases/authenticat
 import validateAuthenticationMiddleware from '../../middlewares/ValidateAuthenticationMiddleware'
 import type TransactionCheckoutResponse
   from '../../../inners/models/value_objects/responses/transactions/TransactionCheckoutResponse'
-import type CheckoutTransaction from '../../../inners/use_cases/transactions/CheckoutTransaction'
+import type TransactionCheckout from '../../../inners/use_cases/transactions/TransactionCheckout'
 
 export default class TransactionHistoryControllerRest {
   router: Router
-  checkoutTransaction: CheckoutTransaction
+  checkoutTransaction: TransactionCheckout
   authenticationValidation: AuthenticationValidation
 
-  constructor (router: Router, checkoutTransaction: CheckoutTransaction, authenticationValidation: AuthenticationValidation) {
+  constructor (router: Router, checkoutTransaction: TransactionCheckout, authenticationValidation: AuthenticationValidation) {
     this.router = router
     this.checkoutTransaction = checkoutTransaction
     this.authenticationValidation = authenticationValidation

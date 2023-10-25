@@ -18,6 +18,7 @@ import {
   type JajanItem,
   type JajanItemSnapshot,
   type NotificationHistory,
+  type PayoutHistory,
   type TopUpHistory,
   type TransactionHistory,
   type TransactionItemHistory,
@@ -28,6 +29,7 @@ import {
   type VendorLevel
 } from '@prisma/client'
 import JajanItemSnapshotMock from '../../../test/mocks/JajanItemSnapshotMock'
+import PayoutHistoryMock from '../../../test/mocks/PayoutHistoryMock'
 
 export default class OneSeeder {
   oneDatastore: OneDatastore
@@ -38,6 +40,7 @@ export default class OneSeeder {
   jajanItemMock: JajanItemMock
   jajanItemSnapshotMock: JajanItemSnapshotMock
   topUpHistoryMock: TopUpHistoryMock
+  payoutHistoryMock: PayoutHistoryMock
   transactionHistoryMock: TransactionHistoryMock
   transactionItemHistoryMock: TransactionItemHistoryMock
   notificationHistoryMock: NotificationHistoryMock
@@ -54,6 +57,7 @@ export default class OneSeeder {
     this.jajanItemMock = new JajanItemMock(this.vendorMock, this.categoryMock)
     this.jajanItemSnapshotMock = new JajanItemSnapshotMock(this.jajanItemMock)
     this.topUpHistoryMock = new TopUpHistoryMock(this.userMock)
+    this.payoutHistoryMock = new PayoutHistoryMock(this.vendorMock)
     this.transactionHistoryMock = new TransactionHistoryMock(this.userMock, this.jajanItemMock)
     this.transactionItemHistoryMock = new TransactionItemHistoryMock(this.transactionHistoryMock, this.jajanItemSnapshotMock)
     this.notificationHistoryMock = new NotificationHistoryMock(this.userMock, this.vendorMock)
@@ -100,6 +104,9 @@ export default class OneSeeder {
     await this.oneDatastore.client.topUpHistory.createMany({
       data: this.topUpHistoryMock.data
     })
+    await this.oneDatastore.client.payoutHistory.createMany({
+      data: this.payoutHistoryMock.data
+    })
     await this.oneDatastore.client.transactionHistory.createMany({
       data: this.transactionHistoryMock.data
     })
@@ -136,6 +143,13 @@ export default class OneSeeder {
       where: {
         id: {
           in: this.userLevelMock.data.map((userLevel: UserLevel) => userLevel.id)
+        }
+      }
+    })
+    await this.oneDatastore.client.payoutHistory.deleteMany({
+      where: {
+        id: {
+          in: this.payoutHistoryMock.data.map((payoutHistory: PayoutHistory) => payoutHistory.id)
         }
       }
     })

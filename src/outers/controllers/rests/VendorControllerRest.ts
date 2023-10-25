@@ -16,6 +16,8 @@ import ResponseBody from '../../../inners/models/value_objects/responses/Respons
 import type AuthenticationValidation from '../../../inners/use_cases/authentications/AuthenticationValidation'
 import validateAuthenticationMiddleware from '../../middlewares/ValidateAuthenticationMiddleware'
 import type VendorAggregate from '../../../inners/models/aggregates/VendorAggregate'
+import type VendorManagementReadManyByDistanceAndLocationResponse
+  from '../../../inners/models/value_objects/responses/managements/vendor_managements/VendorManagementReadManyByDistanceAndLocationResponse'
 
 export default class VendorControllerRest {
   router: Router
@@ -31,6 +33,7 @@ export default class VendorControllerRest {
   registerRoutes = (): void => {
     this.router.use(validateAuthenticationMiddleware(this.authenticationValidation))
     this.router.get('', this.readMany)
+    this.router.get('/locations', this.readManyByDistanceAndLocation)
     this.router.get('/:id', this.readOneById)
     this.router.post('', this.createOne)
     this.router.patch('/:id', this.patchOneById)
@@ -74,13 +77,46 @@ export default class VendorControllerRest {
               vendor.createdAt,
               vendor.updatedAt,
               (vendor as VendorAggregate).notificationHistories,
-              (vendor as VendorAggregate).jajanItems
+              (vendor as VendorAggregate).jajanItems,
+              (vendor as VendorAggregate).jajanItemSnapshots,
+              (vendor as VendorAggregate).payoutHistories
             )
           )
         )
         const responseBody: ResponseBody<VendorManagementReadManyResponse> = new ResponseBody<VendorManagementReadManyResponse>(
           result.message,
           data
+        )
+        response
+          .status(result.status)
+          .send(responseBody)
+      })
+      .catch((error: Error) => {
+        response.status(500).send(error.message)
+      })
+  }
+
+  readManyByDistanceAndLocation = (request: Request, response: Response): void => {
+    const {
+      pageNumber,
+      pageSize,
+      distance,
+      latitude,
+      longitude
+    } = request.query
+    const pagination: Pagination = new Pagination(
+      pageNumber === undefined ? 1 : Number(pageNumber),
+      pageSize === undefined ? 10 : Number(pageSize)
+    )
+    const distanceInput: number = distance === undefined ? 0 : Number(distance)
+    const latitudeInput: number = latitude === undefined ? 0 : Number(latitude)
+    const longitudeInput: number = longitude === undefined ? 0 : Number(longitude)
+    this.vendorManagement
+      .readManyByDistanceAndLocation(distanceInput, latitudeInput, longitudeInput, pagination)
+      .then((result: Result<VendorManagementReadManyByDistanceAndLocationResponse>) => {
+        const responseBody: ResponseBody<VendorManagementReadManyByDistanceAndLocationResponse> = new ResponseBody<VendorManagementReadManyByDistanceAndLocationResponse>(
+          result.message,
+          result.data
         )
         response
           .status(result.status)

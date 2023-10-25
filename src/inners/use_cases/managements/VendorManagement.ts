@@ -11,7 +11,8 @@ import type VendorManagementPatchRequest
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
 import type VendorAggregate from '../../models/aggregates/VendorAggregate'
 import RepositoryArgument from '../../models/value_objects/RepositoryArgument'
-
+import type VendorManagementReadManyByDistanceAndLocationResponse
+  from '../../models/value_objects/responses/managements/vendor_managements/VendorManagementReadManyByDistanceAndLocationResponse'
 export default class VendorManagement {
   vendorRepository: VendorRepository
   objectUtility: ObjectUtility
@@ -19,6 +20,25 @@ export default class VendorManagement {
   constructor (vendorRepository: VendorRepository, objectUtility: ObjectUtility) {
     this.vendorRepository = vendorRepository
     this.objectUtility = objectUtility
+  }
+
+  readManyByDistanceAndSubscribedUserIds = async (distance: number, userIds: string[], include: any): Promise<Result<Vendor[] | VendorAggregate[]>> => {
+    const foundVendors: Vendor[] | VendorAggregate[] = await this.vendorRepository.readManyByDistanceAndSubscribedUserIds(distance, userIds, include)
+
+    return new Result<Vendor[] | VendorAggregate[]>(
+      200,
+      'Vendor read many by distance and subscribed user ids succeed.',
+      foundVendors
+    )
+  }
+
+  readManyByDistanceAndLocation = async (distance: number, latitude: number, longitude: number, pagination: Pagination): Promise<Result<VendorManagementReadManyByDistanceAndLocationResponse>> => {
+    const foundVendors: VendorManagementReadManyByDistanceAndLocationResponse = await this.vendorRepository.readManyByDistanceAndLocation(distance, latitude, longitude, pagination)
+    return new Result<VendorManagementReadManyByDistanceAndLocationResponse>(
+      200,
+      'Vendor read many by distance and location succeed.',
+      foundVendors
+    )
   }
 
   readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Result<Vendor[] | VendorAggregate[]>> => {
