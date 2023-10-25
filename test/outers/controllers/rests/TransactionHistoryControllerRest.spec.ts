@@ -128,7 +128,7 @@ describe('TransactionHistoryControllerRest', () => {
   describe('GET /api/v1/transaction-histories?page_number={}&page_size={}&where={}&include={}', () => {
     it('should return 200 OK', async () => {
       const requestTransactionHistory: TransactionHistory = oneSeeder.transactionHistoryMock.data[0]
-      const requestTransactionItemHistory: TransactionItemHistory[] = oneSeeder.transactionItemHistoryMock.data.filter((transactionItemHistory: TransactionItemHistory) => transactionItemHistory.transactionId === requestTransactionHistory.id)
+      const requestTransactionItemHistories: TransactionItemHistory[] = oneSeeder.transactionItemHistoryMock.data.filter((transactionItemHistory: TransactionItemHistory) => transactionItemHistory.transactionId === requestTransactionHistory.id)
       const requestUser: User = oneSeeder.userMock.data[0]
       const pageNumber: number = 1
       const pageSize: number = oneSeeder.transactionHistoryMock.data.length
@@ -164,7 +164,7 @@ describe('TransactionHistoryControllerRest', () => {
         transactionHistory.should.has.property('created_at').equal(requestTransactionHistory.createdAt.toISOString())
         transactionHistory.should.has.property('user').deep.equal(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestUser))))
         transactionHistory.should.has.property('transaction_items').deep.members(
-          requestTransactionItemHistory.map((transactionItemHistory: TransactionItemHistory) => humps.decamelizeKeys(JSON.parse(JSON.stringify(transactionItemHistory))))
+          requestTransactionItemHistories.map((transactionItemHistory: TransactionItemHistory) => humps.decamelizeKeys(JSON.parse(JSON.stringify(transactionItemHistory))))
         )
       })
     })

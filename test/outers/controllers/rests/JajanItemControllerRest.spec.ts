@@ -134,7 +134,7 @@ describe('JajanItemControllerRest', () => {
     })
   })
 
-  describe('GET /api/v1/jajan-items?page_number={}&page_size={}&&where={}&include={}', () => {
+  describe('GET /api/v1/jajan-items?page_number={}&page_size={}&where={}&include={}', () => {
     it('should return 200 OK', async () => {
       const requestJajanItem: JajanItem = oneSeeder.jajanItemMock.data[0]
       const requestVendor: Vendor = oneSeeder.jajanItemMock.vendorMock.data.filter((vendor: Vendor) => vendor.id === requestJajanItem.vendorId)[0]
