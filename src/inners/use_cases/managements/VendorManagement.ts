@@ -5,11 +5,14 @@ import type Pagination from '../../models/value_objects/Pagination'
 import Result from '../../models/value_objects/Result'
 import { type Vendor } from '@prisma/client'
 import type VendorManagementCreateRequest
-  from '../../models/value_objects/requests/vendor_managements/VendorManagementCreateRequest'
+  from '../../models/value_objects/requests/managements/vendor_managements/VendorManagementCreateRequest'
 import type VendorManagementPatchRequest
-  from '../../models/value_objects/requests/vendor_managements/VendorManagementPatchRequest'
+  from '../../models/value_objects/requests/managements/vendor_managements/VendorManagementPatchRequest'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
-
+import type VendorAggregate from '../../models/aggregates/VendorAggregate'
+import RepositoryArgument from '../../models/value_objects/RepositoryArgument'
+import type VendorManagementReadManyByDistanceAndLocationResponse
+  from '../../models/value_objects/responses/managements/vendor_managements/VendorManagementReadManyByDistanceAndLocationResponse'
 export default class VendorManagement {
   vendorRepository: VendorRepository
   objectUtility: ObjectUtility
@@ -19,17 +22,78 @@ export default class VendorManagement {
     this.objectUtility = objectUtility
   }
 
-  readMany = async (pagination: Pagination): Promise<Result<Vendor[]>> => {
-    const foundVendors: Vendor[] = await this.vendorRepository.readMany(pagination)
-    return new Result<Vendor[]>(
+  readManyByDistanceAndSubscribedUserIds = async (distance: number, userIds: string[], include: any): Promise<Result<Vendor[] | VendorAggregate[]>> => {
+    const foundVendors: Vendor[] | VendorAggregate[] = await this.vendorRepository.readManyByDistanceAndSubscribedUserIds(distance, userIds, include)
+
+    return new Result<Vendor[] | VendorAggregate[]>(
       200,
-      'Vendor read all succeed.',
+      'Vendor read many by distance and subscribed user ids succeed.',
       foundVendors
     )
   }
 
-  readOneById = async (id: string): Promise<Result<Vendor>> => {
-    const foundVendor: Vendor = await this.vendorRepository.readOneById(id)
+  readManyByDistanceAndLocation = async (distance: number, latitude: number, longitude: number, pagination: Pagination): Promise<Result<VendorManagementReadManyByDistanceAndLocationResponse>> => {
+    const foundVendors: VendorManagementReadManyByDistanceAndLocationResponse = await this.vendorRepository.readManyByDistanceAndLocation(distance, latitude, longitude, pagination)
+    return new Result<VendorManagementReadManyByDistanceAndLocationResponse>(
+      200,
+      'Vendor read many by distance and location succeed.',
+      foundVendors
+    )
+  }
+
+  readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Result<Vendor[] | VendorAggregate[]>> => {
+    const args: RepositoryArgument = new RepositoryArgument(
+      whereInput,
+      includeInput,
+      pagination
+    )
+    const foundVendors: Vendor[] = await this.vendorRepository.readMany(args)
+    return new Result<Vendor[]>(
+      200,
+      'Vendor read many succeed.',
+      foundVendors
+    )
+  }
+
+  readManyByIds = async (ids: string[]): Promise<Result<Vendor[] | null>> => {
+    const args: RepositoryArgument = new RepositoryArgument(
+      { id: { in: ids } },
+      undefined,
+      undefined
+    )
+    const foundVendors: Vendor[] = await this.vendorRepository.readMany(args)
+
+    if (foundVendors.length !== ids.length) {
+      return new Result<null>(
+        404,
+        'Vendor read many by ids failed, some vendor ids is not found.',
+        null
+      )
+    }
+
+    return new Result<Vendor[]>(
+      200,
+      'Vendor read many by ids succeed.',
+      foundVendors
+    )
+  }
+
+  readOneById = async (id: string): Promise<Result<Vendor | null>> => {
+    let foundVendor: Vendor
+    try {
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined
+      )
+      foundVendor = await this.vendorRepository.readOne(args)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'Vendor read one by id failed, vendor is not found.',
+        null
+      )
+    }
     return new Result<Vendor>(
       200,
       'Vendor read one by id succeed.',
@@ -37,8 +101,23 @@ export default class VendorManagement {
     )
   }
 
-  readOneByUsername = async (username: string): Promise<Result<Vendor>> => {
-    const foundVendor: Vendor = await this.vendorRepository.readOneByUsername(username)
+  readOneByUsername = async (username: string): Promise<Result<Vendor | null>> => {
+    let foundVendor: Vendor
+    try {
+      const args: RepositoryArgument = new RepositoryArgument(
+        { username },
+        undefined,
+        undefined,
+        undefined
+      )
+      foundVendor = await this.vendorRepository.readOne(args)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'Vendor read one by username failed, vendor is not found.',
+        null
+      )
+    }
     return new Result<Vendor>(
       200,
       'Vendor read one by username succeed.',
@@ -46,8 +125,23 @@ export default class VendorManagement {
     )
   }
 
-  readOneByEmail = async (email: string): Promise<Result<Vendor>> => {
-    const foundVendor: Vendor = await this.vendorRepository.readOneByEmail(email)
+  readOneByEmail = async (email: string): Promise<Result<Vendor | null>> => {
+    let foundVendor: Vendor
+    try {
+      const args: RepositoryArgument = new RepositoryArgument(
+        { email },
+        undefined,
+        undefined,
+        undefined
+      )
+      foundVendor = await this.vendorRepository.readOne(args)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'Vendor read one by email failed, vendor is not found.',
+        null
+      )
+    }
     return new Result<Vendor>(
       200,
       'Vendor read one by email succeed.',
@@ -55,8 +149,23 @@ export default class VendorManagement {
     )
   }
 
-  readOneByUsernameAndPassword = async (username: string, password: string): Promise<Result<Vendor>> => {
-    const foundVendor: Vendor = await this.vendorRepository.readOneByUsernameAndPassword(username, password)
+  readOneByUsernameAndPassword = async (username: string, password: string): Promise<Result<Vendor | null>> => {
+    let foundVendor: Vendor
+    try {
+      const args: RepositoryArgument = new RepositoryArgument(
+        { username, password },
+        undefined,
+        undefined,
+        undefined
+      )
+      foundVendor = await this.vendorRepository.readOne(args)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'Vendor read one by username and password failed, vendor is not found.',
+        null
+      )
+    }
     return new Result<Vendor>(
       200,
       'Vendor read one by username and password succeed.',
@@ -64,8 +173,23 @@ export default class VendorManagement {
     )
   }
 
-  readOneByEmailAndPassword = async (email: string, password: string): Promise<Result<Vendor>> => {
-    const foundVendor: Vendor = await this.vendorRepository.readOneByEmailAndPassword(email, password)
+  readOneByEmailAndPassword = async (email: string, password: string): Promise<Result<Vendor | null>> => {
+    let foundVendor: Vendor
+    try {
+      const args: RepositoryArgument = new RepositoryArgument(
+        { email, password },
+        undefined,
+        undefined,
+        undefined
+      )
+      foundVendor = await this.vendorRepository.readOne(args)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'Vendor read one by email and password failed, vendor is not found.',
+        null
+      )
+    }
     return new Result<Vendor>(
       200,
       'Vendor read one by email and password succeed.',
@@ -73,7 +197,7 @@ export default class VendorManagement {
     )
   }
 
-  createOne = async (request: VendorManagementCreateRequest): Promise<Result<Vendor>> => {
+  createOne = async (request: VendorManagementCreateRequest): Promise<Result<Vendor | null>> => {
     const salt: string | undefined = process.env.BCRYPT_SALT
     if (salt === undefined) {
       throw new Error('Salt is undefined.')
@@ -99,7 +223,39 @@ export default class VendorManagement {
       createdAt: new Date(),
       deletedAt: null
     }
-    const createdVendor: any = await this.vendorRepository.createOne(vendorToCreate)
+
+    const createdVendor: Result<Vendor | null> = await this.createOneRaw(vendorToCreate)
+    if (createdVendor.status !== 201 || createdVendor.data === null) {
+      return new Result<null>(
+        createdVendor.status,
+            `Vendor create one failed, ${createdVendor.message}`,
+            null
+      )
+    }
+    return new Result<Vendor>(
+      201,
+      'Vendor create one succeed.',
+      createdVendor.data
+    )
+  }
+
+  createOneRaw = async (vendor: Vendor): Promise<Result<Vendor | null>> => {
+    let createdVendor: Vendor
+    try {
+      const args: RepositoryArgument = new RepositoryArgument(
+        undefined,
+        undefined,
+        undefined,
+        vendor
+      )
+      createdVendor = await this.vendorRepository.createOne(args)
+    } catch (error) {
+      return new Result<null>(
+        500,
+            `Vendor create one failed, ${(error as Error).message}`,
+            null
+      )
+    }
     return new Result<Vendor>(
       201,
       'Vendor create one succeed.',
@@ -107,33 +263,56 @@ export default class VendorManagement {
     )
   }
 
-  createOneRaw = async (vendor: Vendor): Promise<Result<Vendor>> => {
+  patchOneById = async (id: string, request: VendorManagementPatchRequest): Promise<Result<Vendor | null>> => {
     const salt: string | undefined = process.env.BCRYPT_SALT
     if (salt === undefined) {
       throw new Error('Salt is undefined.')
     }
 
-    const createdVendor: any = await this.vendorRepository.createOne(vendor)
+    request.password = bcrypt.hashSync(request.password, salt)
+
+    const patchedVendor: Result<Vendor | null> = await this.patchOneRawById(id, request)
+    if (patchedVendor.status !== 200 || patchedVendor.data === null) {
+      return new Result<null>(
+        patchedVendor.status,
+          `Vendor patch one by id failed, ${patchedVendor.message}}`,
+          null
+      )
+    }
+
     return new Result<Vendor>(
-      201,
-      'Vendor create one raw succeed.',
-      createdVendor
+      200,
+      'Vendor patch one by id succeed.',
+      patchedVendor.data
     )
   }
 
-  patchOneById = async (id: string, request: VendorManagementPatchRequest): Promise<Result<Vendor>> => {
-    const salt: string | undefined = process.env.BCRYPT_SALT
-    if (salt === undefined) {
-      throw new Error('Salt is undefined.')
+  patchOneRawById = async (id: string, request: any): Promise<Result<Vendor | null>> => {
+    const foundVendor: Result<Vendor | null> = await this.readOneById(id)
+    if (foundVendor.status !== 200 || foundVendor.data === null) {
+      return new Result<null>(
+        foundVendor.status,
+        'Vendor patch one by id failed, vendor is not found.',
+        null
+      )
     }
-
-    if (request.password !== undefined) {
-      request.password = bcrypt.hashSync(request.password, salt)
-    }
-
-    const foundVendor: Result<Vendor> = await this.readOneById(id)
     this.objectUtility.patch(foundVendor.data, request)
-    const patchedVendor: Vendor = await this.vendorRepository.patchOneById(id, foundVendor.data)
+    let patchedVendor: Vendor
+    try {
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        foundVendor.data
+      )
+      patchedVendor = await this.vendorRepository.patchOne(args)
+    } catch (error) {
+      return new Result<null>(
+        500,
+            `Vendor patch one by id failed, ${(error as Error).message}`,
+            null
+      )
+    }
     return new Result<Vendor>(
       200,
       'Vendor patch one by id succeed.',
@@ -141,12 +320,69 @@ export default class VendorManagement {
     )
   }
 
-  deleteOneById = async (id: string): Promise<Result<Vendor>> => {
-    const deletedVendor: any = await this.vendorRepository.deleteOneById(id)
+  deleteOneById = async (id: string): Promise<Result<Vendor | null>> => {
+    let deletedVendor: Vendor
+    try {
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        undefined
+      )
+      deletedVendor = await this.vendorRepository.deleteOne(args)
+    } catch (error) {
+      return new Result<null>(
+        500,
+        'Vendor delete one by id failed.',
+        null
+      )
+    }
     return new Result<Vendor>(
       200,
       'Vendor delete one by id succeed.',
       deletedVendor
+    )
+  }
+
+  patchManyRawByIds = async (ids: string[], requests: any[]): Promise<Result<Vendor[] | null>> => {
+    const foundVendors: Result<Vendor[] | null> = await this.readManyByIds(ids)
+    if (foundVendors.status !== 200 || foundVendors.data === null) {
+      return new Result<null>(
+        foundVendors.status,
+        `Vendor patch many by ids failed, ${foundVendors.message}`,
+        null
+      )
+    }
+
+    const args: RepositoryArgument[] = []
+    for (let i = 0; i < ids.length; i++) {
+      const vendorId: string = ids[i]
+      const foundVendor: Vendor = foundVendors.data.find((vendor: Vendor) => vendor.id === vendorId) as Vendor
+      const request: any = requests.find((request: any) => request.id === vendorId)
+      this.objectUtility.patch(foundVendor, request)
+      const arg = new RepositoryArgument(
+        { id: vendorId },
+        undefined,
+        undefined,
+        foundVendor
+      )
+      args.push(arg)
+    }
+
+    let patchedVendors: Vendor[]
+    try {
+      patchedVendors = await this.vendorRepository.patchMany(args)
+    } catch (error) {
+      return new Result<null>(
+        500,
+          `Vendor patch one by id failed, ${(error as Error).message}`,
+          null
+      )
+    }
+    return new Result<Vendor[]>(
+      200,
+      'Vendor patch one by id succeed.',
+      patchedVendors
     )
   }
 }

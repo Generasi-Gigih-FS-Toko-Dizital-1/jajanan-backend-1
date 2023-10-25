@@ -18,8 +18,6 @@ export default class TransactionHistoryMock {
       {
         id: randomUUID(),
         userId: this.userMock.data[0].id,
-        jajanItemId: this.jajanItemMock.data[0].id,
-        amount: 0.0,
         paymentMethod: 'CASH',
         lastLatitude: 0.0,
         lastLongitude: 0.0,
@@ -30,8 +28,6 @@ export default class TransactionHistoryMock {
       {
         id: randomUUID(),
         userId: this.userMock.data[1].id,
-        jajanItemId: this.jajanItemMock.data[1].id,
-        amount: 1.0,
         paymentMethod: 'BALANCE',
         lastLatitude: 1.0,
         lastLongitude: 1.0,

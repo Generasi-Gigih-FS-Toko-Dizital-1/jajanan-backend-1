@@ -10,30 +10,40 @@ import jwt from 'jsonwebtoken'
 import moment from 'moment'
 import Authorization from '../../../models/value_objects/Authorization'
 import bcrypt from 'bcrypt'
+import type FirebaseGateway from '../../../../outers/gateways/FirebaseGateway'
 
 export default class UserLoginAuthentication {
   userManagement: UserManagement
   sessionManagement: SessionManagement
+  firebaseGateway: FirebaseGateway
 
-  constructor (userManagement: UserManagement, sessionManagement: SessionManagement) {
+  constructor (userManagement: UserManagement, sessionManagement: SessionManagement, firebaseGateway: FirebaseGateway) {
     this.userManagement = userManagement
     this.sessionManagement = sessionManagement
+    this.firebaseGateway = firebaseGateway
   }
 
   loginByEmailAndPassword = async (request: UserLoginByEmailAndPasswordRequest): Promise<Result<Session | null>> => {
-    let foundUserByEmailAndPassword: Result<User>
-    try {
-      foundUserByEmailAndPassword = await this.userManagement.readOneByEmailAndPassword(
-        request.email,
-        request.password
-      )
-    } catch (error) {
+    const foundUserByEmailAndPassword: Result<User | null> = await this.userManagement.readOneByEmailAndPassword(
+      request.email,
+      request.password
+    )
+    if (foundUserByEmailAndPassword.status !== 200 || foundUserByEmailAndPassword.data === null) {
       return new Result<null>(
         404,
-        'User login by email and password failed, unknown email or password.',
+        'User login by email and password failed, user is not found.',
         null
       )
     }
+
+    // const isFirebaseTokenValid: boolean = (await this.firebaseGateway.isFirebaseTokensValid([request.firebaseToken]))[0]
+    // if (!isFirebaseTokenValid) {
+    //   return new Result<null>(
+    //     401,
+    //     'User login by email and password failed, firebase token is invalid.',
+    //     null
+    //   )
+    // }
 
     const jwtSecret: string | undefined = process.env.JWT_SECRET
     if (jwtSecret === undefined) {
@@ -77,7 +87,8 @@ export default class UserLoginAuthentication {
       'USER',
       accessToken,
       randomUUID(),
-      moment().add(jwtRefreshTokenExpirationTime, 'seconds').toDate()
+      moment().add(jwtRefreshTokenExpirationTime, 'seconds').toDate(),
+      request.firebaseToken
     )
 
     const authorization: Authorization = new Authorization(

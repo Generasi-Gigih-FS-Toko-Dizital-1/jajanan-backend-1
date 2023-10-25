@@ -1,205 +1,111 @@
 import type OneDatastore from '../datastores/OneDatastore'
-import { type User } from '@prisma/client'
+import { Prisma, type User } from '@prisma/client'
 import type UserAggregate from '../../inners/models/aggregates/UserAggregate'
-import type Pagination from '../../inners/models/value_objects/Pagination'
+import RepositoryArgument from '../../inners/models/value_objects/RepositoryArgument'
 
 export default class UserRepository {
   oneDatastore: OneDatastore
-  aggregatedArgs: any
 
   constructor (oneDatastore: OneDatastore) {
     this.oneDatastore = oneDatastore
-    this.aggregatedArgs = {
-      include: {
-        notificationHistories: true,
-        topUpHistories: true,
-        transactionHistories: true,
-        userSubscriptions: true
-      }
-    }
   }
 
-  readMany = async (pagination: Pagination, isAggregated?: boolean): Promise<User[] | UserAggregate[]> => {
-    const offset: number = (pagination.pageNumber - 1) * pagination.pageSize
-    const args: any = {
-      take: pagination.pageSize,
-      skip: offset
-    }
-    if (isAggregated === true) {
-      args.include = this.aggregatedArgs.include
-    }
-
+  readManyByDistanceAndSubscribedVendorIds = async (distance: number, vendorIds: string[], include: any): Promise<User[] | UserAggregate[]> => {
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
-    const foundUser: User[] | UserAggregate[] = await this.oneDatastore.client.user.findMany(args)
-    if (foundUser === null) {
-      throw new Error('Found user is undefined.')
-    }
-    return foundUser
+    const query: string = `
+    select s1.u_id
+    from (select v.id  as v_id,
+                 u.id  as u_id,
+                 st_distance(
+                         st_makepoint(v."lastLatitude", v."lastLongitude"),
+                         st_makepoint(u."lastLatitude", u."lastLongitude")
+                     ) as vu_distance
+          from "Vendor" v
+                   inner join "JajanItem" ji on v."id" = ji."vendorId"
+                   inner join "Category" C on C.id = ji."categoryId"
+                   inner join "UserSubscription" us on us."categoryId" = C.id
+                   inner join "User" u on u.id = us."userId") as s1
+    where s1.vu_distance <= ${distance}
+      and s1.v_id in (${vendorIds.map((vendorId: string) => `'${vendorId}'`).join(', ')});
+    `
+    const foundUserIds: any[] = await this.oneDatastore.client.$queryRaw`${Prisma.raw(query)}`
+
+    const repositoryArgument: RepositoryArgument = new RepositoryArgument(
+      { id: { in: foundUserIds.map((row: any) => row.u_id) } },
+      include,
+      undefined,
+      undefined
+    )
+    const foundUsers: User[] | UserAggregate[] = await this.readMany(repositoryArgument)
+
+    return foundUsers
   }
 
-  readOneById = async (id: string, isAggregated?: boolean): Promise<User | UserAggregate> => {
-    const args: any = {
-      where: {
-        id
-      }
-    }
-    if (isAggregated === true) {
-      args.include = this.aggregatedArgs.include
-    }
+  readMany = async (repositoryArgument: RepositoryArgument): Promise<User[] | UserAggregate[]> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
-    const foundUser: User | UserAggregate | null = await this.oneDatastore.client.user.findFirst(args)
-    if (foundUser === null) {
-      throw new Error('Found user is null.')
+    const foundUsers: User[] | UserAggregate[] = await this.oneDatastore.client.user.findMany(args)
+    if (foundUsers === null) {
+      throw new Error('Found users is undefined.')
     }
-    return foundUser
+
+    return foundUsers
   }
 
-  readOneByUsername = async (username: string, isAggregated?: boolean): Promise<User | UserAggregate> => {
-    const args: any = {
-      where: {
-        username
-      }
-    }
-    if (isAggregated === true) {
-      args.include = this.aggregatedArgs.include
-    }
+  createOne = async (repositoryArgument: RepositoryArgument): Promise<User | UserAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
-    }
-
-    const foundUser: User | UserAggregate | null = await this.oneDatastore.client.user.findFirst(args)
-    if (foundUser === null) {
-      throw new Error('Found user is null.')
-    }
-    return foundUser
-  }
-
-  readOneByEmail = async (email: string, isAggregated?: boolean): Promise<any > => {
-    const args: any = {
-      where: {
-        email
-      }
-    }
-    if (isAggregated === true) {
-      args.include = this.aggregatedArgs.include
-    }
-
-    if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
-    }
-
-    const foundUser: User | UserAggregate | null = await this.oneDatastore.client.user.findFirst(args)
-    if (foundUser === null) {
-      throw new Error('Found user is null.')
-    }
-    return foundUser
-  }
-
-  readOneByUsernameAndPassword = async (username: string, password: string, isAggregated?: boolean): Promise<User | UserAggregate> => {
-    const args: any = {
-      where: {
-        username,
-        password
-      }
-    }
-    if (isAggregated === true) {
-      args.include = this.aggregatedArgs.include
-    }
-
-    if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
-    }
-
-    const foundUser: User | UserAggregate | null = await this.oneDatastore.client.user.findFirst(args)
-    if (foundUser === null) {
-      throw new Error('Found user is null.')
-    }
-    return foundUser
-  }
-
-  readOneByEmailAndPassword = async (email: string, password: string, isAggregated?: boolean): Promise<User | UserAggregate> => {
-    const args: any = {
-      where: {
-        email,
-        password
-      }
-    }
-    if (isAggregated === true) {
-      args.include = this.aggregatedArgs.include
-    }
-
-    if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
-    }
-
-    const foundUser: User | UserAggregate | null = await this.oneDatastore.client.user.findFirst(args)
-    if (foundUser === null) {
-      throw new Error('Found user is null.')
-    }
-    return foundUser
-  }
-
-  createOne = async (user: User, isAggregated?: boolean): Promise<User | UserAggregate> => {
-    const args: any = {
-      data: user
-    }
-    if (isAggregated === true) {
-      args.include = this.aggregatedArgs.include
-    }
-
-    if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const createdUser: User | UserAggregate = await this.oneDatastore.client.user.create(args)
-    if (createdUser === undefined) {
-      throw new Error('Created user is undefined.')
-    }
+
     return createdUser
   }
 
-  patchOneById = async (id: string, user: User, isAggregated?: boolean): Promise<User | UserAggregate> => {
-    const args: any = {
-      where: {
-        id
-      },
-      data: user
-    }
-    if (isAggregated === true) {
-      args.include = this.aggregatedArgs.include
-    }
+  readOne = async (repositoryArgument: RepositoryArgument): Promise<User | UserAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
+    }
+
+    const foundUser: User | UserAggregate | null = await this.oneDatastore.client.user.findFirst(args)
+    if (foundUser === null) {
+      throw new Error('Found user is null.')
+    }
+
+    return foundUser
+  }
+
+  patchOne = async (repositoryArgument: RepositoryArgument): Promise<User | UserAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
+
+    if (this.oneDatastore.client === undefined) {
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const patchedUser: User | UserAggregate = await this.oneDatastore.client.user.update(args)
     if (patchedUser === null) {
       throw new Error('Patched user is undefined.')
     }
+
     return patchedUser
   }
 
-  deleteOneById = async (id: string, isAggregated?: boolean): Promise<User | UserAggregate> => {
-    const args: any = {
-      where: {
-        id
-      }
-    }
-    if (isAggregated === true) {
-      args.include = this.aggregatedArgs.include
-    }
+  deleteOne = async (repositoryArgument: RepositoryArgument): Promise<User | UserAggregate> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
-      throw new Error('oneDatastore client is undefined')
+      throw new Error('oneDatastore client is undefined.')
     }
 
     const deletedUser: User | UserAggregate = await this.oneDatastore.client.user.delete(args)

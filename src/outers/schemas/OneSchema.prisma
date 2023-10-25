@@ -64,6 +64,9 @@ model Vendor {
   deletedAt             DateTime?             @db.Timestamptz
   notificationHistories NotificationHistory[]
   jajanItems            JajanItem[]
+  payoutHistories       PayoutHistory[]
+  jajanItemSnapshots    JajanItemSnapshot[]
+  payouts               VendorPayout[]
 }
 
 model Admin {
@@ -78,51 +81,82 @@ model Admin {
 }
 
 model JajanItem {
-  id                   String               @id
-  vendorId             String
-  vendor               Vendor               @relation(fields: [vendorId], references: [id])
-  categoryId           String
-  category             Category             @relation(fields: [categoryId], references: [id])
-  name                 String               @db.VarChar(255)
-  price                Int
-  imageUrl             String               @db.VarChar(255)
-  updatedAt            DateTime             @db.Timestamptz
-  createdAt            DateTime             @db.Timestamptz
-  deletedAt            DateTime?            @db.Timestamptz
-  transactionHistories TransactionHistory[]
+  id         String              @id
+  vendorId   String
+  categoryId String
+  name       String              @db.VarChar(255)
+  price      Int
+  imageUrl   String              @db.VarChar(255)
+  updatedAt  DateTime            @db.Timestamptz
+  createdAt  DateTime            @db.Timestamptz
+  deletedAt  DateTime?           @db.Timestamptz
+  vendor     Vendor              @relation(fields: [vendorId], references: [id])
+  category   Category            @relation(fields: [categoryId], references: [id])
+  snapshots  JajanItemSnapshot[]
+}
+
+model JajanItemSnapshot {
+  id                       String                   @id
+  originId                 String
+  vendorId                 String
+  categoryId               String
+  name                     String                   @db.VarChar(255)
+  price                    Int
+  imageUrl                 String                   @db.VarChar(255)
+  updatedAt                DateTime                 @db.Timestamptz
+  createdAt                DateTime                 @db.Timestamptz
+  deletedAt                DateTime?                @db.Timestamptz
+  transactionItemHistories TransactionItemHistory[]
+  vendor                   Vendor                   @relation(fields: [vendorId], references: [id])
+  category                 Category                 @relation(fields: [categoryId], references: [id])
+  origin                   JajanItem                @relation(fields: [originId], references: [id])
 }
 
 model Category {
-  id                String             @id
-  categoryName      String             @db.VarChar(255)
-  iconUrl           String             @db.VarChar(255)
-  updatedAt         DateTime           @db.Timestamptz
-  createdAt         DateTime           @db.Timestamptz
-  deletedAt         DateTime?          @db.Timestamptz
-  jajanItems        JajanItem[]
-  userSubscriptions UserSubscription[]
+  id                 String              @id
+  name               String              @db.VarChar(255)
+  iconUrl            String              @db.VarChar(255)
+  updatedAt          DateTime            @db.Timestamptz
+  createdAt          DateTime            @db.Timestamptz
+  deletedAt          DateTime?           @db.Timestamptz
+  jajanItems         JajanItem[]
+  userSubscriptions  UserSubscription[]
+  jajanItemSnapshots JajanItemSnapshot[]
 }
 
 model NotificationHistory {
   id        String    @id
   userId    String
-  user      User      @relation(fields: [userId], references: [id])
   vendorId  String
-  vendor    Vendor    @relation(fields: [vendorId], references: [id])
   updatedAt DateTime  @db.Timestamptz
   createdAt DateTime  @db.Timestamptz
   deletedAt DateTime? @db.Timestamptz
+  user      User      @relation(fields: [userId], references: [id])
+  vendor    Vendor    @relation(fields: [vendorId], references: [id])
 }
 
 model TopUpHistory {
-  id        String    @id
-  userId    String
-  user      User      @relation(fields: [userId], references: [id])
-  amount    Float
-  media     String    @db.VarChar(255)
-  updatedAt DateTime  @db.Timestamptz
-  createdAt DateTime  @db.Timestamptz
-  deletedAt DateTime? @db.Timestamptz
+  id              String    @id
+  xenditInvoiceId String
+  userId          String
+  amount          Float
+  media           String    @db.VarChar(255)
+  updatedAt       DateTime  @db.Timestamptz
+  createdAt       DateTime  @db.Timestamptz
+  deletedAt       DateTime? @db.Timestamptz
+  user            User      @relation(fields: [userId], references: [id])
+}
+
+model PayoutHistory {
+  id             String    @id
+  xenditPayoutId String
+  vendorId       String
+  amount         Float
+  media          String    @db.VarChar(255)
+  updatedAt      DateTime  @db.Timestamptz
+  createdAt      DateTime  @db.Timestamptz
+  deletedAt      DateTime? @db.Timestamptz
+  vendor         Vendor    @relation(fields: [vendorId], references: [id])
 }
 
 model UserLevel {
@@ -157,16 +191,36 @@ model UserSubscription {
 }
 
 model TransactionHistory {
-  id            String        @id
-  userId        String
-  jajanItemId   String
-  amount        Int
-  paymentMethod PaymentMethod
-  lastLatitude  Float
-  lastLongitude Float
-  updatedAt     DateTime      @db.Timestamptz
-  createdAt     DateTime      @db.Timestamptz
-  deletedAt     DateTime?     @db.Timestamptz
-  user          User          @relation(fields: [userId], references: [id])
-  jajanItem     JajanItem     @relation(fields: [jajanItemId], references: [id])
+  id               String                   @id
+  userId           String
+  paymentMethod    PaymentMethod
+  lastLatitude     Float
+  lastLongitude    Float
+  updatedAt        DateTime                 @db.Timestamptz
+  createdAt        DateTime                 @db.Timestamptz
+  deletedAt        DateTime?                @db.Timestamptz
+  user             User                     @relation(fields: [userId], references: [id])
+  transactionItems TransactionItemHistory[]
+}
+
+model TransactionItemHistory {
+  id                  String             @id
+  transactionId       String
+  jajanItemSnapshotId String
+  quantity            Float
+  updatedAt           DateTime           @db.Timestamptz
+  createdAt           DateTime           @db.Timestamptz
+  deletedAt           DateTime?          @db.Timestamptz
+  transaction         TransactionHistory @relation(fields: [transactionId], references: [id])
+  jajanItem           JajanItemSnapshot  @relation(fields: [jajanItemSnapshotId], references: [id])
+}
+
+model VendorPayout {
+  id        String    @id
+  vendorId  String
+  payoutId  String
+  updatedAt DateTime  @db.Timestamptz
+  createdAt DateTime  @db.Timestamptz
+  deletedAt DateTime? @db.Timestamptz
+  vendor    Vendor    @relation(fields: [vendorId], references: [id])
 }

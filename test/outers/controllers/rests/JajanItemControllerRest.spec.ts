@@ -4,34 +4,40 @@ import { beforeEach, describe, it } from 'mocha'
 import OneDatastore from '../../../../src/outers/datastores/OneDatastore'
 import { server } from '../../../../src/App'
 import waitUntil from 'async-wait-until'
-import JajanItemMock from '../../../mocks/JajanItemMock'
-import VendorMock from '../../../mocks/VendorMock'
-import CategoryMock from '../../../mocks/CategoryMock'
-import { type Admin, type Category, type JajanItem, type Vendor } from '@prisma/client'
+import {
+  type Admin,
+  type Category,
+  type JajanItem,
+  type JajanItemSnapshot,
+  type Prisma,
+  type TransactionItemHistory,
+  type Vendor
+} from '@prisma/client'
 import JajanItemManagementCreateRequest
-  from '../../../../src/inners/models/value_objects/requests/jajan_item_management/JajanItemManagementCreateRequest'
+  from '../../../../src/inners/models/value_objects/requests/managements/jajan_item_management/JajanItemManagementCreateRequest'
 import JajanItemManagementPatchRequest
-  from '../../../../src/inners/models/value_objects/requests/jajan_item_management/JajanItemManagementPatchRequest'
+  from '../../../../src/inners/models/value_objects/requests/managements/jajan_item_management/JajanItemManagementPatchRequest'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
 import AdminMock from '../../../mocks/AdminMock'
 import AdminLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
+import humps from 'humps'
+import OneSeeder from '../../../../src/outers/seeders/OneSeeder'
 
 chai.use(chaiHttp)
 chai.should()
 
 describe('JajanItemControllerRest', () => {
+  const oneDatastore: OneDatastore = new OneDatastore()
   const authAdminMock: AdminMock = new AdminMock()
-  const vendorMock: VendorMock = new VendorMock()
-  const categoryMock: CategoryMock = new CategoryMock()
-  const jajanItemMock: JajanItemMock = new JajanItemMock(vendorMock, categoryMock)
-  const oneDatastore = new OneDatastore()
+  let oneSeeder: OneSeeder
   let agent: ChaiHttp.Agent
   let authorization: Authorization
 
   before(async () => {
     await waitUntil(() => server !== undefined)
     await oneDatastore.connect()
+    oneSeeder = new OneSeeder(oneDatastore)
 
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
@@ -69,56 +75,17 @@ describe('JajanItemControllerRest', () => {
   })
 
   beforeEach(async () => {
-    await oneDatastore.connect()
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-
-    await oneDatastore.client.vendor.createMany({
-      data: vendorMock.data
-    })
-
-    await oneDatastore.client.category.createMany({
-      data: categoryMock.data
-    })
-
-    await oneDatastore.client.jajanItem.createMany({
-      data: jajanItemMock.data
-    })
+    await oneSeeder.up()
   })
 
   afterEach(async () => {
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-
-    await oneDatastore.client.jajanItem.deleteMany({
-      where: {
-        categoryId: {
-          in: categoryMock.data.map((category: Category) => category.id)
-        }
-      }
-    })
-
-    await oneDatastore.client.category.deleteMany({
-      where: {
-        id: {
-          in: categoryMock.data.map((category: Category) => category.id)
-        }
-      }
-    })
-
-    await oneDatastore.client.vendor.deleteMany(
-      {
-        where: {
-          id: {
-            in: vendorMock.data.map((vendor: Vendor) => vendor.id)
-          }
-        }
-      }
-    )
-
-    await oneDatastore.disconnect()
+    await oneSeeder.down()
   })
 
   after(async () => {
@@ -140,7 +107,7 @@ describe('JajanItemControllerRest', () => {
   describe('GET /api/v1/jajan-items?page_number={}&page_size={}', () => {
     it('should return 200 OK', async () => {
       const pageNumber: number = 1
-      const pageSize: number = jajanItemMock.data.length
+      const pageSize: number = oneSeeder.jajanItemMock.data.length
       const response = await agent
         .get(`/api/v1/jajan-items?page_number=${pageNumber}&page_size=${pageSize}`)
         .set('Authorization', authorization.convertToString())
@@ -148,30 +115,106 @@ describe('JajanItemControllerRest', () => {
 
       response.should.has.status(200)
       response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
       response.body.data.should.has.property('total_jajan_items')
       response.body.data.should.has.property('jajan_items')
       response.body.data.jajan_items.should.be.an('array')
-      response.body.data.jajan_items.forEach((jajanItem: JajanItem) => {
+      response.body.data.jajan_items.length.should.equal(pageSize)
+      response.body.data.jajan_items.forEach((jajanItem: any) => {
         jajanItem.should.has.property('id')
         jajanItem.should.has.property('vendor_id')
         jajanItem.should.has.property('category_id')
         jajanItem.should.has.property('name')
         jajanItem.should.has.property('price')
         jajanItem.should.has.property('image_url')
-        jajanItem.should.has.property('created_at')
         jajanItem.should.has.property('updated_at')
+        jajanItem.should.has.property('created_at')
       })
+    })
+  })
+
+  describe('GET /api/v1/jajan-items?page_number={}&page_size={}&&where={}&include={}', () => {
+    it('should return 200 OK', async () => {
+      const requestJajanItem: JajanItem = oneSeeder.jajanItemMock.data[0]
+      const requestVendor: Vendor = oneSeeder.jajanItemMock.vendorMock.data.filter((vendor: Vendor) => vendor.id === requestJajanItem.vendorId)[0]
+      const requestCategory: Category = oneSeeder.jajanItemMock.categoryMock.data.filter((category: Category) => category.id === requestJajanItem.categoryId)[0]
+      const requestJajanItemSnapshots: JajanItemSnapshot[] = oneSeeder.jajanItemSnapshotMock.data.filter((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.originId === requestJajanItem.id)
+      const pageNumber: number = 1
+      const pageSize: number = oneSeeder.jajanItemMock.data.length
+      const whereInput: any = {
+        id: requestJajanItem.id
+      }
+      const where: string = encodeURIComponent(JSON.stringify(whereInput))
+      const includeInput: any = {
+        vendor: true,
+        category: true,
+        snapshots: true
+      }
+      const include: string = encodeURIComponent(JSON.stringify(includeInput))
+      const response = await agent
+        .get(`/api/v1/jajan-items?page_number=${pageNumber}&page_size=${pageSize}&where=${where}&include=${include}`)
+        .set('Authorization', authorization.convertToString())
+        .send()
+
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      response.body.data.should.has.property('total_jajan_items')
+      response.body.data.should.has.property('jajan_items')
+      response.body.data.jajan_items.should.be.an('array')
+      response.body.data.jajan_items.length.should.equal(1)
+      response.body.data.jajan_items.forEach((jajanItem: any) => {
+        jajanItem.should.has.property('id').equal(requestJajanItem.id)
+        jajanItem.should.has.property('vendor_id').equal(requestJajanItem.vendorId)
+        jajanItem.should.has.property('category_id').equal(requestJajanItem.categoryId)
+        jajanItem.should.has.property('name').equal(requestJajanItem.name)
+        jajanItem.should.has.property('price').equal(requestJajanItem.price)
+        jajanItem.should.has.property('image_url').equal(requestJajanItem.imageUrl)
+        jajanItem.should.has.property('updated_at').equal(requestJajanItem.updatedAt.toISOString())
+        jajanItem.should.has.property('created_at').equal(requestJajanItem.createdAt.toISOString())
+        jajanItem.should.has.property('vendor').deep.equal(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestVendor))))
+        jajanItem.should.has.property('category').deep.equal(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestCategory))))
+        jajanItem.should.has.property('snapshots').deep.members(
+          requestJajanItemSnapshots.map((jajanItemSnapshot: JajanItemSnapshot) => humps.decamelizeKeys(JSON.parse(JSON.stringify(jajanItemSnapshot))))
+        )
+      })
+    })
+  })
+
+  describe('GET /api/v1/jajan-items/:id', () => {
+    it('should return 200 OK', async () => {
+      const requestJajanItem: JajanItem = oneSeeder.jajanItemMock.data[0]
+      const response = await agent
+        .get(`/api/v1/jajan-items/${requestJajanItem.id}`)
+        .set('Authorization', authorization.convertToString())
+        .send()
+
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      response.body.data.should.be.an('object')
+      response.body.data.should.has.property('id').equal(requestJajanItem.id)
+      response.body.data.should.has.property('vendor_id').equal(requestJajanItem.vendorId)
+      response.body.data.should.has.property('category_id').equal(requestJajanItem.categoryId)
+      response.body.data.should.has.property('name').equal(requestJajanItem.name)
+      response.body.data.should.has.property('price').equal(requestJajanItem.price)
+      response.body.data.should.has.property('image_url').equal(requestJajanItem.imageUrl)
+      response.body.data.should.has.property('updated_at').equal(requestJajanItem.updatedAt.toISOString())
+      response.body.data.should.has.property('created_at').equal(requestJajanItem.createdAt.toISOString())
     })
   })
 
   describe('POST /api/v1/jajan-items', () => {
     it('should return 201 CREATED', async () => {
       const requestBody: JajanItemManagementCreateRequest = new JajanItemManagementCreateRequest(
-        jajanItemMock.data[0].vendorId,
-        jajanItemMock.data[0].categoryId,
-        jajanItemMock.data[0].name,
-        jajanItemMock.data[0].price,
-        jajanItemMock.data[0].imageUrl
+        oneSeeder.jajanItemMock.data[0].vendorId,
+        oneSeeder.jajanItemMock.data[0].categoryId,
+        'name2',
+        2.0,
+        'https://placehold.co/400x400?text=imageUrl2'
       )
 
       const response = await agent
@@ -190,15 +233,27 @@ describe('JajanItemControllerRest', () => {
       response.body.data.should.has.property('name').equal(requestBody.name)
       response.body.data.should.has.property('price').equal(requestBody.price)
       response.body.data.should.has.property('image_url').equal(requestBody.imageUrl)
+      response.body.data.should.has.property('updated_at')
+      response.body.data.should.has.property('created_at')
+
+      if (oneDatastore.client === undefined) {
+        throw new Error('oneDatastore client is undefined')
+      }
+      const deleteResult: Prisma.BatchPayload = await oneDatastore.client.jajanItem.deleteMany({
+        where: {
+          id: response.body.data.id
+        }
+      })
+      deleteResult.should.has.property('count').greaterThanOrEqual(1)
     })
   })
 
   describe('PATCH /api/v1/jajan-items/:id', () => {
     it('should return 200 OK', async () => {
-      const requestJajanItem: JajanItem = jajanItemMock.data[0]
+      const requestJajanItem: JajanItem = oneSeeder.jajanItemMock.data[0]
       const requestBody: JajanItemManagementPatchRequest = new JajanItemManagementPatchRequest(
-        vendorMock.data[1].id,
-        categoryMock.data[1].id,
+        oneSeeder.vendorMock.data[1].id,
+        oneSeeder.categoryMock.data[1].id,
         `patched${requestJajanItem.name}`,
         requestJajanItem.price + 1,
         'https://placehold.co/400x400?text=patched'
@@ -220,12 +275,34 @@ describe('JajanItemControllerRest', () => {
       response.body.data.should.has.property('name').equal(requestBody.name)
       response.body.data.should.has.property('price').equal(requestBody.price)
       response.body.data.should.has.property('image_url').equal(requestBody.imageUrl)
+      response.body.data.should.has.property('updated_at')
+      response.body.data.should.has.property('created_at')
     })
   })
 
   describe('DELETE /api/v1/jajan-items/:id', () => {
     it('should return 200 OK', async () => {
-      const requestJajanItem: JajanItem = jajanItemMock.data[0]
+      const requestJajanItem: JajanItem = oneSeeder.jajanItemMock.data[0]
+      const requestJajanItemSnapshots: JajanItemSnapshot[] = oneSeeder.jajanItemSnapshotMock.data.filter((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.originId === requestJajanItem.id)
+      const requestTransactionItemHistories: TransactionItemHistory[] = oneSeeder.transactionItemHistoryMock.data.filter((transactionItemHistory: TransactionItemHistory) => requestJajanItemSnapshots.map((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.id).includes(transactionItemHistory.jajanItemSnapshotId))
+
+      if (oneDatastore.client === undefined) {
+        throw new Error('oneDatastore client is undefined')
+      }
+      await oneDatastore.client.transactionItemHistory.deleteMany({
+        where: {
+          id: {
+            in: requestTransactionItemHistories.map((transactionItemHistory: TransactionItemHistory) => transactionItemHistory.id)
+          }
+        }
+      })
+      await oneDatastore.client.jajanItemSnapshot.deleteMany({
+        where: {
+          id: {
+            in: requestJajanItemSnapshots.map((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.id)
+          }
+        }
+      })
 
       const response = await agent
         .delete(`/api/v1/jajan-items/${requestJajanItem.id}`)
@@ -233,9 +310,11 @@ describe('JajanItemControllerRest', () => {
         .send()
 
       response.should.has.status(200)
-      if (oneDatastore.client === undefined) {
-        throw new Error('oneDatastore client is undefined')
-      }
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      assert.isNull(response.body.data)
+
       const result: JajanItem | null = await oneDatastore.client.jajanItem.findFirst({
         where: {
           id: requestJajanItem.id

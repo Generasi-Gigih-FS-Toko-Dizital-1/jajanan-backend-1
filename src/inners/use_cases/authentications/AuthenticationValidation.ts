@@ -4,6 +4,7 @@ import type Session from '../../models/value_objects/Session'
 import bcrypt from 'bcrypt'
 import jwt, { type VerifyErrors } from 'jsonwebtoken'
 import type Authorization from '../../models/value_objects/Authorization'
+import _ from 'underscore'
 
 export default class AuthenticationValidation {
   sessionManagement: SessionManagement
@@ -36,12 +37,29 @@ export default class AuthenticationValidation {
     const authorizationString: string = JSON.stringify(authorization)
     const id: string = bcrypt.hashSync(authorizationString, salt)
 
-    const foundSession: Result<Session | null> = await this.sessionManagement.readOneById(id)
+    const foundSessionByAuthorization: Result<Session | null> = await this.sessionManagement.readOneById(id)
 
-    if (foundSession.status !== 200 || foundSession.data === null) {
+    if (foundSessionByAuthorization.status !== 200 || foundSessionByAuthorization.data === null) {
       return new Result<null>(
-        foundSession.status,
-        'Validate authentication failed, authorization is unknown.',
+        foundSessionByAuthorization.status,
+        'Validate authentication failed, found session by authorization is unknown.',
+        null
+      )
+    }
+
+    const foundSessionByAccountId: Result<Session | null> = await this.sessionManagement.readOneById(foundSessionByAuthorization.data.accountId)
+    if (foundSessionByAccountId.status !== 200 || foundSessionByAccountId.data === null) {
+      return new Result<null>(
+        foundSessionByAccountId.status,
+        'Validate authentication failed, found session by account id is unknown.',
+        null
+      )
+    }
+
+    if (!_.isEqual(JSON.parse(JSON.stringify(foundSessionByAuthorization.data)), JSON.parse(JSON.stringify(foundSessionByAccountId.data)))) {
+      return new Result<null>(
+        404,
+        'Validate authentication failed, session did not match.',
         null
       )
     }
@@ -55,8 +73,8 @@ export default class AuthenticationValidation {
       )
     }
     try {
-      await this.jwtVerifyAsync(foundSession.data.accessToken, jwtSecret)
-      return new Result<Session>(200, 'Validate authentication succeed.', foundSession.data)
+      await this.jwtVerifyAsync(foundSessionByAuthorization.data.accessToken, jwtSecret)
+      return new Result<Session>(200, 'Validate authentication succeed.', foundSessionByAuthorization.data)
     } catch (error) {
       return new Result<null>(500, `Validate authentication failed, ${(error as VerifyErrors).message}.`, null)
     }

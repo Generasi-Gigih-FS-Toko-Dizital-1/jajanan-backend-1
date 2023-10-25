@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    environment {
+        GOOGLE_APPLICATION_CREDENTIALS = credentials('0c66305b-eacb-4ad5-bad3-317b7cebcaba')
+    }
     stages {
         stage('stage') {
             steps {
@@ -17,7 +20,8 @@ pipeline {
         }
         stage('post') {
             steps {
-                sh 'docker system prune --all --force'
+                sh 'docker system prune --all --volumes --force'
+                sh 'docker volume prune --filter all=1 --force'
                 jiraSendDeploymentInfo environmentId: 'sg-staging-1', environmentName: 'sg-staging-1', environmentType: 'staging', state: 'successful'
                 publishHTML (
                      target : [
