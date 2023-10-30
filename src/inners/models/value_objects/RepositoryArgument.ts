@@ -2,12 +2,14 @@ import type Pagination from './Pagination'
 
 export default class RepositoryArgument {
   where?: any
+  orderBy?: any
   include?: any
   pagination?: Pagination
   data?: any
 
-  constructor (where?: any, include?: any, pagination?: Pagination, data?: any) {
+  constructor (where?: any, include?: any, pagination?: Pagination, data?: any, orderBy?: any) {
     this.where = where
+    this.orderBy = orderBy
     this.include = include
     this.pagination = pagination
     this.data = data
@@ -18,6 +20,10 @@ export default class RepositoryArgument {
 
     if (this.where !== undefined) {
       args.where = this.where
+    }
+
+    if (this.orderBy !== undefined) {
+      args.orderBy = this.orderBy
     }
 
     if (this.include !== undefined) {

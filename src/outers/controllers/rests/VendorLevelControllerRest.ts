@@ -34,6 +34,7 @@ export default class VendorLevelControllerRest {
     this.router.post('', this.createOne)
     this.router.patch('/:id', this.patchOneById)
     this.router.delete('/:id', this.deleteOneById)
+    this.router.get('/levels/:experience', this.readOneByExp)
   }
 
   readMany = (request: Request, response: Response): void => {
@@ -80,6 +81,35 @@ export default class VendorLevelControllerRest {
     const { id } = request.params
     this.vendorLevelManagement
       .readOneById(id)
+      .then((result: Result<VendorLevel | null>) => {
+        let data: VendorLevelManagementReadOneResponse | null
+        if (result.status === 200 && result.data !== null) {
+          data = new VendorLevelManagementReadOneResponse(
+            result.data.id,
+            result.data.name,
+            result.data.minimumExperience,
+            result.data.iconUrl,
+            result.data.createdAt,
+            result.data.updatedAt
+          )
+        } else {
+          data = null
+        }
+        const responseBody: ResponseBody<VendorLevelManagementReadOneResponse | null> = new ResponseBody<VendorLevelManagementReadOneResponse | null>(
+          result.message,
+          data
+        )
+        response.status(result.status).send(responseBody)
+      })
+      .catch((error: Error) => {
+        response.status(500).send(error.message)
+      })
+  }
+
+  readOneByExp = (request: Request, response: Response): void => {
+    const { experience } = request.params
+    this.vendorLevelManagement
+      .readOneByExp(Number(experience))
       .then((result: Result<VendorLevel | null>) => {
         let data: VendorLevelManagementReadOneResponse | null
         if (result.status === 200 && result.data !== null) {

@@ -178,6 +178,26 @@ describe('VendorLevelControllerRest', () => {
     })
   })
 
+  describe('GET /api/v1/vendor-levels/levels/:experience', () => {
+    it('should return 200 OK', async () => {
+      const requestVendorLevel: VendorLevel = oneSeeder.vendorLevelMock.data[0]
+      const requestVendorExp: number = oneSeeder.vendorMock.data[0].experience
+      const response = await agent
+        .get(`/api/v1/vendor-levels/levels/${requestVendorExp}`)
+        .set('Authorization', authorization.convertToString())
+        .send()
+
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      response.body.data.should.be.an('object')
+      response.body.data.should.has.property('name').equal(requestVendorLevel.name)
+      response.body.data.should.has.property('minimum_experience').equal(requestVendorLevel.minimumExperience)
+      response.body.data.should.has.property('icon_url').equal(requestVendorLevel.iconUrl)
+    })
+  })
+
   describe('POST /api/v1/vendor-levels', () => {
     it('should return 201 CREATED', async () => {
       const requestBody: VendorLevelManagementCreateRequest = new VendorLevelManagementCreateRequest(

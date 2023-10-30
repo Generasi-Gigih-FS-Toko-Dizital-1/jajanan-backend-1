@@ -56,6 +56,37 @@ export default class VendorLevelManagement {
     )
   }
 
+  readOneByExp = async (exp: number): Promise<Result<VendorLevel | null>> => {
+    let foundVendorLevel: VendorLevel
+    try {
+      const args: RepositoryArgument = new RepositoryArgument(
+        {
+          minimumExperience: {
+            lte: exp
+          }
+        },
+        undefined,
+        undefined,
+        undefined,
+        {
+          minimumExperience: 'desc'
+        }
+      )
+      foundVendorLevel = await this.vendorLevelRepository.readOne(args)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'Vendor level read one by exp failed, vendor level is not found.',
+        null
+      )
+    }
+    return new Result<VendorLevel>(
+      200,
+      'Vendor level read one by exp succeed.',
+      foundVendorLevel
+    )
+  }
+
   createOne = async (request: VendorLevelManagementCreateRequest): Promise<Result<VendorLevel | null>> => {
     const vendorLevelToCreate: VendorLevel = {
       id: randomUUID(),
