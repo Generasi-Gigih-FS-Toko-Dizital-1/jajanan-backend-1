@@ -9,7 +9,7 @@ import SingleFileUploadResponse
   from '../../../inners/models/value_objects/responses/file_uploads/SingleFileUploadResponse'
 import formidable, { type File } from 'formidable'
 
-export default class FileUploadControllerRest {
+export default class FileControllerRest {
   router: Router
   fileUpload: FileUpload
   authenticationValidation: AuthenticationValidation

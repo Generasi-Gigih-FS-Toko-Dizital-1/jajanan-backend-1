@@ -73,7 +73,7 @@ import PayoutHistoryController from '../controllers/rests/PayoutHistoryControlle
 import CloudinaryGateway from '../gateways/CloudinaryGateway'
 import FileUpload from '../../inners/use_cases/file_uploads/FileUpload'
 import CloudinaryUtility from '../utilities/CloudinaryUtility'
-import FileUploadControllerRest from '../controllers/rests/FileUploadControllerRest'
+import FileControllerRest from '../controllers/rests/FileControllerRest'
 
 export default class RootRoute {
   app: Application
@@ -154,7 +154,7 @@ export default class RootRoute {
 
     const locationSync: LocationSync = new LocationSync(userManagement, vendorManagement, sessionManagement, firebaseGateway, objectUtility)
 
-    const imageUpload: FileUpload = new FileUpload(cloudinaryGateway, cloudinaryUtility, objectUtility)
+    const fileUpload: FileUpload = new FileUpload(cloudinaryGateway, cloudinaryUtility, objectUtility)
 
     const userControllerRest: UserControllerRest = new UserControllerRest(
       Router(),
@@ -288,9 +288,9 @@ export default class RootRoute {
     payoutHistoryControllerRest.registerRoutes()
     routerVersionOne.use('/payout-histories', payoutHistoryControllerRest.router)
 
-    const fileUploadControllerRest: FileUploadControllerRest = new FileUploadControllerRest(Router(), imageUpload, authenticationValidation)
-    fileUploadControllerRest.registerRoutes()
-    routerVersionOne.use('/file-uploads', fileUploadControllerRest.router)
+    const fileControllerRest: FileControllerRest = new FileControllerRest(Router(), fileUpload, authenticationValidation)
+    fileControllerRest.registerRoutes()
+    routerVersionOne.use('/files', fileControllerRest.router)
 
     this.app.use('/api/v1', routerVersionOne)
   }
