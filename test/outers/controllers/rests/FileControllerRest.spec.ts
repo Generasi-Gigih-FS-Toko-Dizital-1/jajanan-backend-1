@@ -91,11 +91,11 @@ describe('FileUploadControllerRest', () => {
     await oneDatastore.disconnect()
   })
 
-  describe('POST /api/v1/file-uploads', () => {
+  describe('POST /api/v1/files', () => {
     it('should return 200 OK', async () => {
       const filePath: string = 'test/assets/400x400.svg'
       const uploadResponse: any = await new Promise((resolve, reject) => {
-        agent.post('/api/v1/file-uploads')
+        agent.post('/api/v1/files')
           .set('Authorization', authorization.convertToString())
           .set('Content-Type', 'multipart/form-data')
           .attach('file', filePath)
@@ -115,11 +115,11 @@ describe('FileUploadControllerRest', () => {
       uploadResponse.body.data.should.be.an('object')
       uploadResponse.body.data.should.have.property('url')
 
-      describe('DELETE /api/v1/file-uploads', () => {
+      describe('DELETE /api/v1/files', () => {
         it('should return 200 OK', async () => {
           const url: string = uploadResponse.body.data.url
 
-          const deleteResponse = await agent.delete('/api/v1/file-uploads')
+          const deleteResponse = await agent.delete('/api/v1/files')
             .set('Authorization', authorization.convertToString())
             .query({ url })
             .send()
