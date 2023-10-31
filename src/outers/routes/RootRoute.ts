@@ -70,6 +70,10 @@ import PayoutHistoryRepository from '../repositories/PayoutHistoryRepository'
 import PayoutWebhook from '../../inners/use_cases/payouts/PayoutWebhook'
 import PayoutHistoryManagement from '../../inners/use_cases/managements/PayoutHistoryManagement'
 import PayoutHistoryController from '../controllers/rests/PayoutHistoryControllerRest'
+import CloudinaryGateway from '../gateways/CloudinaryGateway'
+import FileUpload from '../../inners/use_cases/file_uploads/FileUpload'
+import CloudinaryUtility from '../utilities/CloudinaryUtility'
+import FileUploadControllerRest from '../controllers/rests/FileUploadControllerRest'
 
 export default class RootRoute {
   app: Application
@@ -88,9 +92,11 @@ export default class RootRoute {
     const routerVersionOne = Router()
 
     const objectUtility: ObjectUtility = new ObjectUtility()
+    const cloudinaryUtility: CloudinaryUtility = new CloudinaryUtility()
 
     const paymentGateway: PaymentGateway = new PaymentGateway()
     const firebaseGateway: FirebaseGateway = new FirebaseGateway()
+    const cloudinaryGateway: CloudinaryGateway = new CloudinaryGateway()
 
     const sessionRepository: SessionRepository = new SessionRepository(this.twoDatastore)
     const userRepository: UserRepository = new UserRepository(this.datastoreOne)
@@ -147,6 +153,8 @@ export default class RootRoute {
     const payout: Payout = new Payout(vendorPayoutRepository, paymentGateway, vendorManagement)
 
     const locationSync: LocationSync = new LocationSync(userManagement, vendorManagement, sessionManagement, firebaseGateway, objectUtility)
+
+    const imageUpload: FileUpload = new FileUpload(cloudinaryGateway, cloudinaryUtility, objectUtility)
 
     const userControllerRest: UserControllerRest = new UserControllerRest(
       Router(),
@@ -279,6 +287,10 @@ export default class RootRoute {
     const payoutHistoryControllerRest: PayoutHistoryController = new PayoutHistoryController(Router(), payoutHistoryManagement, authenticationValidation)
     payoutHistoryControllerRest.registerRoutes()
     routerVersionOne.use('/payout-histories', payoutHistoryControllerRest.router)
+
+    const fileUploadControllerRest: FileUploadControllerRest = new FileUploadControllerRest(Router(), imageUpload, authenticationValidation)
+    fileUploadControllerRest.registerRoutes()
+    routerVersionOne.use('/file-uploads', fileUploadControllerRest.router)
 
     this.app.use('/api/v1', routerVersionOne)
   }
