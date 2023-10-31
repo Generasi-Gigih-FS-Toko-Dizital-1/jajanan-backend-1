@@ -86,6 +86,7 @@ export default class FileControllerRest {
         null
       )
       response.status(400).send(responseBody)
+      return
     }
 
     this.fileUpload
