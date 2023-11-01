@@ -11,9 +11,9 @@ import AdminLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
 import humps from 'humps'
 import TopUpHistoryManagementCreateRequest
-  from '../../../../src/inners/models/value_objects/requests/managements/top_up_history_management/TopUpHistoryManagementCreateRequest'
+  from '../../../../src/inners/models/value_objects/requests/managements/top_up_history_managements/TopUpHistoryManagementCreateRequest'
 import TopUpHistoryManagementPatchRequest
-  from '../../../../src/inners/models/value_objects/requests/managements/top_up_history_management/TopUpHistoryManagementPatchRequest'
+  from '../../../../src/inners/models/value_objects/requests/managements/top_up_history_managements/TopUpHistoryManagementPatchRequest'
 
 chai.use(chaiHttp)
 chai.should()

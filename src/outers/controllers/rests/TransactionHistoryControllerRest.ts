@@ -8,13 +8,13 @@ import type TransactionHistoryManagement from '../../../inners/use_cases/managem
 import type AuthenticationValidation from '../../../inners/use_cases/authentications/AuthenticationValidation'
 import validateAuthenticationMiddleware from '../../middlewares/ValidateAuthenticationMiddleware'
 import TransactionHistoryManagementReadOneResponse
-  from '../../../inners/models/value_objects/responses/managements/transaction_history_management/TransactionHistoryManagementReadOneResponse'
+  from '../../../inners/models/value_objects/responses/managements/transaction_history_managements/TransactionHistoryManagementReadOneResponse'
 import TransactionHistoryManagementReadManyResponse
-  from '../../../inners/models/value_objects/responses/managements/transaction_history_management/TransactionHistoryManagementReadManyResponse'
+  from '../../../inners/models/value_objects/responses/managements/transaction_history_managements/TransactionHistoryManagementReadManyResponse'
 import TransactionHistoryManagementCreateResponse
-  from '../../../inners/models/value_objects/responses/managements/transaction_history_management/TransactionHistoryManagementCreateResponse'
+  from '../../../inners/models/value_objects/responses/managements/transaction_history_managements/TransactionHistoryManagementCreateResponse'
 import TransactionHistoryManagementPatchResponse
-  from '../../../inners/models/value_objects/responses/managements/transaction_history_management/TransactionHistoryManagementPatchResponse'
+  from '../../../inners/models/value_objects/responses/managements/transaction_history_managements/TransactionHistoryManagementPatchResponse'
 import type TransactionHistoryAggregate from '../../../inners/models/aggregates/TransactionHistoryAggregate'
 
 export default class TransactionHistoryControllerRest {

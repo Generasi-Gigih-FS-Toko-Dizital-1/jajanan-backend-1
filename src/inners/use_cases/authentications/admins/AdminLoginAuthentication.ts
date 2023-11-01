@@ -61,11 +61,11 @@ export default class AdminLoginAuthentication {
       }
     )
 
-    const jwtRefreshTokenExpirationTime: string | undefined = process.env.JWT_REFRESH_TOKEN_EXPIRATION_TIME
-    if (jwtRefreshTokenExpirationTime === undefined) {
+    const sessionExpirationTime: string | undefined = process.env.JWT_SESSION_EXPIRATION_TIME
+    if (sessionExpirationTime === undefined) {
       return new Result<null>(
         500,
-        'Admin login by email and password failed, JWT refresh token expiration time is undefined.',
+        'Admin login by email and password failed, session expiration time is undefined.',
         null
       )
     }
@@ -75,7 +75,7 @@ export default class AdminLoginAuthentication {
       'ADMIN',
       accessToken,
       randomUUID(),
-      moment().add(jwtRefreshTokenExpirationTime, 'seconds').toDate()
+      moment().add(sessionExpirationTime, 'seconds').toDate()
     )
 
     const authorization: Authorization = new Authorization(

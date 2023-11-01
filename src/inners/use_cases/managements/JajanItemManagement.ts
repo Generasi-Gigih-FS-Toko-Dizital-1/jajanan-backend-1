@@ -3,11 +3,11 @@ import type JajanItemRepository from '../../../outers/repositories/JajanItemRepo
 import type Pagination from '../../models/value_objects/Pagination'
 import Result from '../../models/value_objects/Result'
 import type JajanItemManagementCreateRequest
-  from '../../models/value_objects/requests/managements/jajan_item_management/JajanItemManagementCreateRequest'
+  from '../../models/value_objects/requests/managements/jajan_item_managements/JajanItemManagementCreateRequest'
 import { randomUUID } from 'crypto'
 import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
 import type JajanItemManagementPatchRequest
-  from '../../models/value_objects/requests/managements/jajan_item_management/JajanItemManagementPatchRequest'
+  from '../../models/value_objects/requests/managements/jajan_item_managements/JajanItemManagementPatchRequest'
 import RepositoryArgument from '../../models/value_objects/RepositoryArgument'
 
 export default class JajanItemManagement {
