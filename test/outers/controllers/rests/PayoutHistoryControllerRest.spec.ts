@@ -11,9 +11,9 @@ import AdminLoginByEmailAndPasswordRequest
 import { type Admin, type PayoutHistory, type Prisma, type Vendor } from '@prisma/client'
 import humps from 'humps'
 import PayoutHistoryManagementCreateRequest
-  from '../../../../src/inners/models/value_objects/requests/managements/payout_history_management/PayoutHistoryManagementCreateRequest'
+  from '../../../../src/inners/models/value_objects/requests/managements/payout_history_managements/PayoutHistoryManagementCreateRequest'
 import PayoutHistoryManagementPatchRequest
-  from '../../../../src/inners/models/value_objects/requests/managements/payout_history_management/PayoutHistoryManagementPatchRequest'
+  from '../../../../src/inners/models/value_objects/requests/managements/payout_history_managements/PayoutHistoryManagementPatchRequest'
 
 chai.use(chaiHttp)
 chai.should()

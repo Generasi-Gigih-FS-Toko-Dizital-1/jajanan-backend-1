@@ -6,15 +6,15 @@ import Pagination from '../../../inners/models/value_objects/Pagination'
 import type TopUpHistoryAggregate from '../../../inners/models/aggregates/TopUpHistoryAggregate'
 import { type TopUpHistory } from '@prisma/client'
 import TopUpHistoryManagementReadManyResponse
-  from '../../../inners/models/value_objects/responses/managements/top_up_history_management/TopUpHistoryManagementReadManyResponse'
+  from '../../../inners/models/value_objects/responses/managements/top_up_history_managements/TopUpHistoryManagementReadManyResponse'
 import TopUpHistoryManagementReadOneResponse
-  from '../../../inners/models/value_objects/responses/managements/top_up_history_management/TopUpHistoryManagementReadOneResponse'
+  from '../../../inners/models/value_objects/responses/managements/top_up_history_managements/TopUpHistoryManagementReadOneResponse'
 import type Result from '../../../inners/models/value_objects/Result'
 import ResponseBody from '../../../inners/models/value_objects/responses/ResponseBody'
 import TopUpHistoryManagementCreateResponse
-  from '../../../inners/models/value_objects/responses/managements/top_up_history_management/TopUpHistoryManagementCreateResponse'
+  from '../../../inners/models/value_objects/responses/managements/top_up_history_managements/TopUpHistoryManagementCreateResponse'
 import TopUpHistoryManagementPatchResponse
-  from '../../../inners/models/value_objects/responses/managements/top_up_history_management/TopUpHistoryManagementPatchResponse'
+  from '../../../inners/models/value_objects/responses/managements/top_up_history_managements/TopUpHistoryManagementPatchResponse'
 
 export default class TopUpHistoryController {
   router: Router

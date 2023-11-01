@@ -7,14 +7,14 @@ import { type PayoutHistory } from '@prisma/client'
 import type Result from '../../../inners/models/value_objects/Result'
 import type PayoutHistoryAggregate from '../../../inners/models/aggregates/PayoutHistoryAggregate'
 import PayoutHistoryManagementReadManyResponse
-  from '../../../inners/models/value_objects/responses/managements/payout_history_management/PayoutHistoryManagementReadManyResponse'
+  from '../../../inners/models/value_objects/responses/managements/payout_history_managements/PayoutHistoryManagementReadManyResponse'
 import PayoutHistoryManagementReadOneResponse
-  from '../../../inners/models/value_objects/responses/managements/payout_history_management/PayoutHistoryManagementReadOneResponse'
+  from '../../../inners/models/value_objects/responses/managements/payout_history_managements/PayoutHistoryManagementReadOneResponse'
 import ResponseBody from '../../../inners/models/value_objects/responses/ResponseBody'
 import PayoutHistoryManagementCreateResponse
-  from '../../../inners/models/value_objects/responses/managements/payout_history_management/PayoutHistoryManagementCreateResponse'
+  from '../../../inners/models/value_objects/responses/managements/payout_history_managements/PayoutHistoryManagementCreateResponse'
 import PayoutHistoryManagementPatchResponse
-  from '../../../inners/models/value_objects/responses/managements/payout_history_management/PayoutHistoryManagementPatchResponse'
+  from '../../../inners/models/value_objects/responses/managements/payout_history_managements/PayoutHistoryManagementPatchResponse'
 
 export default class PayoutHistoryController {
   constructor (
