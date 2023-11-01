@@ -4,11 +4,11 @@ import type ObjectUtility from '../../../outers/utilities/ObjectUtility'
 import type Pagination from '../../models/value_objects/Pagination'
 import Result from '../../models/value_objects/Result'
 import type TopUpHistoryManagementCreateRequest
-  from '../../models/value_objects/requests/managements/top_up_history_management/TopUpHistoryManagementCreateRequest'
+  from '../../models/value_objects/requests/managements/top_up_history_managements/TopUpHistoryManagementCreateRequest'
 import { randomUUID } from 'crypto'
 import type UserManagement from './UserManagement'
 import type TopUpHistoryManagementPatchRequest
-  from '../../models/value_objects/requests/managements/top_up_history_management/TopUpHistoryManagementPatchRequest'
+  from '../../models/value_objects/requests/managements/top_up_history_managements/TopUpHistoryManagementPatchRequest'
 import RepositoryArgument from '../../models/value_objects/RepositoryArgument'
 import type TopUpHistoryAggregate from '../../models/aggregates/TopUpHistoryAggregate'
 

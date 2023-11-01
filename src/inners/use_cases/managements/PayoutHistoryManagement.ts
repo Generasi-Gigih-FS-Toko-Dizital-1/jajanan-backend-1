@@ -7,9 +7,9 @@ import type VendorManagement from './VendorManagement'
 import type Pagination from '../../models/value_objects/Pagination'
 import { randomUUID } from 'crypto'
 import type PayoutHistoryManagementCreateRequest
-  from '../../models/value_objects/requests/managements/payout_history_management/PayoutHistoryManagementCreateRequest'
+  from '../../models/value_objects/requests/managements/payout_history_managements/PayoutHistoryManagementCreateRequest'
 import type PayoutHistoryManagementPatchRequest
-  from '../../models/value_objects/requests/managements/payout_history_management/PayoutHistoryManagementPatchRequest'
+  from '../../models/value_objects/requests/managements/payout_history_managements/PayoutHistoryManagementPatchRequest'
 import type PayoutHistoryAggregate from '../../models/aggregates/PayoutHistoryAggregate'
 
 export default class PayoutHistoryManagement {
