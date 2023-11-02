@@ -18,7 +18,7 @@ const main = async (): Promise<void> => {
   app = express()
   app.use(cors())
   app.use(cookieParser())
-  app.use(express.json({ type: '*/*' }))
+  app.use(express.json({ type: 'application/json' }))
   app.use(caseExpressMiddleware())
 
   const appHttp: http.Server = http.createServer(app)

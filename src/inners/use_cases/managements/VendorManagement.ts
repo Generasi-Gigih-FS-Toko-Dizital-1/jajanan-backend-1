@@ -13,6 +13,7 @@ import type VendorAggregate from '../../models/aggregates/VendorAggregate'
 import RepositoryArgument from '../../models/value_objects/RepositoryArgument'
 import type VendorManagementReadManyByDistanceAndLocationResponse
   from '../../models/value_objects/responses/managements/vendor_managements/VendorManagementReadManyByDistanceAndLocationResponse'
+
 export default class VendorManagement {
   vendorRepository: VendorRepository
   objectUtility: ObjectUtility
