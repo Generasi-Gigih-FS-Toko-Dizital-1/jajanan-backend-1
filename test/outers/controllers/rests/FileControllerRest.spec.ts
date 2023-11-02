@@ -14,7 +14,7 @@ import OneSeeder from '../../../../src/outers/seeders/OneSeeder'
 chai.use(chaiHttp)
 chai.should()
 
-describe('FileUploadControllerRest', () => {
+describe('FileControllerRest', () => {
   const oneDatastore: OneDatastore = new OneDatastore()
   const authAdminMock: AdminMock = new AdminMock()
   let oneSeeder: OneSeeder
