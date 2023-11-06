@@ -289,6 +289,7 @@ describe('UserControllerRest', () => {
         `patched${requestUser.username}`,
         `patched${requestUser.email}`,
         `patched${requestUser.password}`,
+        requestUser.password,
         requestUser.lastLatitude + 1,
         requestUser.lastLongitude + 1
       )

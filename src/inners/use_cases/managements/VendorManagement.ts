@@ -272,23 +272,6 @@ export default class VendorManagement {
 
     request.password = bcrypt.hashSync(request.password, salt)
 
-    const patchedVendor: Result<Vendor | null> = await this.patchOneRawById(id, request)
-    if (patchedVendor.status !== 200 || patchedVendor.data === null) {
-      return new Result<null>(
-        patchedVendor.status,
-          `Vendor patch one by id failed, ${patchedVendor.message}}`,
-          null
-      )
-    }
-
-    return new Result<Vendor>(
-      200,
-      'Vendor patch one by id succeed.',
-      patchedVendor.data
-    )
-  }
-
-  patchOneRawById = async (id: string, request: any): Promise<Result<Vendor | null>> => {
     const foundVendor: Result<Vendor | null> = await this.readOneById(id)
     if (foundVendor.status !== 200 || foundVendor.data === null) {
       return new Result<null>(
@@ -297,7 +280,42 @@ export default class VendorManagement {
         null
       )
     }
-    this.objectUtility.patch(foundVendor.data, request)
+
+    if (request.oldPassword !== foundVendor.data.password) {
+      return new Result<null>(
+        400,
+        'Vendor patch one by id failed, old password is not match to the current password.',
+        null
+      )
+    }
+
+    const { oldPassword, ...vendor } = request
+    this.objectUtility.patch(foundVendor.data, vendor)
+    const args: RepositoryArgument = new RepositoryArgument(
+      { id },
+      undefined,
+      undefined,
+      foundVendor.data
+    )
+    const patchedVendor: Vendor = await this.vendorRepository.patchOne(args)
+
+    return new Result<Vendor>(
+      200,
+      'Vendor patch one by id succeed.',
+      patchedVendor
+    )
+  }
+
+  patchOneRawById = async (id: string, vendor: Vendor): Promise<Result<Vendor | null>> => {
+    const foundVendor: Result<Vendor | null> = await this.readOneById(id)
+    if (foundVendor.status !== 200 || foundVendor.data === null) {
+      return new Result<null>(
+        foundVendor.status,
+        'Vendor patch one raw by id failed, vendor is not found.',
+        null
+      )
+    }
+    this.objectUtility.patch(foundVendor.data, vendor)
     let patchedVendor: Vendor
     try {
       const args: RepositoryArgument = new RepositoryArgument(
@@ -310,13 +328,13 @@ export default class VendorManagement {
     } catch (error) {
       return new Result<null>(
         500,
-            `Vendor patch one by id failed, ${(error as Error).message}`,
+            `Vendor patch one raw by id failed, ${(error as Error).message}`,
             null
       )
     }
     return new Result<Vendor>(
       200,
-      'Vendor patch one by id succeed.',
+      'Vendor patch one raw by id succeed.',
       patchedVendor
     )
   }

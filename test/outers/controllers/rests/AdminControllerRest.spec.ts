@@ -228,7 +228,8 @@ describe('AdminControllerRest', () => {
         `patched${requestAdmin.fullName}`,
         'FEMALE',
         `patched${requestAdmin.email}`,
-        `patched${requestAdmin.password}`
+        `patched${requestAdmin.password}`,
+        requestAdmin.password
       )
 
       const response = await agent
