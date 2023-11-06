@@ -353,6 +353,7 @@ describe('VendorControllerRest', () => {
         `patched${requestVendor.username}`,
         `patched${requestVendor.email}`,
         `patched${requestVendor.password}`,
+        requestVendor.password,
         `${requestVendor.jajanImageUrl}patched`,
         `patched${requestVendor.jajanName}`,
         `patched${requestVendor.jajanDescription}`,

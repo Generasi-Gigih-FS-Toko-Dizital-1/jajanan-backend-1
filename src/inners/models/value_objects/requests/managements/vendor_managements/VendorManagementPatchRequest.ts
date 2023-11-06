@@ -6,6 +6,7 @@ export default class VendorManagementPatchRequest {
   username: string
   email: string
   password: string
+  oldPassword: string
   jajanImageUrl: string
   jajanName: string
   jajanDescription: string
@@ -13,12 +14,13 @@ export default class VendorManagementPatchRequest {
   lastLatitude: number
   lastLongitude: number
 
-  constructor (fullName: string, gender: Gender, username: string, email: string, password: string, jajanImageUrl: string, jajanName: string, jajanDescription: string, status: Status, lastLatitude: number, lastLongitude: number) {
+  constructor (fullName: string, gender: Gender, username: string, email: string, password: string, oldPassword: string, jajanImageUrl: string, jajanName: string, jajanDescription: string, status: Status, lastLatitude: number, lastLongitude: number) {
     this.fullName = fullName
     this.gender = gender
     this.username = username
     this.email = email
     this.password = password
+    this.oldPassword = oldPassword
     this.jajanImageUrl = jajanImageUrl
     this.jajanName = jajanName
     this.jajanDescription = jajanDescription

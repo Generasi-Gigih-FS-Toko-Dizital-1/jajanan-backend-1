@@ -141,9 +141,7 @@ export default class AdminManagement {
       throw new Error('Salt is undefined.')
     }
 
-    if (request.password !== undefined) {
-      request.password = bcrypt.hashSync(request.password, salt)
-    }
+    request.password = bcrypt.hashSync(request.password, salt)
 
     const foundAdmin: Result<Admin | null> = await this.readOneById(id)
     if (foundAdmin.status !== 200 || foundAdmin.data === null) {
@@ -154,7 +152,42 @@ export default class AdminManagement {
       )
     }
 
-    this.objectUtility.patch(foundAdmin.data, request)
+    if (request.oldPassword !== foundAdmin.data.password) {
+      return new Result<null>(
+        400,
+        'Admin patch one by id failed, old password is not match to the current password.',
+        null
+      )
+    }
+
+    const { oldPassword, ...admin } = request
+    this.objectUtility.patch(foundAdmin.data, admin)
+    const args: RepositoryArgument = new RepositoryArgument(
+      { id },
+      undefined,
+      undefined,
+      foundAdmin.data
+    )
+    const patchedAdmin: Admin = await this.adminRepository.patchOne(args)
+
+    return new Result<Admin>(
+      200,
+      'Admin patch one by id succeed.',
+      patchedAdmin
+    )
+  }
+
+  patchOneRawById = async (id: string, admin: Admin): Promise<Result<Admin | null>> => {
+    const foundAdmin: Result<Admin | null> = await this.readOneById(id)
+    if (foundAdmin.status !== 200 || foundAdmin.data === null) {
+      return new Result<null>(
+        foundAdmin.status,
+        'Admin patch one raw by id failed, admin is not found.',
+        null
+      )
+    }
+
+    this.objectUtility.patch(foundAdmin.data, admin)
     const args: RepositoryArgument = new RepositoryArgument(
       { id },
       undefined,
@@ -164,7 +197,7 @@ export default class AdminManagement {
     const patchedAdmin: Admin = await this.adminRepository.patchOne(args)
     return new Result<Admin>(
       200,
-      'Admin patch one by id succeed.',
+      'Admin patch one raw by id succeed.',
       patchedAdmin
     )
   }

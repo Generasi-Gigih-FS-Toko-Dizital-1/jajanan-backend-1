@@ -6,15 +6,17 @@ export default class UserManagementPatchRequest {
   username: string
   email: string
   password: string
+  oldPassword: string
   last_latitude: number
   last_longitude: number
 
-  constructor (fullName: string, gender: Gender, username: string, email: string, password: string, last_latitude: number, last_longitude: number) {
+  constructor (fullName: string, gender: Gender, username: string, email: string, password: string, oldPassword: string, last_latitude: number, last_longitude: number) {
     this.fullName = fullName
     this.gender = gender
     this.username = username
     this.email = email
     this.password = password
+    this.oldPassword = oldPassword
     this.last_latitude = last_latitude
     this.last_longitude = last_longitude
   }

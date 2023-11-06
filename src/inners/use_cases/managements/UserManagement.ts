@@ -224,22 +224,41 @@ export default class UserManagement {
 
     request.password = bcrypt.hashSync(request.password, salt)
 
-    const patchedUser: Result<User | null> = await this.patchOneRawById(id, request)
-    if (patchedUser.status !== 200 || patchedUser.data === null) {
+    const foundUser: Result<User | null> = await this.readOneById(id)
+    if (foundUser.status !== 200 || foundUser.data === null) {
       return new Result<null>(
-        patchedUser.status,
-        `User patch one by id failed, ${patchedUser.message}`,
+        foundUser.status,
+        'User patch one by id failed, user is not found.',
         null
       )
     }
+
+    if (request.oldPassword !== foundUser.data.password) {
+      return new Result<null>(
+        400,
+        'User patch one by id failed, old password is not match.',
+        null
+      )
+    }
+
+    const { oldPassword, ...user } = request
+    this.objectUtility.patch(foundUser.data, user)
+    const args: RepositoryArgument = new RepositoryArgument(
+      { id },
+      undefined,
+      undefined,
+      foundUser.data
+    )
+    const patchedUser: User = await this.userRepository.patchOne(args)
+
     return new Result<User>(
       200,
       'User patch one by id succeed.',
-      patchedUser.data
+      patchedUser
     )
   }
 
-  patchOneRawById = async (id: string, request: any): Promise<Result<User | null>> => {
+  patchOneRawById = async (id: string, user: User): Promise<Result<User | null>> => {
     const foundUser: Result<User | null> = await this.readOneById(id)
     if (foundUser.status !== 200 || foundUser.data === null) {
       return new Result<null>(
@@ -248,7 +267,7 @@ export default class UserManagement {
         null
       )
     }
-    this.objectUtility.patch(foundUser.data, request)
+    this.objectUtility.patch(foundUser.data, user)
     const args: RepositoryArgument = new RepositoryArgument(
       { id },
       undefined,

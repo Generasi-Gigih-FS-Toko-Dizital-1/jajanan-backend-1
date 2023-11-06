@@ -28,16 +28,6 @@ const validateAuthenticationMiddleware = (authenticationValidation: Authenticati
       )
       return
     }
-    const sessionExpirationTime: string | undefined = process.env.JWT_SESSION_EXPIRATION_TIME
-    if (sessionExpirationTime === undefined) {
-      response.status(500).send(
-        new ResponseBody<null>(
-          'Validate authentication failed, session expiration time is undefined.',
-          null
-        )
-      )
-      return
-    }
 
     next()
   }
