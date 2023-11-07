@@ -30,6 +30,7 @@ import {
 } from '@prisma/client'
 import JajanItemSnapshotMock from '../../../test/mocks/JajanItemSnapshotMock'
 import PayoutHistoryMock from '../../../test/mocks/PayoutHistoryMock'
+import bcrypt from 'bcrypt'
 
 export default class OneSeeder {
   oneDatastore: OneDatastore
@@ -65,12 +66,17 @@ export default class OneSeeder {
     this.userLevelMock = new UserLevelMock()
     this.vendorLevelMock = new VendorLevelMock()
 
+    const salt: string | undefined = process.env.BCRYPT_SALT
+    if (salt === undefined) {
+      throw new Error('Salt is undefined.')
+    }
+
     this.adminMock.data.push(
       {
         id: randomUUID(),
         fullName: 'admin0',
         email: 'email0@mail.com',
-        password: 'password0',
+        password: bcrypt.hashSync('password0', salt),
         gender: 'MALE',
         updatedAt: new Date(),
         createdAt: new Date(),

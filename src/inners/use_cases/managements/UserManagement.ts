@@ -219,10 +219,15 @@ export default class UserManagement {
   patchOneById = async (id: string, request: UserManagementPatchRequest): Promise<Result<User | null>> => {
     const salt: string | undefined = process.env.BCRYPT_SALT
     if (salt === undefined) {
-      throw new Error('Salt is undefined.')
+      return new Result<null>(
+        500,
+        'User patch one by id failed, salt is undefined.',
+        null
+      )
     }
 
     request.password = bcrypt.hashSync(request.password, salt)
+    request.oldPassword = bcrypt.hashSync(request.oldPassword, salt)
 
     const foundUser: Result<User | null> = await this.readOneById(id)
     if (foundUser.status !== 200 || foundUser.data === null) {
@@ -236,7 +241,7 @@ export default class UserManagement {
     if (request.oldPassword !== foundUser.data.password) {
       return new Result<null>(
         400,
-        'User patch one by id failed, old password is not match.',
+        'User patch one by id failed, old password is not match to the current password.',
         null
       )
     }
@@ -249,7 +254,16 @@ export default class UserManagement {
       undefined,
       foundUser.data
     )
-    const patchedUser: User = await this.userRepository.patchOne(args)
+    let patchedUser: User
+    try {
+      patchedUser = await this.userRepository.patchOne(args)
+    } catch (error) {
+      return new Result<null>(
+        500,
+        `User patch one by id failed, ${(error as Error).message}`,
+        null
+      )
+    }
 
     return new Result<User>(
       200,

@@ -21,9 +21,17 @@ export default class VendorLoginAuthentication {
   }
 
   loginByEmailAndPassword = async (request: VendorLoginByEmailAndPasswordRequest): Promise<Result<Session | null>> => {
+    const salt: string | undefined = process.env.BCRYPT_SALT
+    if (salt === undefined) {
+      return new Result<null>(
+        500,
+        'Vendor login by email and password failed, bcrypt salt is undefined.',
+        null
+      )
+    }
     const foundVendorByEmailAndPassword: Result<Vendor | null> = await this.vendorManagement.readOneByEmailAndPassword(
       request.email,
-      request.password
+      bcrypt.hashSync(request.password, salt)
     )
     if (foundVendorByEmailAndPassword.status !== 200 || foundVendorByEmailAndPassword.data === null) {
       return new Result<null>(
@@ -82,14 +90,6 @@ export default class VendorLoginAuthentication {
       session.accessToken,
       'Bearer'
     )
-    const salt: string | undefined = process.env.BCRYPT_SALT
-    if (salt === undefined) {
-      return new Result<null>(
-        500,
-        'Vendor login by email and password failed, bcrypt salt is undefined.',
-        null
-      )
-    }
     const authorizationString: string = JSON.stringify(authorization)
     const id: string = bcrypt.hashSync(authorizationString, salt)
 
