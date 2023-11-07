@@ -51,7 +51,7 @@ describe('VendorControllerRest', () => {
     const requestAuthAdmin: Admin = authAdminMock.data[0]
     const requestBodyLogin: AdminLoginByEmailAndPasswordRequest = new AdminLoginByEmailAndPasswordRequest(
       requestAuthAdmin.email,
-      requestAuthAdmin.password
+      'password0'
     )
     const response = await agent
       .post('/api/v1/authentications/admins/login?method=email_and_password')
@@ -352,8 +352,8 @@ describe('VendorControllerRest', () => {
         'FEMALE',
         `patched${requestVendor.username}`,
         `patched${requestVendor.email}`,
-        `patched${requestVendor.password}`,
-        requestVendor.password,
+        'patchedpassword0',
+        'password0',
         `${requestVendor.jajanImageUrl}patched`,
         `patched${requestVendor.jajanName}`,
         `patched${requestVendor.jajanDescription}`,

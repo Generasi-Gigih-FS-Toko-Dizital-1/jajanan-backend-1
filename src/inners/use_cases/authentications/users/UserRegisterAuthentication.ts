@@ -4,6 +4,7 @@ import type UserRegisterByEmailAndPasswordRequest
   from '../../../models/value_objects/requests/authentications/users/UserRegisterByEmailAndPasswordRequest'
 import Result from '../../../models/value_objects/Result'
 import type UserManagement from '../../managements/UserManagement'
+import bcrypt from 'bcrypt'
 
 export default class UserRegisterAuthentication {
   userManagement: UserManagement
@@ -31,13 +32,22 @@ export default class UserRegisterAuthentication {
       )
     }
 
+    const salt: string | undefined = process.env.BCRYPT_SALT
+    if (salt === undefined) {
+      return new Result<null>(
+        500,
+        'User register by email and password failed, bcrypt salt is undefined.',
+        null
+      )
+    }
+
     const userToCreate: User = {
       id: randomUUID(),
       fullName: request.fullName,
       gender: request.gender,
       address: request.address,
       email: request.email,
-      password: request.password,
+      password: bcrypt.hashSync(request.password, salt),
       username: request.username,
       balance: 0,
       experience: 0,

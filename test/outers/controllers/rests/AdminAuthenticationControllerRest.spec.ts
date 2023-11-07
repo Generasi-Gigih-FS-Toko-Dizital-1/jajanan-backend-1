@@ -40,7 +40,7 @@ describe('AdminAuthenticationControllerRest', () => {
       const requestAdmin = oneSeeder.adminMock.data[0]
       const requestBodyLogin: AdminLoginByEmailAndPasswordRequest = new AdminLoginByEmailAndPasswordRequest(
         requestAdmin.email,
-        requestAdmin.password
+        'password0'
       )
 
       const response = await chai
@@ -101,7 +101,7 @@ describe('AdminAuthenticationControllerRest', () => {
       const requestAdmin = oneSeeder.adminMock.data[0]
       const requestBodyLogin: AdminLoginByEmailAndPasswordRequest = new AdminLoginByEmailAndPasswordRequest(
         requestAdmin.email,
-        requestAdmin.password
+        'password0'
       )
       const responseLogin = await chai
         .request(server)
@@ -148,7 +148,7 @@ describe('AdminAuthenticationControllerRest', () => {
       const requestAdmin = oneSeeder.adminMock.data[0]
       const requestBodyLogin: AdminLoginByEmailAndPasswordRequest = new AdminLoginByEmailAndPasswordRequest(
         requestAdmin.email,
-        requestAdmin.password
+        'password0'
       )
       const responseLogin = await chai
         .request(server)

@@ -267,10 +267,15 @@ export default class VendorManagement {
   patchOneById = async (id: string, request: VendorManagementPatchRequest): Promise<Result<Vendor | null>> => {
     const salt: string | undefined = process.env.BCRYPT_SALT
     if (salt === undefined) {
-      throw new Error('Salt is undefined.')
+      return new Result<null>(
+        500,
+        'Vendor patch one by id failed, salt is undefined.',
+        null
+      )
     }
 
     request.password = bcrypt.hashSync(request.password, salt)
+    request.oldPassword = bcrypt.hashSync(request.oldPassword, salt)
 
     const foundVendor: Result<Vendor | null> = await this.readOneById(id)
     if (foundVendor.status !== 200 || foundVendor.data === null) {
@@ -297,7 +302,16 @@ export default class VendorManagement {
       undefined,
       foundVendor.data
     )
-    const patchedVendor: Vendor = await this.vendorRepository.patchOne(args)
+    let patchedVendor: Vendor
+    try {
+      patchedVendor = await this.vendorRepository.patchOne(args)
+    } catch (error) {
+      return new Result<null>(
+        500,
+                `Vendor patch one by id failed, ${(error as Error).message}`,
+                null
+      )
+    }
 
     return new Result<Vendor>(
       200,

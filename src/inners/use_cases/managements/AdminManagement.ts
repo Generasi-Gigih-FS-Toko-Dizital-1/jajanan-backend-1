@@ -138,10 +138,15 @@ export default class AdminManagement {
   patchOneById = async (id: string, request: AdminManagementPatchRequest): Promise<Result<Admin | null>> => {
     const salt: string | undefined = process.env.BCRYPT_SALT
     if (salt === undefined) {
-      throw new Error('Salt is undefined.')
+      return new Result<null>(
+        500,
+        'Admin patch one by id failed, salt is undefined.',
+        null
+      )
     }
 
     request.password = bcrypt.hashSync(request.password, salt)
+    request.oldPassword = bcrypt.hashSync(request.oldPassword, salt)
 
     const foundAdmin: Result<Admin | null> = await this.readOneById(id)
     if (foundAdmin.status !== 200 || foundAdmin.data === null) {
@@ -168,7 +173,16 @@ export default class AdminManagement {
       undefined,
       foundAdmin.data
     )
-    const patchedAdmin: Admin = await this.adminRepository.patchOne(args)
+    let patchedAdmin: Admin
+    try {
+      patchedAdmin = await this.adminRepository.patchOne(args)
+    } catch (error) {
+      return new Result<null>(
+        500,
+        `Admin patch one by id failed, ${(error as Error).message}`,
+        null
+      )
+    }
 
     return new Result<Admin>(
       200,

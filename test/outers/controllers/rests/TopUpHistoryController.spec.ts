@@ -41,7 +41,7 @@ describe('TopUpHistoryControllerRest', () => {
     const requestAuthAdmin: Admin = authAdminMock.data[0]
     const requestBodyLogin: AdminLoginByEmailAndPasswordRequest = new AdminLoginByEmailAndPasswordRequest(
       requestAuthAdmin.email,
-      requestAuthAdmin.password
+      'password0'
     )
     const response = await agent
       .post('/api/v1/authentications/admins/login?method=email_and_password')
