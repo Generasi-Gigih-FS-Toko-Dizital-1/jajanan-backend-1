@@ -11,6 +11,7 @@ import type TransactionItemHistoryManagementPatchRequest
   from '../../models/value_objects/requests/managements/transaction_item_history_managements/TransactionItemHistoryManagementPatchRequest'
 import type TransactionHistoryManagement from './TransactionHistoryManagement'
 import type JajanItemSnapshotManagement from './JajanItemSnapshotManagement'
+import type TransactionItemHistoryAggregate from '../../models/aggregates/TransactionItemHistoryAggregate'
 
 export default class TransactionItemHistoryManagement {
   transactionHistoryManagement: TransactionHistoryManagement
@@ -25,22 +26,22 @@ export default class TransactionItemHistoryManagement {
     this.objectUtility = objectUtility
   }
 
-  readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Result<TransactionItemHistory[]>> => {
+  readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Result<TransactionItemHistory[] | TransactionItemHistoryAggregate[]>> => {
     const args: RepositoryArgument = new RepositoryArgument(
       whereInput,
       includeInput,
       pagination
     )
-    const foundTransactionHistories: TransactionItemHistory[] = await this.transactionItemHistoryRepository.readMany(args)
-    return new Result<TransactionItemHistory[]>(
+    const foundTransactionHistories: TransactionItemHistory[] | TransactionItemHistoryAggregate[] = await this.transactionItemHistoryRepository.readMany(args)
+    return new Result<TransactionItemHistory[] | TransactionItemHistoryAggregate[]>(
       200,
       'TransactionItemHistory read many succeed.',
       foundTransactionHistories
     )
   }
 
-  readOneById = async (id: string): Promise<Result<TransactionItemHistory | null>> => {
-    let foundTransactionItemHistory: TransactionItemHistory
+  readOneById = async (id: string): Promise<Result<TransactionItemHistory | TransactionItemHistoryAggregate | null>> => {
+    let foundTransactionItemHistory: TransactionItemHistory | TransactionItemHistoryAggregate
     try {
       const args: RepositoryArgument = new RepositoryArgument(
         { id },
@@ -55,7 +56,7 @@ export default class TransactionItemHistoryManagement {
         null
       )
     }
-    return new Result<TransactionItemHistory>(
+    return new Result<TransactionItemHistory | TransactionItemHistoryAggregate>(
       200,
       'TransactionItemHistory read one by id succeed.',
       foundTransactionItemHistory
@@ -122,8 +123,8 @@ export default class TransactionItemHistoryManagement {
     )
   }
 
-  createManyRaw = async (transactionItemHistories: TransactionItemHistory[]): Promise<Result<TransactionItemHistory[] | null>> => {
-    let createdTransactionItemHistories: TransactionItemHistory[]
+  createManyRaw = async (transactionItemHistories: TransactionItemHistory[]): Promise<Result<TransactionItemHistory[] | TransactionItemHistoryAggregate[] | null>> => {
+    let createdTransactionItemHistories: TransactionItemHistory[] | TransactionItemHistoryAggregate[]
     try {
       const args: RepositoryArgument = new RepositoryArgument(
         undefined,
@@ -139,15 +140,15 @@ export default class TransactionItemHistoryManagement {
           null
       )
     }
-    return new Result<TransactionItemHistory[]>(
+    return new Result<TransactionItemHistory[] | TransactionItemHistoryAggregate[]>(
       201,
       'TransactionItemHistory create many succeed.',
       createdTransactionItemHistories
     )
   }
 
-  patchOneById = async (id: string, request: TransactionItemHistoryManagementPatchRequest): Promise<Result<TransactionItemHistory | null>> => {
-    const patchedTransactionItemHistory: Result<TransactionItemHistory | null> = await this.patchOneRawById(id, request)
+  patchOneById = async (id: string, request: TransactionItemHistoryManagementPatchRequest): Promise<Result<TransactionItemHistory | TransactionItemHistoryAggregate | null>> => {
+    const patchedTransactionItemHistory: Result<TransactionItemHistory | TransactionItemHistoryAggregate | null> = await this.patchOneRawById(id, request)
     if (patchedTransactionItemHistory.status !== 200 || patchedTransactionItemHistory.data === null) {
       return new Result<null>(
         patchedTransactionItemHistory.status,
@@ -155,15 +156,15 @@ export default class TransactionItemHistoryManagement {
             null
       )
     }
-    return new Result<TransactionItemHistory>(
+    return new Result<TransactionItemHistory | TransactionItemHistoryAggregate>(
       200,
       'TransactionItemHistory patch one succeed.',
       patchedTransactionItemHistory.data
     )
   }
 
-  patchOneRawById = async (id: string, request: any): Promise<Result<TransactionItemHistory | null>> => {
-    const foundTransactionItemHistory: Result<TransactionItemHistory | null> = await this.readOneById(id)
+  patchOneRawById = async (id: string, request: any): Promise<Result<TransactionItemHistory | TransactionItemHistoryAggregate | null>> => {
+    const foundTransactionItemHistory: Result<TransactionItemHistory | TransactionItemHistoryAggregate | null> = await this.readOneById(id)
     if (foundTransactionItemHistory.status !== 200 || foundTransactionItemHistory.data === null) {
       return new Result<null>(
         404,
@@ -178,16 +179,16 @@ export default class TransactionItemHistoryManagement {
       undefined,
       foundTransactionItemHistory.data
     )
-    const patchedTransactionItemHistory: TransactionItemHistory = await this.transactionItemHistoryRepository.patchOne(args)
-    return new Result<TransactionItemHistory>(
+    const patchedTransactionItemHistory: TransactionItemHistory | TransactionItemHistoryAggregate = await this.transactionItemHistoryRepository.patchOne(args)
+    return new Result<TransactionItemHistory | TransactionItemHistoryAggregate>(
       200,
       'TransactionItemHistory patch one by id succeed.',
       patchedTransactionItemHistory
     )
   }
 
-  deleteOneById = async (id: string): Promise<Result<TransactionItemHistory | null>> => {
-    let deletedTransactionItemHistory: TransactionItemHistory
+  deleteOneById = async (id: string): Promise<Result<TransactionItemHistory | TransactionItemHistoryAggregate | null>> => {
+    let deletedTransactionItemHistory: TransactionItemHistory | TransactionItemHistoryAggregate
     try {
       const args: RepositoryArgument = new RepositoryArgument(
         { id },
@@ -203,7 +204,7 @@ export default class TransactionItemHistoryManagement {
         null
       )
     }
-    return new Result<TransactionItemHistory>(
+    return new Result<TransactionItemHistory | TransactionItemHistoryAggregate>(
       200,
       'TransactionItemHistory delete one by id succeed.',
       deletedTransactionItemHistory

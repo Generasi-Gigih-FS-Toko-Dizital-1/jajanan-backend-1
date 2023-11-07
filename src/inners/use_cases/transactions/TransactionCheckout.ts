@@ -22,6 +22,7 @@ import TransactionItemCheckoutResponse
   from '../../models/value_objects/responses/transactions/TransactionItemCheckoutResponse'
 import type VendorManagement from '../managements/VendorManagement'
 import type TransactionItemHistoryManagement from '../managements/TransactionItemHistoryManagement'
+import type TransactionItemHistoryAggregate from '../../models/aggregates/TransactionItemHistoryAggregate'
 
 export default class TransactionCheckout {
   userManagement: UserManagement
@@ -242,7 +243,7 @@ export default class TransactionCheckout {
       responseTransactionItems.push(responseTransactionItem)
     }
 
-    const createdTransactionItems: Result<TransactionItemHistory[] | null> = await this.transactionItemHistoryManagement.createManyRaw(transactionItemHistories)
+    const createdTransactionItems: Result<TransactionItemHistory[] | TransactionItemHistoryAggregate[] | null> = await this.transactionItemHistoryManagement.createManyRaw(transactionItemHistories)
     if (createdTransactionItems.status !== 201 || createdTransactionItems.data === null) {
       return new Result<null>(
         createdTransactionItems.status,

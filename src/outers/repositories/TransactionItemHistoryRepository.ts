@@ -44,9 +44,9 @@ export default class TransactionItemHistoryRepository {
       throw new Error('oneDatastore client is undefined.')
     }
 
-    const createdTransactionItemHistories: TransactionItemHistory[] | TransactionItemHistoryAggregate[] = await this.oneDatastore.client.transactionItemHistory.createMany(args)
+    await this.oneDatastore.client.transactionItemHistory.createMany(args)
 
-    return createdTransactionItemHistories
+    return repositoryArgument.data
   }
 
   readOne = async (repositoryArgument: RepositoryArgument): Promise<TransactionItemHistory | TransactionItemHistoryAggregate> => {
