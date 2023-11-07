@@ -83,17 +83,24 @@ export default class TransactionCheckout {
 
     let transactionTotalPrice: number = 0
     const vendorToTotalPriceMap: Map<string, number> = new Map<string, number>()
-
-    const jajanItemSnapshots: JajanItemSnapshot[] = foundJajanItems.data.map((jajanItem: JajanItem) => {
+    const jajanItemSnapshots: JajanItemSnapshot[] = []
+    for (const jajanItem of foundJajanItems.data) {
       transactionTotalPrice += jajanItem.price
       if (vendorToTotalPriceMap.get(jajanItem.vendorId) === undefined) {
         vendorToTotalPriceMap.set(jajanItem.vendorId, jajanItem.price)
       } else {
-        const oldTotalPrice: number = vendorToTotalPriceMap.get(jajanItem.vendorId)
+        const oldTotalPrice: number | undefined = vendorToTotalPriceMap.get(jajanItem.vendorId)
+        if (oldTotalPrice === undefined) {
+          return new Result<null>(
+            500,
+            'Transaction checkout failed, vendor total price is undefined.',
+            null
+          )
+        }
         const newTotalPrice: number = oldTotalPrice + jajanItem.price
         vendorToTotalPriceMap.set(jajanItem.vendorId, newTotalPrice)
       }
-      return {
+      const JajanItemSnapshot: JajanItemSnapshot = {
         id: randomUUID(),
         originId: jajanItem.id,
         vendorId: jajanItem.vendorId,
@@ -105,7 +112,8 @@ export default class TransactionCheckout {
         createdAt: new Date(),
         deletedAt: null
       }
-    })
+      jajanItemSnapshots.push(JajanItemSnapshot)
+    }
 
     const vendorIds: string[] = Array.from(vendorToTotalPriceMap.keys())
     const foundVendors: Result<Vendor[] | null> = await this.vendorManagement.readManyByIds(vendorIds)
@@ -204,38 +212,34 @@ export default class TransactionCheckout {
 
     const transactionItemHistories: TransactionItemHistory[] = []
     const responseTransactionItems: TransactionItemCheckoutResponse[] = []
-    try {
-      createdJajanItemSnapshots.data.forEach((jajanItemSnapshot: JajanItemSnapshot) => {
-        const foundTransactionItem: TransactionItemCheckoutRequest | undefined = groupedTransactionItemsByJajananItemId.find((groupedTransactionItem: TransactionItemCheckoutRequest) => groupedTransactionItem.jajanItemId === jajanItemSnapshot.originId)
+    for (const jajanItemSnapshot of createdJajanItemSnapshots.data) {
+      const foundTransactionItem: TransactionItemCheckoutRequest | undefined = groupedTransactionItemsByJajananItemId.find((groupedTransactionItem: TransactionItemCheckoutRequest) => groupedTransactionItem.jajanItemId === jajanItemSnapshot.originId)
 
-        if (foundTransactionItem === undefined) {
-          throw new Error('Transaction item not found.')
-        }
-
-        const transactionItemHistory: TransactionItemHistory = {
-          id: randomUUID(),
-          transactionId: createdTransactionHistory.data.id,
-          jajanItemSnapshotId: jajanItemSnapshot.id,
-          quantity: foundTransactionItem.quantity,
-          updatedAt: new Date(),
-          createdAt: new Date(),
-          deletedAt: null
-        }
-        transactionItemHistories.push(transactionItemHistory)
-
-        const responseTransactionItem: TransactionItemCheckoutResponse = new TransactionItemCheckoutResponse(
-          transactionItemHistory.id,
-          jajanItemSnapshot.id,
-          foundTransactionItem.quantity
+      if (foundTransactionItem === undefined) {
+        return new Result<null>(
+          500,
+          'Transaction checkout failed, transaction item is undefined.',
+          null
         )
-        responseTransactionItems.push(responseTransactionItem)
-      })
-    } catch (error) {
-      return new Result<null>(
-        500,
-            `Transaction checkout failed, ${(error as Error).message}`,
-            null
+      }
+
+      const transactionItemHistory: TransactionItemHistory = {
+        id: randomUUID(),
+        transactionId: createdTransactionHistory.data.id,
+        jajanItemSnapshotId: jajanItemSnapshot.id,
+        quantity: foundTransactionItem.quantity,
+        updatedAt: new Date(),
+        createdAt: new Date(),
+        deletedAt: null
+      }
+      transactionItemHistories.push(transactionItemHistory)
+
+      const responseTransactionItem: TransactionItemCheckoutResponse = new TransactionItemCheckoutResponse(
+        transactionItemHistory.id,
+        jajanItemSnapshot.id,
+        foundTransactionItem.quantity
       )
+      responseTransactionItems.push(responseTransactionItem)
     }
 
     const createdTransactionItems: Result<TransactionItemHistory[] | null> = await this.transactionItemHistoryManagement.createManyRaw(transactionItemHistories)
