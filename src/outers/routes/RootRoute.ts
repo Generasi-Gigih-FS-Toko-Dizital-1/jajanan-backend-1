@@ -74,6 +74,8 @@ import CloudinaryGateway from '../gateways/CloudinaryGateway'
 import FileUpload from '../../inners/use_cases/file_uploads/FileUpload'
 import CloudinaryUtility from '../utilities/CloudinaryUtility'
 import FileControllerRest from '../controllers/rests/FileControllerRest'
+import TransactionItemHistoryManagement from '../../inners/use_cases/managements/TransactionItemHistoryManagement'
+import TransactionItemHistoryRepository from '../repositories/TransactionItemHistoryRepository'
 
 export default class RootRoute {
   app: Application
@@ -104,6 +106,7 @@ export default class RootRoute {
     const adminRepository: AdminRepository = new AdminRepository(this.datastoreOne)
     const jajanItemRepository: JajanItemRepository = new JajanItemRepository(this.datastoreOne)
     const transactionHistoryRepository: TransactionHistoryRepository = new TransactionHistoryRepository(this.datastoreOne)
+    const transactionItemHistoryRepository: TransactionItemHistoryRepository = new TransactionItemHistoryRepository(this.datastoreOne)
     const userLevelRepository: UserLevelRepository = new UserLevelRepository(this.datastoreOne)
     const vendorLevelRepository: VendorLevelRepository = new VendorLevelRepository(this.datastoreOne)
     const categoryRepository: CategoryRepository = new CategoryRepository(this.datastoreOne)
@@ -121,6 +124,7 @@ export default class RootRoute {
     const jajanItemManagement: JajanItemManagement = new JajanItemManagement(jajanItemRepository, objectUtility)
     const jajanItemSnapshotManagement: JajanItemSnapshotManagement = new JajanItemSnapshotManagement(jajanItemSnashotRepository, objectUtility)
     const transactionHistoryManagement: TransactionHistoryManagement = new TransactionHistoryManagement(userManagement, jajanItemManagement, transactionHistoryRepository, objectUtility)
+    const transactionItemHistoryManagement: TransactionItemHistoryManagement = new TransactionItemHistoryManagement(transactionHistoryManagement, transactionItemHistoryRepository, jajanItemSnapshotManagement, objectUtility)
     const vendorLevelManagement: VendorLevelManagement = new VendorLevelManagement(vendorLevelRepository, objectUtility)
     const userLevelManagement: UserLevelManagement = new UserLevelManagement(userLevelRepository, objectUtility)
     const categoryManagement: CategoryManagement = new CategoryManagement(categoryRepository, objectUtility)
@@ -148,7 +152,7 @@ export default class RootRoute {
     const topUpWebhook: TopUpWebhook = new TopUpWebhook(topUpHistoryRepository, userRepository)
     const topUp: TopUp = new TopUp(paymentGateway, userManagement)
 
-    const transactionCheckout: TransactionCheckout = new TransactionCheckout(userManagement, vendorManagement, jajanItemManagement, jajanItemSnapshotManagement, transactionHistoryManagement, objectUtility)
+    const transactionCheckout: TransactionCheckout = new TransactionCheckout(userManagement, vendorManagement, jajanItemManagement, jajanItemSnapshotManagement, transactionHistoryManagement, transactionItemHistoryManagement, objectUtility)
     const payoutWebhook: PayoutWebhook = new PayoutWebhook(payoutHistoryRepository, vendorRepository)
     const payout: Payout = new Payout(vendorPayoutRepository, paymentGateway, vendorManagement)
 

@@ -140,6 +140,13 @@ describe('TransactionControllerRest', () => {
       if (oneDatastore.client === undefined) {
         throw new Error('Client is undefined.')
       }
+      await oneDatastore.client.transactionItemHistory.deleteMany({
+        where: {
+          id: {
+            in: response.body.data.transaction_items.map((transactionItem: any) => transactionItem.id)
+          }
+        }
+      })
       await oneDatastore.client.transactionHistory.deleteMany({
         where: {
           id: response.body.data.transaction_id
@@ -198,6 +205,13 @@ describe('TransactionControllerRest', () => {
       if (oneDatastore.client === undefined) {
         throw new Error('Client is undefined.')
       }
+      await oneDatastore.client.transactionItemHistory.deleteMany({
+        where: {
+          id: {
+            in: response.body.data.transaction_items.map((transactionItem: any) => transactionItem.id)
+          }
+        }
+      })
       await oneDatastore.client.transactionHistory.deleteMany({
         where: {
           id: response.body.data.transaction_id

@@ -272,7 +272,7 @@ export default class UserManagement {
     )
   }
 
-  patchOneRawById = async (id: string, user: User): Promise<Result<User | null>> => {
+  patchOneRawById = async (id: string, request: any): Promise<Result<User | null>> => {
     const foundUser: Result<User | null> = await this.readOneById(id)
     if (foundUser.status !== 200 || foundUser.data === null) {
       return new Result<null>(
@@ -281,7 +281,7 @@ export default class UserManagement {
         null
       )
     }
-    this.objectUtility.patch(foundUser.data, user)
+    this.objectUtility.patch(foundUser.data, request)
     const args: RepositoryArgument = new RepositoryArgument(
       { id },
       undefined,
