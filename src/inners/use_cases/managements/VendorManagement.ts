@@ -274,7 +274,9 @@ export default class VendorManagement {
       )
     }
 
-    request.password = bcrypt.hashSync(request.password, salt)
+    if (request.password !== undefined) {
+      request.password = bcrypt.hashSync(request.password, salt)
+    }
     request.oldPassword = bcrypt.hashSync(request.oldPassword, salt)
 
     const foundVendor: Result<Vendor | null> = await this.readOneById(id)

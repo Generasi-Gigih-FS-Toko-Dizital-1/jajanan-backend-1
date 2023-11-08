@@ -145,7 +145,9 @@ export default class AdminManagement {
       )
     }
 
-    request.password = bcrypt.hashSync(request.password, salt)
+    if (request.password !== undefined) {
+      request.password = bcrypt.hashSync(request.password, salt)
+    }
     request.oldPassword = bcrypt.hashSync(request.oldPassword, salt)
 
     const foundAdmin: Result<Admin | null> = await this.readOneById(id)
