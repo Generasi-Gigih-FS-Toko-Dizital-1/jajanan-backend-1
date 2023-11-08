@@ -320,7 +320,7 @@ export default class VendorManagement {
     )
   }
 
-  patchOneRawById = async (id: string, vendor: Vendor): Promise<Result<Vendor | null>> => {
+  patchOneRawById = async (id: string, request: any): Promise<Result<Vendor | null>> => {
     const foundVendor: Result<Vendor | null> = await this.readOneById(id)
     if (foundVendor.status !== 200 || foundVendor.data === null) {
       return new Result<null>(
@@ -329,7 +329,7 @@ export default class VendorManagement {
         null
       )
     }
-    this.objectUtility.patch(foundVendor.data, vendor)
+    this.objectUtility.patch(foundVendor.data, request)
     let patchedVendor: Vendor
     try {
       const args: RepositoryArgument = new RepositoryArgument(
@@ -377,7 +377,7 @@ export default class VendorManagement {
     )
   }
 
-  patchManyRawByIds = async (ids: string[], requests: any[]): Promise<Result<Vendor[] | null>> => {
+  patchManyRawByIds = async (ids: string[], vendors: Vendor[]): Promise<Result<Vendor[] | null>> => {
     const foundVendors: Result<Vendor[] | null> = await this.readManyByIds(ids)
     if (foundVendors.status !== 200 || foundVendors.data === null) {
       return new Result<null>(
@@ -390,9 +390,16 @@ export default class VendorManagement {
     const args: RepositoryArgument[] = []
     for (let i = 0; i < ids.length; i++) {
       const vendorId: string = ids[i]
-      const foundVendor: Vendor = foundVendors.data.find((vendor: Vendor) => vendor.id === vendorId) as Vendor
-      const request: any = requests.find((request: any) => request.id === vendorId)
-      this.objectUtility.patch(foundVendor, request)
+      const foundVendor: Vendor | undefined = foundVendors.data.find((vendor: Vendor) => vendor.id === vendorId)
+      if (foundVendor === undefined) {
+        return new Result<null>(
+          500,
+          'Vendor patch many by ids failed, vendor is not found.',
+          null
+        )
+      }
+      const vendor: Vendor = vendors[i]
+      this.objectUtility.patch(foundVendor, vendor)
       const arg = new RepositoryArgument(
         { id: vendorId },
         undefined,
