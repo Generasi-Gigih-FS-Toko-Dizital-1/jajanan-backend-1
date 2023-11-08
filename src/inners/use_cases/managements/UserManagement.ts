@@ -226,7 +226,9 @@ export default class UserManagement {
       )
     }
 
-    request.password = bcrypt.hashSync(request.password, salt)
+    if (request.password !== undefined) {
+      request.password = bcrypt.hashSync(request.password, salt)
+    }
     request.oldPassword = bcrypt.hashSync(request.oldPassword, salt)
 
     const foundUser: Result<User | null> = await this.readOneById(id)
