@@ -34,7 +34,7 @@ export default class VendorLevelControllerRest {
     this.router.post('', this.createOne)
     this.router.patch('/:id', this.patchOneById)
     this.router.delete('/:id', this.deleteOneById)
-    this.router.get('/levels/:experience', this.readOneByExp)
+    this.router.get('/experience/levels', this.readOneByExp)
   }
 
   readMany = (request: Request, response: Response): void => {
@@ -107,7 +107,17 @@ export default class VendorLevelControllerRest {
   }
 
   readOneByExp = (request: Request, response: Response): void => {
-    const { experience } = request.params
+    const { experience } = request.query
+
+    if (experience === undefined || experience === null) {
+      const responseBody: ResponseBody<null> = new ResponseBody<null>(
+        'Experience query parameter is required.',
+        null
+      )
+      response.status(400).send(responseBody)
+      return
+    }
+
     this.vendorLevelManagement
       .readOneByExp(Number(experience))
       .then((result: Result<VendorLevel | null>) => {

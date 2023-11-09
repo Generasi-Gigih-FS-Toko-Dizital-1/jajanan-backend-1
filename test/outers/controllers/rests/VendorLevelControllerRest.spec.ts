@@ -178,12 +178,12 @@ describe('VendorLevelControllerRest', () => {
     })
   })
 
-  describe('GET /api/v1/vendor-levels/levels/:experience', () => {
+  describe('GET /api/v1/vendor-levels/levels?experience={}', () => {
     it('should return 200 OK', async () => {
       const requestVendorLevel: VendorLevel = oneSeeder.vendorLevelMock.data[0]
-      const requestVendorExp: number = oneSeeder.vendorMock.data[0].experience
+      const requestVendorExp: number = requestVendorLevel.minimumExperience
       const response = await agent
-        .get(`/api/v1/vendor-levels/levels/${requestVendorExp}`)
+        .get(`/api/v1/vendor-levels/experience/levels?experience=${requestVendorExp}`)
         .set('Authorization', authorization.convertToString())
         .send()
 

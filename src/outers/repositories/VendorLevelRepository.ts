@@ -38,7 +38,7 @@ export default class VendorLevelRepository {
     return createdVendorLevel
   }
 
-  readOne = async (repositoryArgument: RepositoryArgument): Promise<VendorLevel> => {
+  readOne = async (repositoryArgument: RepositoryArgument): Promise<VendorLevel | null> => {
     const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
@@ -46,9 +46,6 @@ export default class VendorLevelRepository {
     }
 
     const foundVendorLevel: VendorLevel | null = await this.oneDatastore.client.vendorLevel.findFirst(args)
-    if (foundVendorLevel === null) {
-      throw new Error('Found vendorLevel is null.')
-    }
 
     return foundVendorLevel
   }
