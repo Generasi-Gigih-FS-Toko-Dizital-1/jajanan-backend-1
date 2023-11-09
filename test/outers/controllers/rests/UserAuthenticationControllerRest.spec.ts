@@ -58,7 +58,7 @@ describe('UserAuthenticationControllerRest', () => {
       const requestUser = oneSeeder.userMock.data[0]
       const requestBodyLogin: UserLoginByEmailAndPasswordRequest = new UserLoginByEmailAndPasswordRequest(
         requestUser.email,
-        requestUser.password,
+        'password0',
         firebaseToken
       )
 
@@ -229,7 +229,7 @@ describe('UserAuthenticationControllerRest', () => {
       const requestUser = oneSeeder.userMock.data[0]
       const requestBodyLogin: UserLoginByEmailAndPasswordRequest = new UserLoginByEmailAndPasswordRequest(
         requestUser.email,
-        requestUser.password,
+        'password0',
         firebaseToken
       )
 
@@ -279,7 +279,7 @@ describe('UserAuthenticationControllerRest', () => {
       const requestUser = oneSeeder.userMock.data[0]
       const requestBodyLogin: UserLoginByEmailAndPasswordRequest = new UserLoginByEmailAndPasswordRequest(
         requestUser.email,
-        requestUser.password,
+        'password0',
         firebaseToken
       )
 

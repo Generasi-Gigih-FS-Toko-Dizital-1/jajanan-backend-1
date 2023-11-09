@@ -5,6 +5,7 @@ import { type Vendor } from '@prisma/client'
 import type VendorRegisterByEmailAndPasswordRequest
   from '../../../models/value_objects/requests/authentications/vendors/VendorRegisterByEmailAndPasswordRequest'
 import { randomUUID } from 'crypto'
+import bcrypt from 'bcrypt'
 
 export default class VendorRegisterAuthentication {
   vendorManagement: VendorManagement
@@ -32,13 +33,22 @@ export default class VendorRegisterAuthentication {
       )
     }
 
+    const salt: string | undefined = process.env.BCRYPT_SALT
+    if (salt === undefined) {
+      return new Result<null>(
+        500,
+        'Vendor register by email and password failed, bcrypt salt is undefined.',
+        null
+      )
+    }
+
     const vendorToCreate: Vendor = {
       id: randomUUID(),
       fullName: request.fullName,
       gender: request.gender,
       address: request.address,
       email: request.email,
-      password: request.password,
+      password: bcrypt.hashSync(request.password, salt),
       username: request.username,
       jajanImageUrl: request.jajanImageUrl,
       jajanName: request.jajanName,

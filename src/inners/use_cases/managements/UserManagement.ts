@@ -219,23 +219,58 @@ export default class UserManagement {
   patchOneById = async (id: string, request: UserManagementPatchRequest): Promise<Result<User | null>> => {
     const salt: string | undefined = process.env.BCRYPT_SALT
     if (salt === undefined) {
-      throw new Error('Salt is undefined.')
-    }
-
-    request.password = bcrypt.hashSync(request.password, salt)
-
-    const patchedUser: Result<User | null> = await this.patchOneRawById(id, request)
-    if (patchedUser.status !== 200 || patchedUser.data === null) {
       return new Result<null>(
-        patchedUser.status,
-        `User patch one by id failed, ${patchedUser.message}`,
+        500,
+        'User patch one by id failed, salt is undefined.',
         null
       )
     }
+
+    if (request.password !== undefined) {
+      request.password = bcrypt.hashSync(request.password, salt)
+    }
+    request.oldPassword = bcrypt.hashSync(request.oldPassword, salt)
+
+    const foundUser: Result<User | null> = await this.readOneById(id)
+    if (foundUser.status !== 200 || foundUser.data === null) {
+      return new Result<null>(
+        foundUser.status,
+        'User patch one by id failed, user is not found.',
+        null
+      )
+    }
+
+    if (request.oldPassword !== foundUser.data.password) {
+      return new Result<null>(
+        400,
+        'User patch one by id failed, old password is not match to the current password.',
+        null
+      )
+    }
+
+    const { oldPassword, ...user } = request
+    this.objectUtility.patch(foundUser.data, user)
+    const args: RepositoryArgument = new RepositoryArgument(
+      { id },
+      undefined,
+      undefined,
+      foundUser.data
+    )
+    let patchedUser: User
+    try {
+      patchedUser = await this.userRepository.patchOne(args)
+    } catch (error) {
+      return new Result<null>(
+        500,
+        `User patch one by id failed, ${(error as Error).message}`,
+        null
+      )
+    }
+
     return new Result<User>(
       200,
       'User patch one by id succeed.',
-      patchedUser.data
+      patchedUser
     )
   }
 

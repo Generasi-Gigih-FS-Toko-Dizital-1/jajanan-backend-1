@@ -1,17 +1,22 @@
 import { type User } from '@prisma/client'
 import { randomUUID } from 'crypto'
+import bcrypt from 'bcrypt'
 
 export default class UserMock {
   data: User[]
 
   constructor () {
+    const salt: string | undefined = process.env.BCRYPT_SALT
+    if (salt === undefined) {
+      throw new Error('Salt is undefined.')
+    }
     this.data = [
       {
         id: randomUUID(),
         fullName: 'fulName0',
         address: 'address0',
         email: `${randomUUID()}@mail.com`,
-        password: 'password0',
+        password: bcrypt.hashSync('password0', salt),
         username: `${randomUUID()}`,
         balance: 10.0,
         gender: 'MALE',
@@ -27,7 +32,7 @@ export default class UserMock {
         fullName: 'fulName1',
         address: 'address1',
         email: `${randomUUID()}@mail.com`,
-        password: 'password1',
+        password: bcrypt.hashSync('password1', salt),
         username: `${randomUUID()}`,
         balance: 11.0,
         gender: 'FEMALE',

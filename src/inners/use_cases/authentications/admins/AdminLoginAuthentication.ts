@@ -21,9 +21,18 @@ export default class AdminLoginAuthentication {
   }
 
   loginByEmailAndPassword = async (request: AdminLoginByEmailAndPasswordRequest): Promise<Result<Session | null>> => {
+    const salt: string | undefined = process.env.BCRYPT_SALT
+    if (salt === undefined) {
+      return new Result<null>(
+        500,
+        'Admin login by email and password failed, salt is undefined.',
+        null
+      )
+    }
+
     const foundAdminByEmailAndPassword: Result<Admin | null> = await this.adminManagement.readOneByEmailAndPassword(
       request.email,
-      request.password
+      bcrypt.hashSync(request.password, salt)
     )
     if (foundAdminByEmailAndPassword.status !== 200 || foundAdminByEmailAndPassword.data === null) {
       return new Result<null>(
@@ -82,14 +91,6 @@ export default class AdminLoginAuthentication {
       session.accessToken,
       'Bearer'
     )
-    const salt: string | undefined = process.env.BCRYPT_SALT
-    if (salt === undefined) {
-      return new Result<null>(
-        500,
-        'Admin login by email and password failed, bcrypt salt is undefined.',
-        null
-      )
-    }
     const authorizationString: string = JSON.stringify(authorization)
     const id: string = bcrypt.hashSync(authorizationString, salt)
 
