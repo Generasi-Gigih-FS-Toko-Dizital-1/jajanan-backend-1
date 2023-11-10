@@ -146,27 +146,49 @@ export default class CategoryManagement {
     )
   }
 
-  deleteOneById = async (id: string): Promise<Result<Category | null>> => {
-    let deletedCategory: Category
+  deleteOneById = async (id: string, method: string): Promise<Result<Category | null>> => {
     try {
-      const args: RepositoryArgument = new RepositoryArgument(
-        { id },
-        undefined,
-        undefined,
-        undefined
+      let deletedCatgory: Category
+
+      const args: RepositoryArgument = new RepositoryArgument({ id })
+
+      if (method === 'hard') {
+        deletedCatgory = await this.categoryRepository.deleteOne(args)
+      } else if (method === 'soft') {
+        const category: Category = await this.categoryRepository.readOne(args)
+
+        const newCategory: Category = {
+          ...category,
+          deletedAt: new Date()
+        }
+
+        const softDeleteArgs: RepositoryArgument = new RepositoryArgument(
+          { id },
+          undefined,
+          undefined,
+          newCategory
+        )
+
+        deletedCatgory = await this.categoryRepository.patchOne(softDeleteArgs)
+      } else {
+        return new Result<null>(
+          400,
+          'Invalid deletion method. Use "hard" or "soft".',
+          null
+        )
+      }
+
+      return new Result<Category>(
+        200,
+        'Category delete one by id succeed.',
+        deletedCatgory
       )
-      deletedCategory = await this.categoryRepository.deleteOne(args)
     } catch (error) {
       return new Result<null>(
-        500,
-        'Category delete one by id failed.',
+        404,
+        'Category delete one by id failed, admin is not found.',
         null
       )
     }
-    return new Result<Category>(
-      200,
-      'Category delete one by id succeed.',
-      deletedCategory
-    )
   }
 }

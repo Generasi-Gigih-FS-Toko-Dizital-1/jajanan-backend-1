@@ -165,8 +165,9 @@ export default class AdminControllerRest {
 
   deleteOneById = (request: Request, response: Response): void => {
     const { id } = request.params
+    const { method } = request.query
     this.adminManagement
-      .deleteOneById(id)
+      .deleteOneById(id, String(method))
       .then((result: Result<Admin | null>) => {
         const responseBody: ResponseBody<null> = new ResponseBody<null>(
           result.message,
