@@ -44,7 +44,7 @@ describe('VendorAuthenticationControllerRest', () => {
       const requestVendor = oneSeeder.vendorMock.data[0]
       const requestBodyLogin: VendorLoginByEmailAndPasswordRequest = new VendorLoginByEmailAndPasswordRequest(
         requestVendor.email,
-        requestVendor.password
+        'password0'
       )
       const response = await chai
         .request(server)
@@ -227,7 +227,7 @@ describe('VendorAuthenticationControllerRest', () => {
       const requestVendor = oneSeeder.vendorMock.data[0]
       const requestBodyLogin: VendorLoginByEmailAndPasswordRequest = new VendorLoginByEmailAndPasswordRequest(
         requestVendor.email,
-        requestVendor.password
+        'password0'
       )
       const responseLogin = await chai
         .request(server)
@@ -273,7 +273,7 @@ describe('VendorAuthenticationControllerRest', () => {
       const requestVendor = oneSeeder.vendorMock.data[0]
       const requestBodyLogin: VendorLoginByEmailAndPasswordRequest = new VendorLoginByEmailAndPasswordRequest(
         requestVendor.email,
-        requestVendor.password
+        'password0'
       )
       const responseLogin = await chai
         .request(server)

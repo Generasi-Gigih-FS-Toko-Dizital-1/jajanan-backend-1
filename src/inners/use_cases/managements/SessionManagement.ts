@@ -31,7 +31,15 @@ export default class SessionManagement {
   }
 
   setOneById = async (id: string, session: Session): Promise<Result<null>> => {
-    await this.sessionRepository.setOneById(id, session)
+    try {
+      await this.sessionRepository.setOneById(id, session)
+    } catch (error) {
+      return new Result<null>(
+        500,
+        `Session set one failed, ${(error as Error).message}.`,
+        null
+      )
+    }
     return new Result<null>(
       200,
       'Session set one succeed.',

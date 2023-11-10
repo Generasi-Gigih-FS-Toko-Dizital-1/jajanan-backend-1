@@ -12,11 +12,10 @@ import VendorLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/vendors/VendorLoginByEmailAndPasswordRequest'
 import type PayoutCreateRequest from '../../../../src/inners/models/value_objects/requests/payouts/PayoutCreateRequest'
 import axios from 'axios'
-import MockAdafter from 'axios-mock-adapter'
+import MockAdapter from 'axios-mock-adapter'
 
 chai.use(chaiHttp)
 chai.should()
-const mock = new MockAdafter(axios)
 
 describe('PayoutControllerRest', () => {
   const vendorMock: VendorMock = new VendorMock()
@@ -24,6 +23,7 @@ describe('PayoutControllerRest', () => {
   let agent: ChaiHttp.Agent
   let authorization: Authorization
   const payoutResponseMock = new PayoutResponseMock()
+  const mock = new MockAdapter(axios)
 
   before(async () => {
     await waitUntil(() => server !== undefined)
@@ -45,7 +45,7 @@ describe('PayoutControllerRest', () => {
     const requestAuthVendor: Vendor = vendorMock.data[0]
     const requestBodyLogin: VendorLoginByEmailAndPasswordRequest = new VendorLoginByEmailAndPasswordRequest(
       requestAuthVendor.email,
-      requestAuthVendor.password
+      'password0'
     )
     const response = await agent
       .post('/api/v1/authentications/vendors/login?method=email_and_password')

@@ -1,55 +1,60 @@
 import chai from 'chai'
 import { beforeEach, describe, it } from 'mocha'
 import waitUntil from 'async-wait-until'
-import UserMock from '../../../mocks/UserMock'
 import OneDatastore from '../../../../src/outers/datastores/OneDatastore'
 import { server } from '../../../../src/App'
 import chaiHttp from 'chai-http'
-import { type User } from '@prisma/client'
-import fetchMock from 'fetch-mock'
+import { type Admin, type User } from '@prisma/client'
 import Authorization from '../../../../src/inners/models/value_objects/Authorization'
-import TopUpResponseMock from '../../../mocks/TopUpResponseMock'
-import UserLoginByEmailAndPasswordRequest
-  from '../../../../src/inners/models/value_objects/requests/authentications/users/UserLoginByEmailAndPasswordRequest'
 import TopUpCreateRequest from '../../../../src/inners/models/value_objects/requests/top_ups/TopUpCreateRequest'
-import { randomUUID } from 'crypto'
+import AdminMock from '../../../mocks/AdminMock'
+import OneSeeder from '../../../../src/outers/seeders/OneSeeder'
+import AdminLoginByEmailAndPasswordRequest
+  from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
 
 chai.use(chaiHttp)
 chai.should()
 
 describe('TopUpControllerRest', () => {
-  const userMock: UserMock = new UserMock()
-  const oneDatastore = new OneDatastore()
-  const topUpResponseMock = new TopUpResponseMock()
+  const oneDatastore: OneDatastore = new OneDatastore()
+  const authAdminMock: AdminMock = new AdminMock()
+  let oneSeeder: OneSeeder
   let agent: ChaiHttp.Agent
   let authorization: Authorization
 
   before(async () => {
     await waitUntil(() => server !== undefined)
-
     await oneDatastore.connect()
+    oneSeeder = new OneSeeder(oneDatastore)
+
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-    await oneDatastore.client.user.createMany({
-      data: userMock.data
+    await oneDatastore.client.admin.createMany({
+      data: authAdminMock.data
     })
 
-    fetchMock.mock('https://api.xendit.co/v2/invoices/', topUpResponseMock.data)
-  })
-
-  beforeEach(async () => {
     agent = chai.request.agent(server)
-    const requestAuthUser: User = userMock.data[0]
-    const requestBodyLogin: UserLoginByEmailAndPasswordRequest = new UserLoginByEmailAndPasswordRequest(
-      requestAuthUser.email,
-      requestAuthUser.password,
-      randomUUID()
+    const requestAuthAdmin: Admin = authAdminMock.data[0]
+    const requestBodyLogin: AdminLoginByEmailAndPasswordRequest = new AdminLoginByEmailAndPasswordRequest(
+      requestAuthAdmin.email,
+      'password0'
     )
-
     const response = await agent
-      .post('/api/v1/authentications/users/login?method=email_and_password')
+      .post('/api/v1/authentications/admins/login?method=email_and_password')
       .send(requestBodyLogin)
+
+    response.should.has.status(200)
+    response.body.should.be.an('object')
+    response.body.should.has.property('message')
+    response.body.should.has.property('data')
+    response.body.data.should.has.property('session')
+    response.body.data.session.should.be.an('object')
+    response.body.data.session.should.has.property('account_id').equal(requestAuthAdmin.id)
+    response.body.data.session.should.has.property('account_type').equal('ADMIN')
+    response.body.data.session.should.has.property('access_token')
+    response.body.data.session.should.has.property('refresh_token')
+    response.body.data.session.should.has.property('expired_at')
 
     authorization = new Authorization(
       response.body.data.session.access_token,
@@ -57,24 +62,41 @@ describe('TopUpControllerRest', () => {
     )
   })
 
+  beforeEach(async () => {
+    if (oneDatastore.client === undefined) {
+      throw new Error('Client is undefined.')
+    }
+    await oneSeeder.up()
+  })
+
+  afterEach(async () => {
+    if (oneDatastore.client === undefined) {
+      throw new Error('Client is undefined.')
+    }
+    await oneSeeder.down()
+  })
+
   after(async () => {
     if (oneDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
-    await oneDatastore.client.user.deleteMany({
-      where: {
-        id: {
-          in: userMock.data.map((user: User) => user.id)
+    await oneDatastore.client.admin.deleteMany(
+      {
+        where: {
+          id: {
+            in: authAdminMock.data.map((admin: Admin) => admin.id)
+          }
         }
       }
-    })
+    )
     await oneDatastore.disconnect()
   })
 
   describe('POST /api/v1/top-ups', () => {
     it('should return 201', async () => {
+      const requestUser: User = oneSeeder.userMock.data[0]
       const requestBody = new TopUpCreateRequest(
-        userMock.data[0].id,
+        requestUser.id,
         20000
       )
       const response = await agent.post('/api/v1/top-ups')

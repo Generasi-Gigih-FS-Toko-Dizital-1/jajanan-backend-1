@@ -24,9 +24,17 @@ export default class UserLoginAuthentication {
   }
 
   loginByEmailAndPassword = async (request: UserLoginByEmailAndPasswordRequest): Promise<Result<Session | null>> => {
+    const salt: string | undefined = process.env.BCRYPT_SALT
+    if (salt === undefined) {
+      return new Result<null>(
+        500,
+        'User login by email and password failed, bcrypt salt is undefined.',
+        null
+      )
+    }
     const foundUserByEmailAndPassword: Result<User | null> = await this.userManagement.readOneByEmailAndPassword(
       request.email,
-      request.password
+      bcrypt.hashSync(request.password, salt)
     )
     if (foundUserByEmailAndPassword.status !== 200 || foundUserByEmailAndPassword.data === null) {
       return new Result<null>(
@@ -95,14 +103,6 @@ export default class UserLoginAuthentication {
       session.accessToken,
       'Bearer'
     )
-    const salt: string | undefined = process.env.BCRYPT_SALT
-    if (salt === undefined) {
-      return new Result<null>(
-        500,
-        'User login by email and password failed, bcrypt salt is undefined.',
-        null
-      )
-    }
     const authorizationString: string = JSON.stringify(authorization)
     const id: string = bcrypt.hashSync(authorizationString, salt)
 

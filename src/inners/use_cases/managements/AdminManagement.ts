@@ -138,18 +138,67 @@ export default class AdminManagement {
   patchOneById = async (id: string, request: AdminManagementPatchRequest): Promise<Result<Admin | null>> => {
     const salt: string | undefined = process.env.BCRYPT_SALT
     if (salt === undefined) {
-      throw new Error('Salt is undefined.')
+      return new Result<null>(
+        500,
+        'Admin patch one by id failed, salt is undefined.',
+        null
+      )
     }
 
     if (request.password !== undefined) {
       request.password = bcrypt.hashSync(request.password, salt)
     }
+    request.oldPassword = bcrypt.hashSync(request.oldPassword, salt)
 
     const foundAdmin: Result<Admin | null> = await this.readOneById(id)
     if (foundAdmin.status !== 200 || foundAdmin.data === null) {
       return new Result<null>(
         foundAdmin.status,
         'Admin patch one by id failed, admin is not found.',
+        null
+      )
+    }
+
+    if (request.oldPassword !== foundAdmin.data.password) {
+      return new Result<null>(
+        400,
+        'Admin patch one by id failed, old password is not match to the current password.',
+        null
+      )
+    }
+
+    const { oldPassword, ...admin } = request
+    this.objectUtility.patch(foundAdmin.data, admin)
+    const args: RepositoryArgument = new RepositoryArgument(
+      { id },
+      undefined,
+      undefined,
+      foundAdmin.data
+    )
+    let patchedAdmin: Admin
+    try {
+      patchedAdmin = await this.adminRepository.patchOne(args)
+    } catch (error) {
+      return new Result<null>(
+        500,
+        `Admin patch one by id failed, ${(error as Error).message}`,
+        null
+      )
+    }
+
+    return new Result<Admin>(
+      200,
+      'Admin patch one by id succeed.',
+      patchedAdmin
+    )
+  }
+
+  patchOneRawById = async (id: string, request: any): Promise<Result<Admin | null>> => {
+    const foundAdmin: Result<Admin | null> = await this.readOneById(id)
+    if (foundAdmin.status !== 200 || foundAdmin.data === null) {
+      return new Result<null>(
+        foundAdmin.status,
+        'Admin patch one raw by id failed, admin is not found.',
         null
       )
     }
@@ -164,7 +213,7 @@ export default class AdminManagement {
     const patchedAdmin: Admin = await this.adminRepository.patchOne(args)
     return new Result<Admin>(
       200,
-      'Admin patch one by id succeed.',
+      'Admin patch one raw by id succeed.',
       patchedAdmin
     )
   }
