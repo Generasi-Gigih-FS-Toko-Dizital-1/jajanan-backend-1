@@ -4,17 +4,17 @@ import type Result from '../../../inners/models/value_objects/Result'
 import type AuthenticationValidation from '../../../inners/use_cases/authentications/AuthenticationValidation'
 import validateAuthenticationMiddleware from '../../middlewares/ValidateAuthenticationMiddleware'
 import ResponseBody from '../../../inners/models/value_objects/responses/ResponseBody'
-import type FileUpload from '../../../inners/use_cases/file_uploads/FileUpload'
+import type FileManagement from '../../../inners/use_cases/managements/FileManagement'
 import SingleFileUploadResponse
   from '../../../inners/models/value_objects/responses/file_uploads/SingleFileUploadResponse'
 import formidable, { type File } from 'formidable'
 
 export default class FileControllerRest {
   router: Router
-  fileUpload: FileUpload
+  fileUpload: FileManagement
   authenticationValidation: AuthenticationValidation
 
-  constructor (router: Router, fileUpload: FileUpload, authenticationValidation: AuthenticationValidation) {
+  constructor (router: Router, fileUpload: FileManagement, authenticationValidation: AuthenticationValidation) {
     this.router = router
     this.fileUpload = fileUpload
     this.authenticationValidation = authenticationValidation
@@ -42,7 +42,7 @@ export default class FileControllerRest {
       if (fileValues.length <= 0) {
         response.status(400).send(
           new ResponseBody(
-            'File upload failed: No file found.',
+            'FileManagement upload failed: No file found.',
             null
           )
         )
