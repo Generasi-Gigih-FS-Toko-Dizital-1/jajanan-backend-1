@@ -34,6 +34,7 @@ export default class UserLevelControllerRest {
     this.router.post('', this.createOne)
     this.router.patch('/:id', this.patchOneById)
     this.router.delete('/:id', this.deleteOneById)
+    this.router.get('/experience/levels', this.readOneByExp)
   }
 
   readMany = (request: Request, response: Response): void => {
@@ -80,6 +81,45 @@ export default class UserLevelControllerRest {
     const { id } = request.params
     this.userLevelManagement
       .readOneById(id)
+      .then((result: Result<UserLevel | null>) => {
+        let data: UserLevelManagementReadOneResponse | null
+        if (result.status === 200 && result.data !== null) {
+          data = new UserLevelManagementReadOneResponse(
+            result.data.id,
+            result.data.name,
+            result.data.minimumExperience,
+            result.data.iconUrl,
+            result.data.createdAt,
+            result.data.updatedAt
+          )
+        } else {
+          data = null
+        }
+        const responseBody: ResponseBody<UserLevelManagementReadOneResponse | null> = new ResponseBody<UserLevelManagementReadOneResponse | null>(
+          result.message,
+          data
+        )
+        response.status(result.status).send(responseBody)
+      })
+      .catch((error: Error) => {
+        response.status(500).send(error.message)
+      })
+  }
+
+  readOneByExp = (request: Request, response: Response): void => {
+    const { experience } = request.query
+
+    if (experience === undefined || experience === null) {
+      const responseBody: ResponseBody<null> = new ResponseBody<null>(
+        'Experience query parameter is required.',
+        null
+      )
+      response.status(400).send(responseBody)
+      return
+    }
+
+    this.userLevelManagement
+      .readOneByExp(Number(experience))
       .then((result: Result<UserLevel | null>) => {
         let data: UserLevelManagementReadOneResponse | null
         if (result.status === 200 && result.data !== null) {

@@ -243,6 +243,26 @@ describe('UserLevelControllerRest', () => {
     })
   })
 
+  describe('GET /api/v1/user-levels/experience/levels?experience={}', () => {
+    it('should return 200 OK', async () => {
+      const requestUserLevel: UserLevel = oneSeeder.vendorLevelMock.data[0]
+      const requestVendorExp: number = requestUserLevel.minimumExperience
+      const response = await agent
+        .get(`/api/v1/user-levels/experience/levels?experience=${requestVendorExp}`)
+        .set('Authorization', authorization.convertToString())
+        .send()
+
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      response.body.data.should.be.an('object')
+      response.body.data.should.has.property('name').equal(requestUserLevel.name)
+      response.body.data.should.has.property('minimum_experience').equal(requestUserLevel.minimumExperience)
+      response.body.data.should.has.property('icon_url').equal(requestUserLevel.iconUrl)
+    })
+  })
+
   describe('DELETE /api/v1/user-levels/:id', () => {
     it('should return 200 OK', async () => {
       const requestUserLevel: UserLevel = oneSeeder.userLevelMock.data[0]

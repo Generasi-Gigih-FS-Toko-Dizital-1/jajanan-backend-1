@@ -38,7 +38,7 @@ export default class UserLevelRepository {
     return createdUserLevel
   }
 
-  readOne = async (repositoryArgument: RepositoryArgument): Promise<UserLevel> => {
+  readOne = async (repositoryArgument: RepositoryArgument): Promise<UserLevel | null> => {
     const args: any = repositoryArgument.convertToPrismaArgs()
 
     if (this.oneDatastore.client === undefined) {
@@ -46,9 +46,6 @@ export default class UserLevelRepository {
     }
 
     const foundUserLevel: UserLevel | null = await this.oneDatastore.client.userLevel.findFirst(args)
-    if (foundUserLevel === null) {
-      throw new Error('Found userLevel is null.')
-    }
 
     return foundUserLevel
   }
