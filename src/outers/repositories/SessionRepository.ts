@@ -14,11 +14,12 @@ export default class SessionRepository {
     }
     const sessionString: string = JSON.stringify(session)
     await this.twoDatastore.client.set(id, sessionString)
-    await this.twoDatastore.client.set(session.accountId, sessionString)
-    await this.twoDatastore.client.expireAt(id, session.expiredAt.getTime())
+    await this.twoDatastore.client.expireAt(id, session.expiredAt)
+    await this.twoDatastore.client.set(session.accountId, id)
+    await this.twoDatastore.client.expireAt(session.accountId, session.expiredAt)
   }
 
-  readOneById = async (id: string): Promise<Session> => {
+  readOneByAuthorizationId = async (id: string): Promise<Session> => {
     if (this.twoDatastore.client === undefined) {
       throw new Error('Client is undefined.')
     }
@@ -26,6 +27,22 @@ export default class SessionRepository {
     if (session === null) {
       throw new Error('Session is not saved.')
     }
+    return Session.convertFromJsonString(session)
+  }
+
+  readOneByAccountId = async (accountId: string): Promise<Session> => {
+    if (this.twoDatastore.client === undefined) {
+      throw new Error('Client is undefined.')
+    }
+    const authorizationId: string | null = await this.twoDatastore.client.get(accountId)
+    if (authorizationId === null) {
+      throw new Error('Authorization id is not saved.')
+    }
+    const session: string | null = await this.twoDatastore.client.get(authorizationId)
+    if (session === null) {
+      throw new Error('Session is not saved.')
+    }
+
     return Session.convertFromJsonString(session)
   }
 

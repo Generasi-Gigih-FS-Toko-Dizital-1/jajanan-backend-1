@@ -3,7 +3,7 @@ import type CloudinaryGateway from '../../../outers/gateways/CloudinaryGateway'
 import type CloudinaryUtility from '../../../outers/utilities/CloudinaryUtility'
 import Result from '../../models/value_objects/Result'
 
-export default class FileUpload {
+export default class FileManagement {
   cloudinaryGateway: CloudinaryGateway
   cloudinaryUtility: CloudinaryUtility
   objectUtility: ObjectUtility
@@ -18,8 +18,8 @@ export default class FileUpload {
     try {
       const uploadFileResponse: any = await this.cloudinaryGateway.uploadFile(file)
       return new Result<string>(
-        200,
-        'File upload succeed.',
+        201,
+        'FileManagement upload succeed.',
         uploadFileResponse.secure_url
       )
     } catch (error) {
@@ -37,7 +37,7 @@ export default class FileUpload {
       await this.cloudinaryGateway.deleteFile(publicId)
       return new Result<null>(
         200,
-        'File delete succeed.',
+        'FileManagement delete succeed.',
         null
       )
     } catch (error) {
