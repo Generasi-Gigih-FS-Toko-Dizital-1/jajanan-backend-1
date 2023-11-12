@@ -56,7 +56,7 @@ export default class VendorLevelManagement {
     )
   }
 
-  readOneByExp = async (exp: number): Promise<Result<VendorLevel | null>> => {
+  readOneByExperience = async (exp: number): Promise<Result<VendorLevel | null>> => {
     let foundVendorLevel: VendorLevel | null
     try {
       const args: RepositoryArgument = new RepositoryArgument(

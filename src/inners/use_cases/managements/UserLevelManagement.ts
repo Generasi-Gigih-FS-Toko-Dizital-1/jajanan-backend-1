@@ -56,7 +56,7 @@ export default class UserLevelManagement {
     )
   }
 
-  readOneByExp = async (exp: number): Promise<Result<UserLevel | null>> => {
+  readOneByExperience = async (exp: number): Promise<Result<UserLevel | null>> => {
     let foundUserLevel: UserLevel | null
     try {
       const args: RepositoryArgument = new RepositoryArgument(

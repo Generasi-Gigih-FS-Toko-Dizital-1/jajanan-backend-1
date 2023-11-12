@@ -34,7 +34,7 @@ export default class UserLevelControllerRest {
     this.router.post('', this.createOne)
     this.router.patch('/:id', this.patchOneById)
     this.router.delete('/:id', this.deleteOneById)
-    this.router.get('/experience/levels', this.readOneByExp)
+    this.router.get('/experience/levels', this.readOneByExperience)
   }
 
   readMany = (request: Request, response: Response): void => {
@@ -106,7 +106,7 @@ export default class UserLevelControllerRest {
       })
   }
 
-  readOneByExp = (request: Request, response: Response): void => {
+  readOneByExperience = (request: Request, response: Response): void => {
     const { experience } = request.query
 
     if (experience === undefined || experience === null) {
@@ -119,7 +119,7 @@ export default class UserLevelControllerRest {
     }
 
     this.userLevelManagement
-      .readOneByExp(Number(experience))
+      .readOneByExperience(Number(experience))
       .then((result: Result<UserLevel | null>) => {
         let data: UserLevelManagementReadOneResponse | null
         if (result.status === 200 && result.data !== null) {
