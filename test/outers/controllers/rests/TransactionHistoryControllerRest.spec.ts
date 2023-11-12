@@ -262,7 +262,7 @@ describe('TransactionHistoryControllerRest', () => {
     })
   })
 
-  describe('DELETE /api/v1/transaction-histories/:id', () => {
+  describe('DELETE /api/v1/transaction-histories/:id?method=hard', () => {
     it('should return 200 OK', async () => {
       const requestTransactionHistory: TransactionHistory = oneSeeder.transactionHistoryMock.data[0]
       const requestTransactionItemHistory: TransactionItemHistory[] = oneSeeder.transactionItemHistoryMock.data.filter((transactionItemHistory: TransactionItemHistory) => transactionItemHistory.transactionId === requestTransactionHistory.id)
@@ -279,7 +279,7 @@ describe('TransactionHistoryControllerRest', () => {
       })
 
       const response = await agent
-        .delete(`/api/v1/transaction-histories/${requestTransactionHistory.id}`)
+        .delete(`/api/v1/transaction-histories/${requestTransactionHistory.id}?method=hard`)
         .set('Authorization', authorization.convertToString())
         .send()
 
@@ -295,6 +295,35 @@ describe('TransactionHistoryControllerRest', () => {
         }
       })
       assert.isNull(result)
+    })
+  })
+
+  describe('DELETE /api/v1/transaction-histories/:id?method=soft', () => {
+    it('should return 200 OK', async () => {
+      const requestTransactionHistory: TransactionHistory = oneSeeder.transactionHistoryMock.data[0]
+
+      const response = await agent
+        .delete(`/api/v1/transaction-histories/${requestTransactionHistory.id}?method=soft`)
+        .set('Authorization', authorization.convertToString())
+        .send()
+
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      assert.isNull(response.body.data)
+
+      if (oneDatastore.client === undefined) {
+        throw new Error('oneDatastore client is undefined')
+      }
+
+      const result: TransactionHistory | null = await oneDatastore.client.transactionHistory.findFirst({
+        where: {
+          id: requestTransactionHistory.id
+        }
+      })
+      assert.isNotNull(result)
+      assert.isNotNull(result?.deletedAt)
     })
   })
 })

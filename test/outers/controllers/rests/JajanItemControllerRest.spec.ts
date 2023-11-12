@@ -305,7 +305,7 @@ describe('JajanItemControllerRest', () => {
       })
 
       const response = await agent
-        .delete(`/api/v1/jajan-items/${requestJajanItem.id}`)
+        .delete(`/api/v1/jajan-items/${requestJajanItem.id}?method=hard`)
         .set('Authorization', authorization.convertToString())
         .send()
 
@@ -321,6 +321,35 @@ describe('JajanItemControllerRest', () => {
         }
       })
       assert.isNull(result)
+    })
+  })
+
+  describe('DELETE /api/v1/jajan-items/:id?method=soft', () => {
+    it('should return 200 OK', async () => {
+      const requestJajanItem: JajanItem = oneSeeder.jajanItemMock.data[0]
+
+      const response = await agent
+        .delete(`/api/v1/jajan-items/${requestJajanItem.id}?method=soft`)
+        .set('Authorization', authorization.convertToString())
+        .send()
+
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      assert.isNull(response.body.data)
+
+      if (oneDatastore.client === undefined) {
+        throw new Error('oneDatastore client is undefined')
+      }
+
+      const result: JajanItem | null = await oneDatastore.client.jajanItem.findFirst({
+        where: {
+          id: requestJajanItem.id
+        }
+      })
+      assert.isNotNull(result)
+      assert.isNotNull(result?.deletedAt)
     })
   })
 })

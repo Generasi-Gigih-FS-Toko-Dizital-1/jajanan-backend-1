@@ -172,19 +172,49 @@ export default class TopUpHistoryController {
 
   deleteOneById = (request: Request, response: Response): void => {
     const { id } = request.params
-    this.topUpHistoryManagement
-      .deleteOneById(id)
-      .then((result: Result<TopUpHistory | null>) => {
-        const responseBody: ResponseBody<null> = new ResponseBody<null>(
-          result.message,
-          null
-        )
-        response
-          .status(result.status)
-          .send(responseBody)
-      })
-      .catch((error: Error) => {
-        response.status(500).send(error.message)
-      })
+    const { method } = request.query
+
+    if (method === undefined || method === null) {
+      const responseBody: ResponseBody<null> = new ResponseBody<null>(
+        'Query parameter method is required.',
+        null
+      )
+      response.status(400).send(responseBody)
+      return
+    }
+
+    if (method === 'soft') {
+      this.topUpHistoryManagement
+        .deleteSoftOneById(id)
+        .then((result: Result<TopUpHistory | null>) => {
+          const responseBody: ResponseBody<null> = new ResponseBody<null>(
+            result.message,
+            null
+          )
+          response.status(result.status).send(responseBody)
+        })
+        .catch((error: Error) => {
+          response.status(500).send(error.message)
+        })
+    } else if (method === 'hard') {
+      this.topUpHistoryManagement
+        .deleteHardOneById(id)
+        .then((result: Result<TopUpHistory | null>) => {
+          const responseBody: ResponseBody<null> = new ResponseBody<null>(
+            result.message,
+            null
+          )
+          response.status(result.status).send(responseBody)
+        })
+        .catch((error: Error) => {
+          response.status(500).send(error.message)
+        })
+    } else {
+      const responseBody: ResponseBody<null> = new ResponseBody<null>(
+        'Query parameter method is invalid.',
+        null
+      )
+      response.status(400).send(responseBody)
+    }
   }
 }

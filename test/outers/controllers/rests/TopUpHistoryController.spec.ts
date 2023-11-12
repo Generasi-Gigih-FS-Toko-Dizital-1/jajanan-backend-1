@@ -1,4 +1,4 @@
-import chai from 'chai'
+import chai, { assert } from 'chai'
 import chaiHttp from 'chai-http'
 import { server } from '../../../../src/App'
 import OneDatastore from '../../../../src/outers/datastores/OneDatastore'
@@ -218,16 +218,16 @@ describe('TopUpHistoryControllerRest', () => {
       response.body.data.should.has.property('amount').equal(requestBody.amount)
       response.body.data.should.has.property('media').equal(requestBody.media)
       response.body.data.should.has.property('created_at')
-      response.body.data.should.has.property('created_at')
+      response.body.data.should.has.property('updated_at')
     })
   })
 
-  describe('DELETE /api/v1/top-up-histories/:id', () => {
+  describe('DELETE /api/v1/top-up-histories/:id?method=hard', () => {
     it('should return 200 OK', async () => {
       const requestTopUpHistory: TopUpHistory = oneSeeder.topUpHistoryMock.data[0]
 
       const response = await agent
-        .delete(`/api/v1/top-up-histories/${requestTopUpHistory.id}`)
+        .delete(`/api/v1/top-up-histories/${requestTopUpHistory.id}?method=hard`)
         .set('Authorization', authorization.convertToString())
         .send()
 
@@ -235,6 +235,45 @@ describe('TopUpHistoryControllerRest', () => {
       response.body.should.be.an('object')
       response.body.should.has.property('message')
       response.body.should.has.property('data')
+      assert.isNull(response.body.data)
+
+      if (oneDatastore.client === undefined) {
+        throw new Error('oneDatastore client is undefined')
+      }
+      const result: TopUpHistory | null = await oneDatastore.client.topUpHistory.findFirst({
+        where: {
+          id: requestTopUpHistory.id
+        }
+      })
+      assert.isNull(result)
+    })
+  })
+
+  describe('DELETE /api/v1/top-up-histories/:id?method=soft', () => {
+    it('should return 200 OK', async () => {
+      const requestTopUpHistory: TopUpHistory = oneSeeder.topUpHistoryMock.data[0]
+
+      const response = await agent
+        .delete(`/api/v1/top-up-histories/${requestTopUpHistory.id}?method=soft`)
+        .set('Authorization', authorization.convertToString())
+        .send()
+
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      assert.isNull(response.body.data)
+
+      if (oneDatastore.client === undefined) {
+        throw new Error('oneDatastore client is undefined')
+      }
+      const result: TopUpHistory | null = await oneDatastore.client.topUpHistory.findFirst({
+        where: {
+          id: requestTopUpHistory.id
+        }
+      })
+      assert.isNotNull(result)
+      assert.isNotNull(result?.deletedAt)
     })
   })
 })

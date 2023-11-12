@@ -189,7 +189,7 @@ export default class VendorLevelManagement {
     )
   }
 
-  deleteOneById = async (id: string): Promise<Result<VendorLevel | null>> => {
+  deleteHardOneById = async (id: string): Promise<Result<VendorLevel | null>> => {
     let deletedVendorLevel: VendorLevel
     try {
       const args: RepositoryArgument = new RepositoryArgument(
@@ -201,14 +201,49 @@ export default class VendorLevelManagement {
       deletedVendorLevel = await this.vendorLevelRepository.deleteOne(args)
     } catch (error) {
       return new Result<null>(
-        500,
-        'VendorLevel delete one by id failed',
+        404,
+        'VendorLevel delete hard one by id failed, vendor level is not found.',
         null
       )
     }
     return new Result<VendorLevel>(
       200,
-      'Vendor level delete one by id succeed.',
+      'VendorLevel delete hard one by id succeed.',
+      deletedVendorLevel
+    )
+  }
+
+  deleteSoftOneById = async (id: string): Promise<Result<VendorLevel | null>> => {
+    let deletedVendorLevel: VendorLevel
+    try {
+      const foundVendorLevel: Result<VendorLevel | null> = await this.readOneById(id)
+      if (foundVendorLevel.status !== 200 || foundVendorLevel.data === null) {
+        return new Result<null>(
+          foundVendorLevel.status,
+          'VendorLevel delete soft one by id failed, vendor level is not found.',
+          null
+        )
+      }
+
+      foundVendorLevel.data.deletedAt = new Date()
+
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        foundVendorLevel.data
+      )
+      deletedVendorLevel = await this.vendorLevelRepository.patchOne(args)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'VendorLevel delete soft one by id failed, vendor level is not found.',
+        null
+      )
+    }
+    return new Result<VendorLevel>(
+      200,
+      'VendorLevel delete soft one by id succeed.',
       deletedVendorLevel
     )
   }

@@ -21,14 +21,20 @@ export default class AdminControllerRest {
   adminManagement: AdminManagement
   authenticationValidation: AuthenticationValidation
 
-  constructor (router: Router, adminManagement: AdminManagement, authenticationValidation: AuthenticationValidation) {
+  constructor (
+    router: Router,
+    adminManagement: AdminManagement,
+    authenticationValidation: AuthenticationValidation
+  ) {
     this.router = router
     this.adminManagement = adminManagement
     this.authenticationValidation = authenticationValidation
   }
 
   registerRoutes = (): void => {
-    this.router.use(validateAuthenticationMiddleware(this.authenticationValidation))
+    this.router.use(
+      validateAuthenticationMiddleware(this.authenticationValidation)
+    )
     this.router.get('', this.readMany)
     this.router.get('/:id', this.readOneById)
     this.router.post('', this.createOne)
@@ -37,39 +43,39 @@ export default class AdminControllerRest {
   }
 
   readMany = (request: Request, response: Response): void => {
-    const {
-      pageNumber,
-      pageSize,
-      where
-    } = request.query
+    const { pageNumber, pageSize, where } = request.query
     const pagination: Pagination = new Pagination(
       pageNumber === undefined ? 1 : Number(pageNumber),
       pageSize === undefined ? 10 : Number(pageSize)
     )
-    const whereInput: any = where === undefined ? {} : JSON.parse(decodeURIComponent(where as string))
+    const whereInput: any =
+      where === undefined
+        ? {}
+        : JSON.parse(decodeURIComponent(where as string))
     this.adminManagement
       .readMany(pagination, whereInput)
       .then((result: Result<Admin[]>) => {
-        const data: AdminManagementReadManyResponse = new AdminManagementReadManyResponse(
-          result.data.length,
-          result.data.map((admin: Admin) =>
-            new AdminManagementReadOneResponse(
-              admin.id,
-              admin.fullName,
-              admin.gender,
-              admin.email,
-              admin.createdAt,
-              admin.updatedAt
+        const data: AdminManagementReadManyResponse =
+          new AdminManagementReadManyResponse(
+            result.data.length,
+            result.data.map(
+              (admin: Admin) =>
+                new AdminManagementReadOneResponse(
+                  admin.id,
+                  admin.fullName,
+                  admin.gender,
+                  admin.email,
+                  admin.createdAt,
+                  admin.updatedAt
+                )
             )
           )
-        )
-        const responseBody: ResponseBody<AdminManagementReadManyResponse> = new ResponseBody<AdminManagementReadManyResponse>(
-          result.message,
-          data
-        )
-        response
-          .status(result.status)
-          .send(responseBody)
+        const responseBody: ResponseBody<AdminManagementReadManyResponse> =
+          new ResponseBody<AdminManagementReadManyResponse>(
+            result.message,
+            data
+          )
+        response.status(result.status).send(responseBody)
       })
       .catch((error: Error) => {
         response.status(500).send(error.message)
@@ -94,13 +100,12 @@ export default class AdminControllerRest {
         } else {
           data = null
         }
-        const responseBody: ResponseBody<AdminManagementReadOneResponse | null> = new ResponseBody<AdminManagementReadOneResponse | null>(
-          result.message,
-          data
-        )
-        response
-          .status(result.status)
-          .send(responseBody)
+        const responseBody: ResponseBody<AdminManagementReadOneResponse | null> =
+          new ResponseBody<AdminManagementReadOneResponse | null>(
+            result.message,
+            data
+          )
+        response.status(result.status).send(responseBody)
       })
       .catch((error: Error) => {
         response.status(500).send(error.message)
@@ -111,21 +116,18 @@ export default class AdminControllerRest {
     this.adminManagement
       .createOne(request.body)
       .then((result: Result<Admin>) => {
-        const data: AdminManagementCreateResponse = new AdminManagementCreateResponse(
-          result.data.id,
-          result.data.fullName,
-          result.data.gender,
-          result.data.email,
-          result.data.createdAt,
-          result.data.updatedAt
-        )
-        const responseBody: ResponseBody<AdminManagementCreateResponse> = new ResponseBody<AdminManagementCreateResponse>(
-          result.message,
-          data
-        )
-        response
-          .status(result.status)
-          .send(responseBody)
+        const data: AdminManagementCreateResponse =
+          new AdminManagementCreateResponse(
+            result.data.id,
+            result.data.fullName,
+            result.data.gender,
+            result.data.email,
+            result.data.createdAt,
+            result.data.updatedAt
+          )
+        const responseBody: ResponseBody<AdminManagementCreateResponse> =
+          new ResponseBody<AdminManagementCreateResponse>(result.message, data)
+        response.status(result.status).send(responseBody)
       })
       .catch((error: Error) => {
         response.status(500).send(error.message)
@@ -150,13 +152,12 @@ export default class AdminControllerRest {
         } else {
           data = null
         }
-        const responseBody: ResponseBody<AdminManagementPatchResponse | null> = new ResponseBody<AdminManagementPatchResponse | null>(
-          result.message,
-          data
-        )
-        response
-          .status(result.status)
-          .send(responseBody)
+        const responseBody: ResponseBody<AdminManagementPatchResponse | null> =
+          new ResponseBody<AdminManagementPatchResponse | null>(
+            result.message,
+            data
+          )
+        response.status(result.status).send(responseBody)
       })
       .catch((error: Error) => {
         response.status(500).send(error.message)
@@ -165,19 +166,49 @@ export default class AdminControllerRest {
 
   deleteOneById = (request: Request, response: Response): void => {
     const { id } = request.params
-    this.adminManagement
-      .deleteOneById(id)
-      .then((result: Result<Admin | null>) => {
-        const responseBody: ResponseBody<null> = new ResponseBody<null>(
-          result.message,
-          null
-        )
-        response
-          .status(result.status)
-          .send(responseBody)
-      })
-      .catch((error: Error) => {
-        response.status(500).send(error.message)
-      })
+    const { method } = request.query
+
+    if (method === undefined || method === null) {
+      const responseBody: ResponseBody<null> = new ResponseBody<null>(
+        'Query parameter method is required.',
+        null
+      )
+      response.status(400).send(responseBody)
+      return
+    }
+
+    if (method === 'soft') {
+      this.adminManagement
+        .deleteSoftOneById(id)
+        .then((result: Result<Admin | null>) => {
+          const responseBody: ResponseBody<null> = new ResponseBody<null>(
+            result.message,
+            null
+          )
+          response.status(result.status).send(responseBody)
+        })
+        .catch((error: Error) => {
+          response.status(500).send(error.message)
+        })
+    } else if (method === 'hard') {
+      this.adminManagement
+        .deleteHardOneById(id)
+        .then((result: Result<Admin | null>) => {
+          const responseBody: ResponseBody<null> = new ResponseBody<null>(
+            result.message,
+            null
+          )
+          response.status(result.status).send(responseBody)
+        })
+        .catch((error: Error) => {
+          response.status(500).send(error.message)
+        })
+    } else {
+      const responseBody: ResponseBody<null> = new ResponseBody<null>(
+        'Query parameter method is invalid.',
+        null
+      )
+      response.status(400).send(responseBody)
+    }
   }
 }

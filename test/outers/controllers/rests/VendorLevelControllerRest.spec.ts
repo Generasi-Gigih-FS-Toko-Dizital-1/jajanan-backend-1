@@ -263,7 +263,7 @@ describe('VendorLevelControllerRest', () => {
     })
   })
 
-  describe('DELETE /api/v1/vendor-levels/:id', () => {
+  describe('DELETE /api/v1/vendor-levels/:id?method=hard', () => {
     it('should return 200 OK', async () => {
       const requestVendorLevel: VendorLevel = oneSeeder.vendorLevelMock.data[0]
       if (oneDatastore.client === undefined) {
@@ -271,7 +271,7 @@ describe('VendorLevelControllerRest', () => {
       }
 
       const response = await agent
-        .delete(`/api/v1/vendor-levels/${requestVendorLevel.id}`)
+        .delete(`/api/v1/vendor-levels/${requestVendorLevel.id}?method=hard`)
         .set('Authorization', authorization.convertToString())
         .send()
 
@@ -287,6 +287,34 @@ describe('VendorLevelControllerRest', () => {
         }
       })
       assert.isNull(result)
+    })
+  })
+
+  describe('DELETE /api/v1/vendor-levels/:id?method=soft', () => {
+    it('should return 200 OK', async () => {
+      const requestVendorLevel: VendorLevel = oneSeeder.vendorLevelMock.data[0]
+      if (oneDatastore.client === undefined) {
+        throw new Error('oneDatastore client is undefined')
+      }
+
+      const response = await agent
+        .delete(`/api/v1/vendor-levels/${requestVendorLevel.id}?method=soft`)
+        .set('Authorization', authorization.convertToString())
+        .send()
+
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      assert.isNull(response.body.data)
+
+      const result: VendorLevel | null = await oneDatastore.client.vendorLevel.findFirst({
+        where: {
+          id: requestVendorLevel.id
+        }
+      })
+      assert.isNotNull(result)
+      assert.isNotNull(result?.deletedAt)
     })
   })
 })

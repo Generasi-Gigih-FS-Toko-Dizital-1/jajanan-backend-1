@@ -218,7 +218,7 @@ export default class AdminManagement {
     )
   }
 
-  deleteOneById = async (id: string): Promise<Result<Admin | null>> => {
+  deleteHardOneById = async (id: string): Promise<Result<Admin | null>> => {
     let deletedAdmin: Admin
     try {
       const args: RepositoryArgument = new RepositoryArgument(
@@ -231,13 +231,48 @@ export default class AdminManagement {
     } catch (error) {
       return new Result<null>(
         404,
-        'Admin delete one by id failed, admin is not found.',
+        'Admin delete hard one by id failed, admin is not found.',
         null
       )
     }
     return new Result<Admin>(
       200,
-      'Admin delete one by id succeed.',
+      'Admin delete hard one by id succeed.',
+      deletedAdmin
+    )
+  }
+
+  deleteSoftOneById = async (id: string): Promise<Result<Admin | null>> => {
+    let deletedAdmin: Admin
+    try {
+      const foundAdmin: Result<Admin | null> = await this.readOneById(id)
+      if (foundAdmin.status !== 200 || foundAdmin.data === null) {
+        return new Result<null>(
+          foundAdmin.status,
+          'Admin delete soft one by id failed, admin is not found.',
+          null
+        )
+      }
+
+      foundAdmin.data.deletedAt = new Date()
+
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        foundAdmin.data
+      )
+      deletedAdmin = await this.adminRepository.patchOne(args)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'Admin delete soft one by id failed, admin is not found.',
+        null
+      )
+    }
+    return new Result<Admin>(
+      200,
+      'Admin delete soft one by id succeed.',
       deletedAdmin
     )
   }

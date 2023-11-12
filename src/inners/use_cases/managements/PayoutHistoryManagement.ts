@@ -10,7 +10,6 @@ import type PayoutHistoryManagementCreateRequest
   from '../../models/value_objects/requests/managements/payout_history_managements/PayoutHistoryManagementCreateRequest'
 import type PayoutHistoryManagementPatchRequest
   from '../../models/value_objects/requests/managements/payout_history_managements/PayoutHistoryManagementPatchRequest'
-import type PayoutHistoryAggregate from '../../models/aggregates/PayoutHistoryAggregate'
 
 export default class PayoutHistoryManagement {
   constructor (
@@ -112,14 +111,62 @@ export default class PayoutHistoryManagement {
     return new Result<PayoutHistory | null>(200, 'PayoutHistory patch one by id succeed.', patchedPayoutHistory)
   }
 
-  deleteOneById = async (id: string): Promise<Result<PayoutHistory | null>> => {
-    const args: RepositoryArgument = new RepositoryArgument(
-      { id }
-    )
-    const deletedPayoutHistory: PayoutHistory | PayoutHistoryAggregate = await this.payoutHistoryRepository.deleteOne(args)
-
+  deleteHardOneById = async (id: string): Promise<Result<PayoutHistory | null>> => {
+    let deletedPayoutHistory: PayoutHistory
+    try {
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        undefined
+      )
+      deletedPayoutHistory = await this.payoutHistoryRepository.deleteOne(args)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'PayoutHistory delete hard one by id failed, payout history is not found.',
+        null
+      )
+    }
     return new Result<PayoutHistory>(
-      200, 'PayoutHistory delete one by id succeed.', deletedPayoutHistory
+      200,
+      'PayoutHistory delete hard one by id succeed.',
+      deletedPayoutHistory
+    )
+  }
+
+  deleteSoftOneById = async (id: string): Promise<Result<PayoutHistory | null>> => {
+    let deletedPayoutHistory: PayoutHistory
+    try {
+      const foundPayoutHistory: Result<PayoutHistory | null> = await this.readOneById(id)
+      if (foundPayoutHistory.status !== 200 || foundPayoutHistory.data === null) {
+        return new Result<null>(
+          foundPayoutHistory.status,
+          'PayoutHistory delete soft one by id failed, payout history is not found.',
+          null
+        )
+      }
+
+      foundPayoutHistory.data.deletedAt = new Date()
+
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        foundPayoutHistory.data
+      )
+      deletedPayoutHistory = await this.payoutHistoryRepository.patchOne(args)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'PayoutHistory delete soft one by id failed, payout history is not found.',
+        null
+      )
+    }
+    return new Result<PayoutHistory>(
+      200,
+      'PayoutHistory delete soft one by id succeed.',
+      deletedPayoutHistory
     )
   }
 }

@@ -46,9 +46,7 @@ export default class JajanItemSnapshotManagement {
     let foundJajanItemSnapshot: JajanItemSnapshot
     try {
       const args: RepositoryArgument = new RepositoryArgument(
-        { id },
-        undefined,
-        undefined
+        { id }
       )
       foundJajanItemSnapshot = await this.jajanItemSnapshotRepository.readOne(args)
     } catch (error) {
@@ -137,7 +135,7 @@ export default class JajanItemSnapshotManagement {
     )
   }
 
-  deleteOneById = async (id: string): Promise<Result<JajanItemSnapshot | null>> => {
+  deleteHardOneById = async (id: string): Promise<Result<JajanItemSnapshot | null>> => {
     let deletedJajanItemSnapshot: JajanItemSnapshot
     try {
       const args: RepositoryArgument = new RepositoryArgument(
@@ -149,14 +147,49 @@ export default class JajanItemSnapshotManagement {
       deletedJajanItemSnapshot = await this.jajanItemSnapshotRepository.deleteOne(args)
     } catch (error) {
       return new Result<null>(
-        500,
-        'JajanItemSnapshot delete one by id failed',
+        404,
+        'JajanItemSnapshot delete hard one by id failed, jajan item snapshot is not found.',
         null
       )
     }
     return new Result<JajanItemSnapshot>(
       200,
-      'Jajan Item Snapshot delete one by id succeed.',
+      'JajanItemSnapshot delete hard one by id succeed.',
+      deletedJajanItemSnapshot
+    )
+  }
+
+  deleteSoftOneById = async (id: string): Promise<Result<JajanItemSnapshot | null>> => {
+    let deletedJajanItemSnapshot: JajanItemSnapshot
+    try {
+      const foundJajanItemSnapshot: Result<JajanItemSnapshot | null> = await this.readOneById(id)
+      if (foundJajanItemSnapshot.status !== 200 || foundJajanItemSnapshot.data === null) {
+        return new Result<null>(
+          foundJajanItemSnapshot.status,
+          'JajanItemSnapshot delete soft one by id failed, jajan item snapshot is not found.',
+          null
+        )
+      }
+
+      foundJajanItemSnapshot.data.deletedAt = new Date()
+
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        foundJajanItemSnapshot.data
+      )
+      deletedJajanItemSnapshot = await this.jajanItemSnapshotRepository.patchOne(args)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'JajanItemSnapshot delete soft one by id failed, jajan item snapshot is not found.',
+        null
+      )
+    }
+    return new Result<JajanItemSnapshot>(
+      200,
+      'JajanItemSnapshot delete soft one by id succeed.',
       deletedJajanItemSnapshot
     )
   }

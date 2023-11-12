@@ -251,12 +251,12 @@ describe('AdminControllerRest', () => {
     })
   })
 
-  describe('DELETE /api/v1/admins/:id', () => {
+  describe('DELETE /api/v1/admins/:id?method=hard', () => {
     it('should return 200 OK', async () => {
       const requestAdmin: Admin = oneSeeder.adminMock.data[0]
 
       const response = await agent
-        .delete(`/api/v1/admins/${requestAdmin.id}`)
+        .delete(`/api/v1/admins/${requestAdmin.id}?method=hard`)
         .set('Authorization', authorization.convertToString())
         .send()
 
@@ -275,6 +275,33 @@ describe('AdminControllerRest', () => {
         }
       })
       assert.isNull(result)
+    })
+  })
+
+  describe('DELETE /api/v1/admins/:id?method=soft', () => {
+    it('should return 200 OK', async () => {
+      const requestAdmin: Admin = oneSeeder.adminMock.data[0]
+
+      const response = await agent
+        .delete(`/api/v1/admins/${requestAdmin.id}?method=soft`)
+        .set('Authorization', authorization.convertToString())
+        .send()
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      assert.isNull(response.body.data)
+
+      if (oneDatastore.client === undefined) {
+        throw new Error('oneDatastore client is undefined')
+      }
+      const result: Admin | null = await oneDatastore.client.admin.findFirst({
+        where: {
+          id: requestAdmin.id
+        }
+      })
+      assert.isNotNull(result)
+      assert.isNotNull(result?.deletedAt)
     })
   })
 })
