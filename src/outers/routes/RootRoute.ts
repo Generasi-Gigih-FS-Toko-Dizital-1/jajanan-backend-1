@@ -116,8 +116,6 @@ export default class RootRoute {
     const vendorPayoutRepository = new VendorPayoutRepository(this.datastoreOne)
     const payoutHistoryRepository = new PayoutHistoryRepository(this.datastoreOne)
 
-    const sessionManagement: SessionManagement = new SessionManagement(sessionRepository, objectUtility)
-    const authenticationValidation: AuthenticationValidation = new AuthenticationValidation(sessionManagement)
     const userManagement: UserManagement = new UserManagement(userRepository, objectUtility)
     const vendorManagement: VendorManagement = new VendorManagement(vendorRepository, objectUtility)
     const adminManagement: AdminManagement = new AdminManagement(adminRepository, objectUtility)
@@ -132,6 +130,8 @@ export default class RootRoute {
     const userSubscriptionManagement: UserSubscriptionManagement = new UserSubscriptionManagement(userSubscriptionRepository, objectUtility)
     const payoutHistoryManagement: PayoutHistoryManagement = new PayoutHistoryManagement(payoutHistoryRepository, vendorManagement, objectUtility)
     const fileManagement: FileManagement = new FileManagement(cloudinaryGateway, cloudinaryUtility, objectUtility)
+    const sessionManagement: SessionManagement = new SessionManagement(sessionRepository, objectUtility)
+    const authenticationValidation: AuthenticationValidation = new AuthenticationValidation(sessionManagement, userManagement, vendorManagement, adminManagement, objectUtility)
 
     const subscriptionUser: SubscriptionUser = new SubscriptionUser(userSubscriptionManagement)
 

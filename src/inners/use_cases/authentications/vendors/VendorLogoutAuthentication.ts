@@ -47,7 +47,7 @@ export default class VendorLogoutAuthentication {
     const authorizationString: string = JSON.stringify(oldAuthorization)
     const oldId: string = bcrypt.hashSync(authorizationString, salt)
 
-    const oldSession: Result<Session | null> = await this.sessionManagement.readOneById(oldId)
+    const oldSession: Result<Session | null> = await this.sessionManagement.readOneByAuthorizationId(oldId)
     if (oldSession.status !== 200 || oldSession.data === null) {
       return new Result<null>(
         404,

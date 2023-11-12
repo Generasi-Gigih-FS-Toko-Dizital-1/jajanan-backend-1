@@ -88,7 +88,7 @@ export default class LocationSync {
     if (request.isNotifyUsers) {
       const foundUserFirebaseTokens: string[] = []
       for (const user of foundUsers.data) {
-        const foundUserSession: Result<Session | null> = await this.sessionManagement.readOneById(user.id)
+        const foundUserSession: Result<Session | null> = await this.sessionManagement.readOneByAccountId(user.id)
         if (foundUserSession.status !== 200 || foundUserSession.data === null) {
           console.log(`Session read one by account id failed, user id: ${user.id}`)
         } else {
