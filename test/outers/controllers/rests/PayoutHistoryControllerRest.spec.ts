@@ -222,7 +222,7 @@ describe('PayoutHistoryControllerRest', () => {
       response.body.data.should.has.property('amount').equal(requestBody.amount)
       response.body.data.should.has.property('media').equal(requestBody.media)
       response.body.data.should.has.property('created_at')
-      response.body.data.should.has.property('created_at')
+      response.body.data.should.has.property('updated_at')
     })
   })
 
@@ -276,13 +276,8 @@ describe('PayoutHistoryControllerRest', () => {
           id: requestPayoutHistory.id
         }
       })
+      assert.isNotNull(result)
       assert.isNotNull(result?.deletedAt)
-
-      await oneDatastore.client.payoutHistory.delete({
-        where: {
-          id: requestPayoutHistory.id
-        }
-      })
     })
   })
 })

@@ -170,50 +170,62 @@ export default class JajanItemManagement {
     )
   }
 
-  deleteOneById = async (id: string, method: string): Promise<Result<JajanItem | null>> => {
+  deleteHardOneById = async (id: string): Promise<Result<JajanItem | null>> => {
+    let deletedJajanItem: JajanItem
     try {
-      let deletedJajanItem: JajanItem
       const args: RepositoryArgument = new RepositoryArgument(
-        { id }
+        { id },
+        undefined,
+        undefined,
+        undefined
       )
-      if (method === 'hard') {
-        deletedJajanItem = await this.jajanItemRepository.deleteOne(args)
-      } else if (method === 'soft') {
-        const jajanItem: JajanItem = await this.jajanItemRepository.readOne(args)
+      deletedJajanItem = await this.jajanItemRepository.deleteOne(args)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'JajanItem delete one hard by id failed, jajan item is not found.',
+        null
+      )
+    }
+    return new Result<JajanItem>(
+      200,
+      'JajanItem delete hard one by id succeed.',
+      deletedJajanItem
+    )
+  }
 
-        const newJajanItem: JajanItem = {
-          ...jajanItem,
-          deletedAt: new Date()
-        }
-
-        const softDeleteArgs: RepositoryArgument = new RepositoryArgument(
-          { id },
-          undefined,
-          undefined,
-          newJajanItem
-        )
-
-        deletedJajanItem = await this.jajanItemRepository.patchOne(softDeleteArgs)
-      } else {
+  deleteSoftOneById = async (id: string): Promise<Result<JajanItem | null>> => {
+    let deletedJajanItem: JajanItem
+    try {
+      const foundJajanItem: Result<JajanItem | null> = await this.readOneById(id)
+      if (foundJajanItem.status !== 200 || foundJajanItem.data === null) {
         return new Result<null>(
-          400,
-          'Invalid deletion method. Use "hard" or "soft".',
+          foundJajanItem.status,
+          'JajanItem delete soft one by id failed, jajan item is not found.',
           null
         )
       }
 
-      return new Result<JajanItem>(
-        200,
-        'Jajan Item delete one by id succeed.',
-        deletedJajanItem
+      foundJajanItem.data.deletedAt = new Date()
+
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        foundJajanItem.data
       )
+      deletedJajanItem = await this.jajanItemRepository.patchOne(args)
     } catch (error) {
-      const errorMessage = (error as Error).message
       return new Result<null>(
         404,
-        `Admin delete one by id failed, ${errorMessage}`,
+        'JajanItem delete soft one by id failed, jajan item is not found.',
         null
       )
     }
+    return new Result<JajanItem>(
+      200,
+      'JajanItem delete soft one by id succeed.',
+      deletedJajanItem
+    )
   }
 }

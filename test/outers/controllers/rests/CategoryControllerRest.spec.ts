@@ -338,47 +338,8 @@ describe('CategoryControllerRest', () => {
           id: requestCategory.id
         }
       })
+      assert.isNotNull(result)
       assert.isNotNull(result?.deletedAt)
-
-      const requestJajanItems: JajanItem[] = oneSeeder.jajanItemMock.data.filter((jajanItem: JajanItem) => jajanItem.categoryId === requestCategory.id)
-      const requestJajanItemSnapshots: JajanItemSnapshot[] = oneSeeder.jajanItemSnapshotMock.data.filter((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.categoryId === requestCategory.id)
-      const requestTransactionItemHistories: TransactionItemHistory[] = oneSeeder.transactionItemHistoryMock.data.filter((transactionItemHistory: TransactionItemHistory) => requestJajanItemSnapshots.map((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.id).includes(transactionItemHistory.jajanItemSnapshotId))
-      const requestUserSubscriptions: UserSubscription[] = oneSeeder.userSubscriptionMock.data.filter((userSubscription: UserSubscription) => userSubscription.categoryId === requestCategory.id)
-
-      await oneDatastore.client.userSubscription.deleteMany({
-        where: {
-          id: {
-            in: requestUserSubscriptions.map((userSubscription: UserSubscription) => userSubscription.id)
-          }
-        }
-      })
-      await oneDatastore.client.transactionItemHistory.deleteMany({
-        where: {
-          id: {
-            in: requestTransactionItemHistories.map((transactionItemHistory: TransactionItemHistory) => transactionItemHistory.id)
-          }
-        }
-      })
-      await oneDatastore.client.jajanItemSnapshot.deleteMany({
-        where: {
-          id: {
-            in: requestJajanItemSnapshots.map((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.id)
-          }
-        }
-      })
-      await oneDatastore.client.jajanItem.deleteMany({
-        where: {
-          id: {
-            in: requestJajanItems.map((jajanItem: JajanItem) => jajanItem.id)
-          }
-        }
-      })
-
-      await oneDatastore.client.category.delete({
-        where: {
-          id: requestCategory.id
-        }
-      })
     })
   })
 })

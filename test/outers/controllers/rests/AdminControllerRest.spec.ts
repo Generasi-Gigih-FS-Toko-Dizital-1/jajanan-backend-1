@@ -300,13 +300,8 @@ describe('AdminControllerRest', () => {
           id: requestAdmin.id
         }
       })
+      assert.isNotNull(result)
       assert.isNotNull(result?.deletedAt)
-
-      await oneDatastore.client.admin.delete({
-        where: {
-          id: requestAdmin.id
-        }
-      })
     })
   })
 })

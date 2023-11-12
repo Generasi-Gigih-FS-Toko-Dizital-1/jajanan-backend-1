@@ -391,7 +391,7 @@ describe('VendorControllerRest', () => {
     })
   })
 
-  describe('DELETE /api/v1/vendors/:id', () => {
+  describe('DELETE /api/v1/vendors/:id?method=hard', () => {
     it('should return 200 OK', async () => {
       const requestVendor: Vendor = oneSeeder.vendorMock.data[0]
       const requestNotificationHistories: NotificationHistory[] = oneSeeder.notificationHistoryMock.data.filter((notificationHistory: NotificationHistory) => notificationHistory.vendorId === requestVendor.id)
@@ -440,7 +440,7 @@ describe('VendorControllerRest', () => {
       })
 
       const response = await agent
-        .delete(`/api/v1/vendors/${requestVendor.id}`)
+        .delete(`/api/v1/vendors/${requestVendor.id}?method=hard`)
         .set('Authorization', authorization.convertToString())
         .send()
 
@@ -456,6 +456,35 @@ describe('VendorControllerRest', () => {
         }
       })
       assert.isNull(result)
+    })
+  })
+
+  describe('DELETE /api/v1/vendors/:id?method=soft', () => {
+    it('should return 200 OK', async () => {
+      const requestVendor: Vendor = oneSeeder.vendorMock.data[0]
+
+      if (oneDatastore.client === undefined) {
+        throw new Error('oneDatastore client is undefined')
+      }
+
+      const response = await agent
+        .delete(`/api/v1/vendors/${requestVendor.id}?method=soft`)
+        .set('Authorization', authorization.convertToString())
+        .send()
+
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      assert.isNull(response.body.data)
+
+      const result: Vendor | null = await oneDatastore.client.vendor.findFirst({
+        where: {
+          id: requestVendor.id
+        }
+      })
+      assert.isNotNull(result)
+      assert.isNotNull(result?.deletedAt)
     })
   })
 })

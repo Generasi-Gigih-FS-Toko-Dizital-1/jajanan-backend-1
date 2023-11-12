@@ -177,7 +177,7 @@ export default class TransactionHistoryManagement {
     )
   }
 
-  deleteOneById = async (id: string): Promise<Result<TransactionHistory | null>> => {
+  deleteHardOneById = async (id: string): Promise<Result<TransactionHistory | null>> => {
     let deletedTransactionHistory: TransactionHistory
     try {
       const args: RepositoryArgument = new RepositoryArgument(
@@ -190,7 +190,42 @@ export default class TransactionHistoryManagement {
     } catch (error) {
       return new Result<null>(
         404,
-        'TransactionHistory delete one by id failed, transaction history is not found.',
+        'TransactionHistory delete  hard one by id failed, transaction history is not found.',
+        null
+      )
+    }
+    return new Result<TransactionHistory>(
+      200,
+      'TransactionHistory delete hard one by id succeed.',
+      deletedTransactionHistory
+    )
+  }
+
+  deleteSoftOneById = async (id: string): Promise<Result<TransactionHistory | null>> => {
+    let deletedTransactionHistory: TransactionHistory
+    try {
+      const foundTransactionHistory: Result<TransactionHistory | null> = await this.readOneById(id)
+      if (foundTransactionHistory.status !== 200 || foundTransactionHistory.data === null) {
+        return new Result<null>(
+          foundTransactionHistory.status,
+          'TransactionHistory delete soft one by id failed, transaction history is not found.',
+          null
+        )
+      }
+
+      foundTransactionHistory.data.deletedAt = new Date()
+
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        foundTransactionHistory.data
+      )
+      deletedTransactionHistory = await this.transactionHistoryRepository.patchOne(args)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'TransactionHistory delete soft one by id failed, transaction history is not found.',
         null
       )
     }

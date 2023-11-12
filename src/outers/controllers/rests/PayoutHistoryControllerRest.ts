@@ -172,19 +172,48 @@ export default class PayoutHistoryController {
   deleteOneById = (request: Request, response: Response): void => {
     const { id } = request.params
     const { method } = request.query
-    this.payoutHistoryManagement
-      .deleteOneById(id, String(method))
-      .then((result: Result<PayoutHistory | null>) => {
-        const responseBody: ResponseBody<null> = new ResponseBody<null>(
-          result.message,
-          null
-        )
-        response
-          .status(result.status)
-          .send(responseBody)
-      })
-      .catch((error: Error) => {
-        response.status(500).send(error.message)
-      })
+
+    if (method === undefined || method === null) {
+      const responseBody: ResponseBody<null> = new ResponseBody<null>(
+        'Query parameter method is required.',
+        null
+      )
+      response.status(400).send(responseBody)
+      return
+    }
+
+    if (method === 'soft') {
+      this.payoutHistoryManagement
+        .deleteSoftOneById(id)
+        .then((result: Result<PayoutHistory | null>) => {
+          const responseBody: ResponseBody<null> = new ResponseBody<null>(
+            result.message,
+            null
+          )
+          response.status(result.status).send(responseBody)
+        })
+        .catch((error: Error) => {
+          response.status(500).send(error.message)
+        })
+    } else if (method === 'hard') {
+      this.payoutHistoryManagement
+        .deleteHardOneById(id)
+        .then((result: Result<PayoutHistory | null>) => {
+          const responseBody: ResponseBody<null> = new ResponseBody<null>(
+            result.message,
+            null
+          )
+          response.status(result.status).send(responseBody)
+        })
+        .catch((error: Error) => {
+          response.status(500).send(error.message)
+        })
+    } else {
+      const responseBody: ResponseBody<null> = new ResponseBody<null>(
+        'Query parameter method is invalid.',
+        null
+      )
+      response.status(400).send(responseBody)
+    }
   }
 }

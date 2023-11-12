@@ -298,7 +298,7 @@ export default class UserManagement {
     )
   }
 
-  deleteOneById = async (id: string): Promise<Result<User | null>> => {
+  deleteHardOneById = async (id: string): Promise<Result<User | null>> => {
     let deletedUser: User
     try {
       const args: RepositoryArgument = new RepositoryArgument(
@@ -310,14 +310,49 @@ export default class UserManagement {
       deletedUser = await this.userRepository.deleteOne(args)
     } catch (error) {
       return new Result<null>(
-        500,
-        'User delete one by id failed.',
+        404,
+        'User delete hard one by id failed, user is not found.',
         null
       )
     }
     return new Result<User>(
       200,
-      'User delete one by id succeed.',
+      'User delete hard one by id succeed.',
+      deletedUser
+    )
+  }
+
+  deleteSoftOneById = async (id: string): Promise<Result<User | null>> => {
+    let deletedUser: User
+    try {
+      const foundUser: Result<User | null> = await this.readOneById(id)
+      if (foundUser.status !== 200 || foundUser.data === null) {
+        return new Result<null>(
+          foundUser.status,
+          'User delete soft one by id failed, user is not found.',
+          null
+        )
+      }
+
+      foundUser.data.deletedAt = new Date()
+
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        foundUser.data
+      )
+      deletedUser = await this.userRepository.patchOne(args)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'User delete soft one by id failed, user is not found.',
+        null
+      )
+    }
+    return new Result<User>(
+      200,
+      'User delete soft one by id succeed.',
       deletedUser
     )
   }

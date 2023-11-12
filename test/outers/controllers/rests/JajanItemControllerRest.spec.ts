@@ -348,31 +348,8 @@ describe('JajanItemControllerRest', () => {
           id: requestJajanItem.id
         }
       })
+      assert.isNotNull(result)
       assert.isNotNull(result?.deletedAt)
-
-      const requestJajanItemSnapshots: JajanItemSnapshot[] = oneSeeder.jajanItemSnapshotMock.data.filter((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.originId === requestJajanItem.id)
-      const requestTransactionItemHistories: TransactionItemHistory[] = oneSeeder.transactionItemHistoryMock.data.filter((transactionItemHistory: TransactionItemHistory) => requestJajanItemSnapshots.map((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.id).includes(transactionItemHistory.jajanItemSnapshotId))
-
-      await oneDatastore.client.transactionItemHistory.deleteMany({
-        where: {
-          id: {
-            in: requestTransactionItemHistories.map((transactionItemHistory: TransactionItemHistory) => transactionItemHistory.id)
-          }
-        }
-      })
-      await oneDatastore.client.jajanItemSnapshot.deleteMany({
-        where: {
-          id: {
-            in: requestJajanItemSnapshots.map((jajanItemSnapshot: JajanItemSnapshot) => jajanItemSnapshot.id)
-          }
-        }
-      })
-
-      await oneDatastore.client.jajanItem.delete({
-        where: {
-          id: requestJajanItem.id
-        }
-      })
     })
   })
 })

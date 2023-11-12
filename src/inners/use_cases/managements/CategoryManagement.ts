@@ -146,50 +146,62 @@ export default class CategoryManagement {
     )
   }
 
-  deleteOneById = async (id: string, method: string): Promise<Result<Category | null>> => {
+  deleteHardOneById = async (id: string): Promise<Result<Category | null>> => {
+    let deletedCategory: Category
     try {
-      let deletedCatgory: Category
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        undefined
+      )
+      deletedCategory = await this.categoryRepository.deleteOne(args)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'Category delete hard one by id failed, category is not found.',
+        null
+      )
+    }
+    return new Result<Category>(
+      200,
+      'Category delete hard one by id succeed.',
+      deletedCategory
+    )
+  }
 
-      const args: RepositoryArgument = new RepositoryArgument({ id })
-
-      if (method === 'hard') {
-        deletedCatgory = await this.categoryRepository.deleteOne(args)
-      } else if (method === 'soft') {
-        const category: Category = await this.categoryRepository.readOne(args)
-
-        const newCategory: Category = {
-          ...category,
-          deletedAt: new Date()
-        }
-
-        const softDeleteArgs: RepositoryArgument = new RepositoryArgument(
-          { id },
-          undefined,
-          undefined,
-          newCategory
-        )
-
-        deletedCatgory = await this.categoryRepository.patchOne(softDeleteArgs)
-      } else {
+  deleteSoftOneById = async (id: string): Promise<Result<Category | null>> => {
+    let deletedCatgeory: Category
+    try {
+      const foundCategory: Result<Category | null> = await this.readOneById(id)
+      if (foundCategory.status !== 200 || foundCategory.data === null) {
         return new Result<null>(
-          400,
-          'Invalid deletion method. Use "hard" or "soft".',
+          foundCategory.status,
+          'Category patch one by id failed, admin is not found.',
           null
         )
       }
 
-      return new Result<Category>(
-        200,
-        'Category delete one by id succeed.',
-        deletedCatgory
+      foundCategory.data.deletedAt = new Date()
+
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        foundCategory.data
       )
+      deletedCatgeory = await this.categoryRepository.patchOne(args)
     } catch (error) {
-      const errorMessage = (error as Error).message
       return new Result<null>(
         404,
-        `Category delete one by id failed, ${errorMessage}`,
+        'Category delete soft one by id failed, category is not found.',
         null
       )
     }
+    return new Result<Category>(
+      200,
+      'Category delete soft one by id succeed.',
+      deletedCatgeory
+    )
   }
 }

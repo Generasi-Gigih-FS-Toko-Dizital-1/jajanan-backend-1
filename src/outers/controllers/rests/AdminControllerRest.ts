@@ -164,7 +164,7 @@ export default class AdminControllerRest {
     const { id } = request.params
     const { method } = request.query
 
-    if (method !== 'soft' && method !== 'hard') {
+    if (method === undefined || method === null) {
       const responseBody: ResponseBody<null> = new ResponseBody<null>(
         'Query parameter method is required.',
         null

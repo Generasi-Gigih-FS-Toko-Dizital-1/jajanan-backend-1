@@ -231,13 +231,13 @@ export default class AdminManagement {
     } catch (error) {
       return new Result<null>(
         404,
-        'admin delete one by id failed, transaction history is not found.',
+        'Admin delete hard one by id failed, admin is not found.',
         null
       )
     }
     return new Result<Admin>(
       200,
-      'admin delete one by id succeed.',
+      'Admin delete hard one by id succeed.',
       deletedAdmin
     )
   }
@@ -249,7 +249,7 @@ export default class AdminManagement {
       if (foundAdmin.status !== 200 || foundAdmin.data === null) {
         return new Result<null>(
           foundAdmin.status,
-          'Admin patch one by id failed, admin is not found.',
+          'Admin delete soft one by id failed, admin is not found.',
           null
         )
       }
@@ -266,13 +266,13 @@ export default class AdminManagement {
     } catch (error) {
       return new Result<null>(
         404,
-        'admin delete one by id failed, transaction history is not found.',
+        'Admin delete soft one by id failed, admin is not found.',
         null
       )
     }
     return new Result<Admin>(
       200,
-      'admin delete one by id succeed.',
+      'Admin delete soft one by id succeed.',
       deletedAdmin
     )
   }

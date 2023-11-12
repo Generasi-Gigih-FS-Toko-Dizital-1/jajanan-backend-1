@@ -135,50 +135,62 @@ export default class JajanItemSnapshotManagement {
     )
   }
 
-  deleteOneById = async (id: string, method: string): Promise<Result<JajanItemSnapshot | null>> => {
+  deleteHardOneById = async (id: string): Promise<Result<JajanItemSnapshot | null>> => {
+    let deletedJajanItemSnapshot: JajanItemSnapshot
     try {
-      let deletedJajanItemSnapshot: JajanItemSnapshot
       const args: RepositoryArgument = new RepositoryArgument(
-        { id }
+        { id },
+        undefined,
+        undefined,
+        undefined
       )
-      if (method === 'hard') {
-        deletedJajanItemSnapshot = await this.jajanItemSnapshotRepository.deleteOne(args)
-      } else if (method === 'soft') {
-        const jajanItemSnapshot: JajanItemSnapshot = await this.jajanItemSnapshotRepository.readOne(args)
+      deletedJajanItemSnapshot = await this.jajanItemSnapshotRepository.deleteOne(args)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'JajanItemSnapshot delete hard one by id failed, jajan item snapshot is not found.',
+        null
+      )
+    }
+    return new Result<JajanItemSnapshot>(
+      200,
+      'JajanItemSnapshot delete hard one by id succeed.',
+      deletedJajanItemSnapshot
+    )
+  }
 
-        const newJajanItemSnapshot: JajanItemSnapshot = {
-          ...jajanItemSnapshot,
-          deletedAt: new Date()
-        }
-
-        const softDeleteArgs: RepositoryArgument = new RepositoryArgument(
-          { id },
-          undefined,
-          undefined,
-          newJajanItemSnapshot
-        )
-
-        deletedJajanItemSnapshot = await this.jajanItemSnapshotRepository.patchOne(softDeleteArgs)
-      } else {
+  deleteSoftOneById = async (id: string): Promise<Result<JajanItemSnapshot | null>> => {
+    let deletedJajanItemSnapshot: JajanItemSnapshot
+    try {
+      const foundJajanItemSnapshot: Result<JajanItemSnapshot | null> = await this.readOneById(id)
+      if (foundJajanItemSnapshot.status !== 200 || foundJajanItemSnapshot.data === null) {
         return new Result<null>(
-          400,
-          'Invalid deletion method. Use "hard" or "soft".',
+          foundJajanItemSnapshot.status,
+          'JajanItemSnapshot delete soft one by id failed, jajan item snapshot is not found.',
           null
         )
       }
 
-      return new Result<JajanItemSnapshot>(
-        200,
-        'Jajan Item Snapshot delete one by id succeed.',
-        deletedJajanItemSnapshot
+      foundJajanItemSnapshot.data.deletedAt = new Date()
+
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        foundJajanItemSnapshot.data
       )
+      deletedJajanItemSnapshot = await this.jajanItemSnapshotRepository.patchOne(args)
     } catch (error) {
-      const errorMessage = (error as Error).message
       return new Result<null>(
         404,
-        `JajajnItemSnapshot delete one by id failed, ${errorMessage}`,
+        'JajanItemSnapshot delete soft one by id failed, jajan item snapshot is not found.',
         null
       )
     }
+    return new Result<JajanItemSnapshot>(
+      200,
+      'JajanItemSnapshot delete soft one by id succeed.',
+      deletedJajanItemSnapshot
+    )
   }
 }

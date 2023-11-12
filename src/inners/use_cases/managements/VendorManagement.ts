@@ -355,8 +355,8 @@ export default class VendorManagement {
     )
   }
 
-  deleteOneById = async (id: string): Promise<Result<Vendor | null>> => {
-    let deletedVendor: Vendor
+  deleteHardOneById = async (id: string): Promise<Result<Vendor | null>> => {
+    let deletedvendor: Vendor
     try {
       const args: RepositoryArgument = new RepositoryArgument(
         { id },
@@ -364,18 +364,53 @@ export default class VendorManagement {
         undefined,
         undefined
       )
-      deletedVendor = await this.vendorRepository.deleteOne(args)
+      deletedvendor = await this.vendorRepository.deleteOne(args)
     } catch (error) {
       return new Result<null>(
-        500,
-        'Vendor delete one by id failed.',
+        404,
+        'vendor delete hard one by id failed, vendor is not found.',
         null
       )
     }
     return new Result<Vendor>(
       200,
-      'Vendor delete one by id succeed.',
-      deletedVendor
+      'vendor delete hard one by id succeed.',
+      deletedvendor
+    )
+  }
+
+  deleteSoftOneById = async (id: string): Promise<Result<Vendor | null>> => {
+    let deletedvendor: Vendor
+    try {
+      const foundvendor: Result<Vendor | null> = await this.readOneById(id)
+      if (foundvendor.status !== 200 || foundvendor.data === null) {
+        return new Result<null>(
+          foundvendor.status,
+          'vendor delete soft one by id failed, vendor is not found.',
+          null
+        )
+      }
+
+      foundvendor.data.deletedAt = new Date()
+
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        foundvendor.data
+      )
+      deletedvendor = await this.vendorRepository.patchOne(args)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'vendor delete soft one by id failed, vendor is not found.',
+        null
+      )
+    }
+    return new Result<Vendor>(
+      200,
+      'vendor delete soft one by id succeed.',
+      deletedvendor
     )
   }
 

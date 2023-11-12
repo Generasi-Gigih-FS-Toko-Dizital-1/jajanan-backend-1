@@ -145,7 +145,7 @@ export default class UserLevelManagement {
     )
   }
 
-  deleteOneById = async (id: string): Promise<Result<UserLevel | null>> => {
+  deleteHardOneById = async (id: string): Promise<Result<UserLevel | null>> => {
     let deletedUserLevel: UserLevel
     try {
       const args: RepositoryArgument = new RepositoryArgument(
@@ -157,14 +157,49 @@ export default class UserLevelManagement {
       deletedUserLevel = await this.userLevelRepository.deleteOne(args)
     } catch (error) {
       return new Result<null>(
-        500,
-        'UserLevel delete one by id failed',
+        404,
+        'UserLevel delete hard one by id failed, user level is not found.',
         null
       )
     }
     return new Result<UserLevel>(
       200,
-      'User level delete one by id succeed.',
+      'UserLevel delete hard one by id succeed.',
+      deletedUserLevel
+    )
+  }
+
+  deleteSoftOneById = async (id: string): Promise<Result<UserLevel | null>> => {
+    let deletedUserLevel: UserLevel
+    try {
+      const foundUserLevel: Result<UserLevel | null> = await this.readOneById(id)
+      if (foundUserLevel.status !== 200 || foundUserLevel.data === null) {
+        return new Result<null>(
+          foundUserLevel.status,
+          'UserLevel delete soft one by id failed, user level is not found.',
+          null
+        )
+      }
+
+      foundUserLevel.data.deletedAt = new Date()
+
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        foundUserLevel.data
+      )
+      deletedUserLevel = await this.userLevelRepository.patchOne(args)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'UserLevel delete soft one by id failed, user level is not found.',
+        null
+      )
+    }
+    return new Result<UserLevel>(
+      200,
+      'UserLevel delete soft one by id succeed.',
       deletedUserLevel
     )
   }
