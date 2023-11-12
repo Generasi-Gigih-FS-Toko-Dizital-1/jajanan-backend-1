@@ -244,58 +244,80 @@ describe('UserLevelControllerRest', () => {
   })
 
   describe('DELETE /api/v1/user-levels/:id?method=hard', () => {
-    it('should return 200 OK', async () => {
-      const requestUserLevel: UserLevel = oneSeeder.userLevelMock.data[0]
-      if (oneDatastore.client === undefined) {
-        throw new Error('oneDatastore client is undefined')
-      }
+    describe('GET /api/v1/user-levels/experience/levels?experience={}', () => {
+      it('should return 200 OK', async () => {
+        const requestUserLevel: UserLevel = oneSeeder.vendorLevelMock.data[0]
+        const requestVendorExp: number = requestUserLevel.minimumExperience
+        const response = await agent
+          .get(`/api/v1/user-levels/experience/levels?experience=${requestVendorExp}`)
+          .set('Authorization', authorization.convertToString())
+          .send()
 
-      const response = await agent
-        .delete(`/api/v1/user-levels/${requestUserLevel.id}?method=hard`)
-        .set('Authorization', authorization.convertToString())
-        .send()
-
-      response.should.has.status(200)
-      response.body.should.be.an('object')
-      response.body.should.has.property('message')
-      response.body.should.has.property('data')
-      assert.isNull(response.body.data)
-
-      const result: UserLevel | null = await oneDatastore.client.userLevel.findFirst({
-        where: {
-          id: requestUserLevel.id
-        }
+        response.should.has.status(200)
+        response.body.should.be.an('object')
+        response.body.should.has.property('message')
+        response.body.should.has.property('data')
+        response.body.data.should.be.an('object')
+        response.body.data.should.has.property('name').equal(requestUserLevel.name)
+        response.body.data.should.has.property('minimum_experience').equal(requestUserLevel.minimumExperience)
+        response.body.data.should.has.property('icon_url').equal(requestUserLevel.iconUrl)
       })
-      assert.isNull(result)
     })
-  })
 
-  describe('DELETE /api/v1/user-levels/:id?method=soft', () => {
-    it('should return 200 OK', async () => {
-      const requestUserLevel: UserLevel = oneSeeder.userLevelMock.data[0]
-
-      const response = await agent
-        .delete(`/api/v1/user-levels/${requestUserLevel.id}?method=soft`)
-        .set('Authorization', authorization.convertToString())
-        .send()
-
-      response.should.has.status(200)
-      response.body.should.be.an('object')
-      response.body.should.has.property('message')
-      response.body.should.has.property('data')
-      assert.isNull(response.body.data)
-
-      if (oneDatastore.client === undefined) {
-        throw new Error('oneDatastore client is undefined')
-      }
-
-      const result: UserLevel | null = await oneDatastore.client.userLevel.findFirst({
-        where: {
-          id: requestUserLevel.id
+    describe('DELETE /api/v1/user-levels/:id', () => {
+      it('should return 200 OK', async () => {
+        const requestUserLevel: UserLevel = oneSeeder.userLevelMock.data[0]
+        if (oneDatastore.client === undefined) {
+          throw new Error('oneDatastore client is undefined')
         }
+
+        const response = await agent
+          .delete(`/api/v1/user-levels/${requestUserLevel.id}?method=hard`)
+          .set('Authorization', authorization.convertToString())
+          .send()
+
+        response.should.has.status(200)
+        response.body.should.be.an('object')
+        response.body.should.has.property('message')
+        response.body.should.has.property('data')
+        assert.isNull(response.body.data)
+
+        const result: UserLevel | null = await oneDatastore.client.userLevel.findFirst({
+          where: {
+            id: requestUserLevel.id
+          }
+        })
+        assert.isNull(result)
       })
-      assert.isNotNull(result)
-      assert.isNotNull(result?.deletedAt)
+    })
+
+    describe('DELETE /api/v1/user-levels/:id?method=soft', () => {
+      it('should return 200 OK', async () => {
+        const requestUserLevel: UserLevel = oneSeeder.userLevelMock.data[0]
+
+        const response = await agent
+          .delete(`/api/v1/user-levels/${requestUserLevel.id}?method=soft`)
+          .set('Authorization', authorization.convertToString())
+          .send()
+
+        response.should.has.status(200)
+        response.body.should.be.an('object')
+        response.body.should.has.property('message')
+        response.body.should.has.property('data')
+        assert.isNull(response.body.data)
+
+        if (oneDatastore.client === undefined) {
+          throw new Error('oneDatastore client is undefined')
+        }
+
+        const result: UserLevel | null = await oneDatastore.client.userLevel.findFirst({
+          where: {
+            id: requestUserLevel.id
+          }
+        })
+        assert.isNotNull(result)
+        assert.isNotNull(result?.deletedAt)
+      })
     })
   })
 })

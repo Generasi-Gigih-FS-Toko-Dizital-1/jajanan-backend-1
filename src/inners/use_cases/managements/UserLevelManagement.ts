@@ -34,24 +34,68 @@ export default class UserLevelManagement {
   }
 
   readOneById = async (id: string): Promise<Result<UserLevel | null>> => {
-    let foundUserLevel: UserLevel
-    try {
-      const args: RepositoryArgument = new RepositoryArgument(
-        { id },
-        undefined,
-        undefined
-      )
-      foundUserLevel = await this.userLevelRepository.readOne(args)
-    } catch (error) {
+    const args: RepositoryArgument = new RepositoryArgument(
+      { id },
+      undefined,
+      undefined
+    )
+    const foundUserLevel: UserLevel | null = await this.userLevelRepository.readOne(args)
+
+    if (foundUserLevel === null) {
       return new Result<null>(
         404,
-        'User level read one by id failed, user level is not found.',
+        'User Level read one by id failed, user level is not found.',
         null
       )
     }
+
     return new Result<UserLevel>(
       200,
       'User level read one by id succeed.',
+      foundUserLevel
+    )
+  }
+
+  readOneByExperience = async (exp: number): Promise<Result<UserLevel | null>> => {
+    let foundUserLevel: UserLevel | null
+    try {
+      const args: RepositoryArgument = new RepositoryArgument(
+        {
+          minimumExperience: {
+            lte: exp
+          }
+        },
+        undefined,
+        undefined,
+        undefined,
+        {
+          minimumExperience: 'desc'
+        }
+      )
+      foundUserLevel = await this.userLevelRepository.readOne(args)
+
+      if (foundUserLevel === null) {
+        const argsMinExp: RepositoryArgument = new RepositoryArgument(
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          {
+            minimumExperience: 'asc'
+          }
+        )
+        foundUserLevel = await this.userLevelRepository.readOne(argsMinExp)
+      }
+    } catch (error) {
+      return new Result<null>(
+        404,
+        `User Level read one by exp failed, ${(error as Error).message}`,
+        null
+      )
+    }
+    return new Result<UserLevel | null>(
+      200,
+      'User Level read one by exp succeed.',
       foundUserLevel
     )
   }

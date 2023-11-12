@@ -34,24 +34,68 @@ export default class VendorLevelManagement {
   }
 
   readOneById = async (id: string): Promise<Result<VendorLevel | null>> => {
-    let foundVendorLevel: VendorLevel
-    try {
-      const args: RepositoryArgument = new RepositoryArgument(
-        { id },
-        undefined,
-        undefined
-      )
-      foundVendorLevel = await this.vendorLevelRepository.readOne(args)
-    } catch (error) {
+    const args: RepositoryArgument = new RepositoryArgument(
+      { id },
+      undefined,
+      undefined
+    )
+    const foundVendorLevel: VendorLevel | null = await this.vendorLevelRepository.readOne(args)
+
+    if (foundVendorLevel === null) {
       return new Result<null>(
         404,
         'Vendor level read one by id failed, vendor level is not found.',
         null
       )
     }
+
     return new Result<VendorLevel>(
       200,
       'Vendor level read one by id succeed.',
+      foundVendorLevel
+    )
+  }
+
+  readOneByExperience = async (exp: number): Promise<Result<VendorLevel | null>> => {
+    let foundVendorLevel: VendorLevel | null
+    try {
+      const args: RepositoryArgument = new RepositoryArgument(
+        {
+          minimumExperience: {
+            lte: exp
+          }
+        },
+        undefined,
+        undefined,
+        undefined,
+        {
+          minimumExperience: 'desc'
+        }
+      )
+      foundVendorLevel = await this.vendorLevelRepository.readOne(args)
+
+      if (foundVendorLevel === null) {
+        const argsMinExp: RepositoryArgument = new RepositoryArgument(
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          {
+            minimumExperience: 'asc'
+          }
+        )
+        foundVendorLevel = await this.vendorLevelRepository.readOne(argsMinExp)
+      }
+    } catch (error) {
+      return new Result<null>(
+        404,
+        `Vendor level read one by exp failed, ${(error as Error).message}`,
+        null
+      )
+    }
+    return new Result<VendorLevel | null>(
+      200,
+      'Vendor level read one by exp succeed.',
       foundVendorLevel
     )
   }
