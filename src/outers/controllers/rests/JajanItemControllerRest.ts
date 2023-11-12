@@ -176,8 +176,9 @@ export default class JajanItemControllerRest {
 
   deleteOneById = (request: Request, response: Response): void => {
     const { id } = request.params
+    const { method } = request.query
     this.jajanItemManagement
-      .deleteOneById(id)
+      .deleteOneById(id, String(method))
       .then((result: Result<JajanItem | null>) => {
         const responseBody: ResponseBody<null> = new ResponseBody<null>(
           result.message,

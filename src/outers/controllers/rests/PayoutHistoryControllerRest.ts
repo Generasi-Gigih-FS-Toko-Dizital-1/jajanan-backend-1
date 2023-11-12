@@ -171,8 +171,9 @@ export default class PayoutHistoryController {
 
   deleteOneById = (request: Request, response: Response): void => {
     const { id } = request.params
+    const { method } = request.query
     this.payoutHistoryManagement
-      .deleteOneById(id)
+      .deleteOneById(id, String(method))
       .then((result: Result<PayoutHistory | null>) => {
         const responseBody: ResponseBody<null> = new ResponseBody<null>(
           result.message,

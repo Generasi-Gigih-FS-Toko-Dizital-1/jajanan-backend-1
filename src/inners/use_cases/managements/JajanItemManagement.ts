@@ -170,27 +170,50 @@ export default class JajanItemManagement {
     )
   }
 
-  deleteOneById = async (id: string): Promise<Result<JajanItem | null>> => {
-    let deletedJajanItem: JajanItem
+  deleteOneById = async (id: string, method: string): Promise<Result<JajanItem | null>> => {
     try {
+      let deletedJajanItem: JajanItem
       const args: RepositoryArgument = new RepositoryArgument(
-        { id },
-        undefined,
-        undefined,
-        undefined
+        { id }
       )
-      deletedJajanItem = await this.jajanItemRepository.deleteOne(args)
+      if (method === 'hard') {
+        deletedJajanItem = await this.jajanItemRepository.deleteOne(args)
+      } else if (method === 'soft') {
+        const jajanItem: JajanItem = await this.jajanItemRepository.readOne(args)
+
+        const newJajanItem: JajanItem = {
+          ...jajanItem,
+          deletedAt: new Date()
+        }
+
+        const softDeleteArgs: RepositoryArgument = new RepositoryArgument(
+          { id },
+          undefined,
+          undefined,
+          newJajanItem
+        )
+
+        deletedJajanItem = await this.jajanItemRepository.patchOne(softDeleteArgs)
+      } else {
+        return new Result<null>(
+          400,
+          'Invalid deletion method. Use "hard" or "soft".',
+          null
+        )
+      }
+
+      return new Result<JajanItem>(
+        200,
+        'Jajan Item delete one by id succeed.',
+        deletedJajanItem
+      )
     } catch (error) {
+      const errorMessage = (error as Error).message
       return new Result<null>(
-        500,
-        'JajanItem delete one by id failed',
+        404,
+        `Admin delete one by id failed, ${errorMessage}`,
         null
       )
     }
-    return new Result<JajanItem>(
-      200,
-      'Jajan Item delete one by id succeed.',
-      deletedJajanItem
-    )
   }
 }

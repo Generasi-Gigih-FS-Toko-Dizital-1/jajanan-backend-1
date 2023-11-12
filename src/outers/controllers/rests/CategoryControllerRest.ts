@@ -164,8 +164,9 @@ export default class CategoryControllerRest {
 
   deleteOneById = (request: Request, response: Response): void => {
     const { id } = request.params
+    const { method } = request.query
     this.categoryManagement
-      .deleteOneById(id)
+      .deleteOneById(id, String(method))
       .then((result: Result<Category | null>) => {
         const responseBody: ResponseBody<null> = new ResponseBody<null>(
           result.message,

@@ -218,49 +218,62 @@ export default class AdminManagement {
     )
   }
 
-  deleteOneById = async (id: string, method: string): Promise<Result<Admin | null>> => {
+  deleteHardOneById = async (id: string): Promise<Result<Admin | null>> => {
+    let deletedAdmin: Admin
     try {
-      let deletedAdmin: Admin
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        undefined
+      )
+      deletedAdmin = await this.adminRepository.deleteOne(args)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'admin delete one by id failed, transaction history is not found.',
+        null
+      )
+    }
+    return new Result<Admin>(
+      200,
+      'admin delete one by id succeed.',
+      deletedAdmin
+    )
+  }
 
-      const args: RepositoryArgument = new RepositoryArgument({ id })
-
-      if (method === 'hard') {
-        deletedAdmin = await this.adminRepository.deleteOne(args)
-      } else if (method === 'soft') {
-        const admin: Admin = await this.adminRepository.readOne(args)
-
-        const newAdmin: Admin = {
-          ...admin,
-          deletedAt: new Date()
-        }
-
-        const softDeleteArgs: RepositoryArgument = new RepositoryArgument(
-          { id },
-          undefined,
-          undefined,
-          newAdmin
-        )
-
-        deletedAdmin = await this.adminRepository.patchOne(softDeleteArgs)
-      } else {
+  deleteSoftOneById = async (id: string): Promise<Result<Admin | null>> => {
+    let deletedAdmin: Admin
+    try {
+      const foundAdmin: Result<Admin | null> = await this.readOneById(id)
+      if (foundAdmin.status !== 200 || foundAdmin.data === null) {
         return new Result<null>(
-          400,
-          'Invalid deletion method. Use "hard" or "soft".',
+          foundAdmin.status,
+          'Admin patch one by id failed, admin is not found.',
           null
         )
       }
 
-      return new Result<Admin>(
-        200,
-        'Admin delete one by id succeed.',
-        deletedAdmin
+      foundAdmin.data.deletedAt = new Date()
+
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        foundAdmin.data
       )
+      deletedAdmin = await this.adminRepository.patchOne(args)
     } catch (error) {
       return new Result<null>(
         404,
-        'Admin delete one by id failed, admin is not found.',
+        'admin delete one by id failed, transaction history is not found.',
         null
       )
     }
+    return new Result<Admin>(
+      200,
+      'admin delete one by id succeed.',
+      deletedAdmin
+    )
   }
 }

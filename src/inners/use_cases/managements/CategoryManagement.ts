@@ -184,9 +184,10 @@ export default class CategoryManagement {
         deletedCatgory
       )
     } catch (error) {
+      const errorMessage = (error as Error).message
       return new Result<null>(
         404,
-        'Category delete one by id failed, admin is not found.',
+        `Category delete one by id failed, ${errorMessage}`,
         null
       )
     }

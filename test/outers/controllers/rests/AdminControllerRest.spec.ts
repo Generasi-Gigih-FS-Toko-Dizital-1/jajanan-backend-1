@@ -291,6 +291,22 @@ describe('AdminControllerRest', () => {
       response.body.should.has.property('message')
       response.body.should.has.property('data')
       assert.isNull(response.body.data)
+
+      if (oneDatastore.client === undefined) {
+        throw new Error('oneDatastore client is undefined')
+      }
+      const result: Admin | null = await oneDatastore.client.admin.findFirst({
+        where: {
+          id: requestAdmin.id
+        }
+      })
+      assert.isNotNull(result?.deletedAt)
+
+      await oneDatastore.client.admin.delete({
+        where: {
+          id: requestAdmin.id
+        }
+      })
     })
   })
 })

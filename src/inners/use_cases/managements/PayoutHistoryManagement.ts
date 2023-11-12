@@ -10,7 +10,6 @@ import type PayoutHistoryManagementCreateRequest
   from '../../models/value_objects/requests/managements/payout_history_managements/PayoutHistoryManagementCreateRequest'
 import type PayoutHistoryManagementPatchRequest
   from '../../models/value_objects/requests/managements/payout_history_managements/PayoutHistoryManagementPatchRequest'
-import type PayoutHistoryAggregate from '../../models/aggregates/PayoutHistoryAggregate'
 
 export default class PayoutHistoryManagement {
   constructor (
@@ -112,14 +111,37 @@ export default class PayoutHistoryManagement {
     return new Result<PayoutHistory | null>(200, 'PayoutHistory patch one by id succeed.', patchedPayoutHistory)
   }
 
-  deleteOneById = async (id: string): Promise<Result<PayoutHistory | null>> => {
-    const args: RepositoryArgument = new RepositoryArgument(
-      { id }
-    )
-    const deletedPayoutHistory: PayoutHistory | PayoutHistoryAggregate = await this.payoutHistoryRepository.deleteOne(args)
+  deleteOneById = async (id: string, method: string): Promise<Result<PayoutHistory | null>> => {
+    try {
+      let deletedPayoutHistory: PayoutHistory
+      const args: RepositoryArgument = new RepositoryArgument({
+        id
+      })
+      if (method === 'hard') {
+        deletedPayoutHistory = await this.payoutHistoryRepository.deleteOne(args)
+      } else if (method === 'soft') {
+        const payoutHistory: PayoutHistory = await this.payoutHistoryRepository.readOne(args)
 
-    return new Result<PayoutHistory>(
-      200, 'PayoutHistory delete one by id succeed.', deletedPayoutHistory
-    )
+        const newPayoutHistory: PayoutHistory = {
+          ...payoutHistory,
+          deletedAt: new Date()
+        }
+
+        const softDeleteArgs: RepositoryArgument = new RepositoryArgument(
+          { id },
+          undefined,
+          undefined,
+          newPayoutHistory
+        )
+
+        deletedPayoutHistory = await this.payoutHistoryRepository.patchOne(softDeleteArgs)
+      } else {
+        return new Result<null>(400, 'Invalid deletion method. Use "hard" or "soft".', null)
+      }
+
+      return new Result<PayoutHistory>(200, 'PayoutHistory delete one by id succeed.', deletedPayoutHistory)
+    } catch (error) {
+      return new Result<null>(404, `PayoutHistory delete one by id failed, ${(error as Error).message}`, null)
+    }
   }
 }

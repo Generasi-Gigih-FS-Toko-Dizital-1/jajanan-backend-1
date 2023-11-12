@@ -46,9 +46,7 @@ export default class JajanItemSnapshotManagement {
     let foundJajanItemSnapshot: JajanItemSnapshot
     try {
       const args: RepositoryArgument = new RepositoryArgument(
-        { id },
-        undefined,
-        undefined
+        { id }
       )
       foundJajanItemSnapshot = await this.jajanItemSnapshotRepository.readOne(args)
     } catch (error) {
@@ -137,27 +135,50 @@ export default class JajanItemSnapshotManagement {
     )
   }
 
-  deleteOneById = async (id: string): Promise<Result<JajanItemSnapshot | null>> => {
-    let deletedJajanItemSnapshot: JajanItemSnapshot
+  deleteOneById = async (id: string, method: string): Promise<Result<JajanItemSnapshot | null>> => {
     try {
+      let deletedJajanItemSnapshot: JajanItemSnapshot
       const args: RepositoryArgument = new RepositoryArgument(
-        { id },
-        undefined,
-        undefined,
-        undefined
+        { id }
       )
-      deletedJajanItemSnapshot = await this.jajanItemSnapshotRepository.deleteOne(args)
+      if (method === 'hard') {
+        deletedJajanItemSnapshot = await this.jajanItemSnapshotRepository.deleteOne(args)
+      } else if (method === 'soft') {
+        const jajanItemSnapshot: JajanItemSnapshot = await this.jajanItemSnapshotRepository.readOne(args)
+
+        const newJajanItemSnapshot: JajanItemSnapshot = {
+          ...jajanItemSnapshot,
+          deletedAt: new Date()
+        }
+
+        const softDeleteArgs: RepositoryArgument = new RepositoryArgument(
+          { id },
+          undefined,
+          undefined,
+          newJajanItemSnapshot
+        )
+
+        deletedJajanItemSnapshot = await this.jajanItemSnapshotRepository.patchOne(softDeleteArgs)
+      } else {
+        return new Result<null>(
+          400,
+          'Invalid deletion method. Use "hard" or "soft".',
+          null
+        )
+      }
+
+      return new Result<JajanItemSnapshot>(
+        200,
+        'Jajan Item Snapshot delete one by id succeed.',
+        deletedJajanItemSnapshot
+      )
     } catch (error) {
+      const errorMessage = (error as Error).message
       return new Result<null>(
-        500,
-        'JajanItemSnapshot delete one by id failed',
+        404,
+        `JajajnItemSnapshot delete one by id failed, ${errorMessage}`,
         null
       )
     }
-    return new Result<JajanItemSnapshot>(
-      200,
-      'Jajan Item Snapshot delete one by id succeed.',
-      deletedJajanItemSnapshot
-    )
   }
 }

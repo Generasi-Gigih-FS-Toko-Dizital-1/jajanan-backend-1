@@ -1,4 +1,4 @@
-import chai from 'chai'
+import chai, { assert } from 'chai'
 import chaiHttp from 'chai-http'
 import { server } from '../../../../src/App'
 import OneDatastore from '../../../../src/outers/datastores/OneDatastore'
@@ -226,12 +226,12 @@ describe('PayoutHistoryControllerRest', () => {
     })
   })
 
-  describe('DELETE /api/v1/payout-histories/:id', () => {
+  describe('DELETE /api/v1/payout-histories/:id?method=hard', () => {
     it('should return 200 OK', async () => {
       const requestPayoutHistory: PayoutHistory = oneSeeder.payoutHistoryMock.data[0]
 
       const response = await agent
-        .delete(`/api/v1/payout-histories/${requestPayoutHistory.id}`)
+        .delete(`/api/v1/payout-histories/${requestPayoutHistory.id}?method=hard`)
         .set('Authorization', authorization.convertToString())
         .send()
 
@@ -239,6 +239,50 @@ describe('PayoutHistoryControllerRest', () => {
       response.body.should.be.an('object')
       response.body.should.has.property('message')
       response.body.should.has.property('data')
+      assert.isNull(response.body.data)
+
+      if (oneDatastore.client === undefined) {
+        throw new Error('oneDatastore client is undefined')
+      }
+      const result: PayoutHistory | null = await oneDatastore.client.payoutHistory.findFirst({
+        where: {
+          id: requestPayoutHistory.id
+        }
+      })
+      assert.isNull(result)
+    })
+  })
+
+  describe('DELETE /api/v1/payout-histories/:id?method=soft', () => {
+    it('should return 200 OK', async () => {
+      const requestPayoutHistory: PayoutHistory = oneSeeder.payoutHistoryMock.data[0]
+
+      const response = await agent
+        .delete(`/api/v1/payout-histories/${requestPayoutHistory.id}?method=soft`)
+        .set('Authorization', authorization.convertToString())
+        .send()
+
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      assert.isNull(response.body.data)
+
+      if (oneDatastore.client === undefined) {
+        throw new Error('oneDatastore client is undefined')
+      }
+      const result: PayoutHistory | null = await oneDatastore.client.payoutHistory.findFirst({
+        where: {
+          id: requestPayoutHistory.id
+        }
+      })
+      assert.isNotNull(result?.deletedAt)
+
+      await oneDatastore.client.payoutHistory.delete({
+        where: {
+          id: requestPayoutHistory.id
+        }
+      })
     })
   })
 })
