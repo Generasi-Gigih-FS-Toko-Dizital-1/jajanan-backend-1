@@ -146,7 +146,7 @@ export default class CategoryManagement {
     )
   }
 
-  deleteOneById = async (id: string): Promise<Result<Category | null>> => {
+  deleteHardOneById = async (id: string): Promise<Result<Category | null>> => {
     let deletedCategory: Category
     try {
       const args: RepositoryArgument = new RepositoryArgument(
@@ -158,15 +158,50 @@ export default class CategoryManagement {
       deletedCategory = await this.categoryRepository.deleteOne(args)
     } catch (error) {
       return new Result<null>(
-        500,
-        'Category delete one by id failed.',
+        404,
+        'Category delete hard one by id failed, category is not found.',
         null
       )
     }
     return new Result<Category>(
       200,
-      'Category delete one by id succeed.',
+      'Category delete hard one by id succeed.',
       deletedCategory
+    )
+  }
+
+  deleteSoftOneById = async (id: string): Promise<Result<Category | null>> => {
+    let deletedCatgeory: Category
+    try {
+      const foundCategory: Result<Category | null> = await this.readOneById(id)
+      if (foundCategory.status !== 200 || foundCategory.data === null) {
+        return new Result<null>(
+          foundCategory.status,
+          'Category patch one by id failed, admin is not found.',
+          null
+        )
+      }
+
+      foundCategory.data.deletedAt = new Date()
+
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        foundCategory.data
+      )
+      deletedCatgeory = await this.categoryRepository.patchOne(args)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'Category delete soft one by id failed, category is not found.',
+        null
+      )
+    }
+    return new Result<Category>(
+      200,
+      'Category delete soft one by id succeed.',
+      deletedCatgeory
     )
   }
 }

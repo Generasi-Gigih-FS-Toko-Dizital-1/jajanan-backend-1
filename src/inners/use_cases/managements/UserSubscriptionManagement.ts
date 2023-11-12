@@ -190,7 +190,7 @@ export default class UserSubscriptionManagement {
     )
   }
 
-  deleteOneById = async (id: string): Promise<Result<UserSubscription | null>> => {
+  deleteHardOneById = async (id: string): Promise<Result<UserSubscription | null>> => {
     let deletedUserSubscription: UserSubscription
     try {
       const args: RepositoryArgument = new RepositoryArgument(
@@ -202,14 +202,49 @@ export default class UserSubscriptionManagement {
       deletedUserSubscription = await this.userSubscriptionRepository.deleteOne(args)
     } catch (error) {
       return new Result<null>(
-        500,
-        'UserSubscription delete one by id failed',
+        404,
+        'UserSubscription delete hard one by id failed, user subscription is not found.',
         null
       )
     }
     return new Result<UserSubscription>(
       200,
-      'User Subscription delete one by id succeed.',
+      'UserSubscription delete hard one by id succeed.',
+      deletedUserSubscription
+    )
+  }
+
+  deleteSoftOneById = async (id: string): Promise<Result<UserSubscription | null>> => {
+    let deletedUserSubscription: UserSubscription
+    try {
+      const foundUserSubscription: Result<UserSubscription | null> = await this.readOneById(id)
+      if (foundUserSubscription.status !== 200 || foundUserSubscription.data === null) {
+        return new Result<null>(
+          foundUserSubscription.status,
+          'UserSubscription delete soft one by id failed, user subscription is not found.',
+          null
+        )
+      }
+
+      foundUserSubscription.data.deletedAt = new Date()
+
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        foundUserSubscription.data
+      )
+      deletedUserSubscription = await this.userSubscriptionRepository.patchOne(args)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'UserSubscription delete soft one by id failed, user subscription is not found.',
+        null
+      )
+    }
+    return new Result<UserSubscription>(
+      200,
+      'UserSubscription delete soft one by id succeed.',
       deletedUserSubscription
     )
   }

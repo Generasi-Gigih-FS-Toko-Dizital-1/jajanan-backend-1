@@ -251,20 +251,49 @@ export default class VendorControllerRest {
 
   deleteOneById = (request: Request, response: Response): void => {
     const { id } = request.params
-    this.vendorManagement
-      .deleteOneById(id)
-      .then((result: Result<Vendor | null>) => {
-        const responseBody: ResponseBody<null> = new ResponseBody<null>(
-          result.message,
-          null
-        )
-        response
-          .status(result.status)
-          .send(responseBody)
-        response.status(result.status).send()
-      })
-      .catch((error: Error) => {
-        response.status(500).send(error.message)
-      })
+    const { method } = request.query
+
+    if (method === undefined || method === null) {
+      const responseBody: ResponseBody<null> = new ResponseBody<null>(
+        'Query parameter method is required.',
+        null
+      )
+      response.status(400).send(responseBody)
+      return
+    }
+
+    if (method === 'soft') {
+      this.vendorManagement
+        .deleteSoftOneById(id)
+        .then((result: Result<Vendor | null>) => {
+          const responseBody: ResponseBody<null> = new ResponseBody<null>(
+            result.message,
+            null
+          )
+          response.status(result.status).send(responseBody)
+        })
+        .catch((error: Error) => {
+          response.status(500).send(error.message)
+        })
+    } else if (method === 'hard') {
+      this.vendorManagement
+        .deleteHardOneById(id)
+        .then((result: Result<Vendor | null>) => {
+          const responseBody: ResponseBody<null> = new ResponseBody<null>(
+            result.message,
+            null
+          )
+          response.status(result.status).send(responseBody)
+        })
+        .catch((error: Error) => {
+          response.status(500).send(error.message)
+        })
+    } else {
+      const responseBody: ResponseBody<null> = new ResponseBody<null>(
+        'Query parameter method is invalid.',
+        null
+      )
+      response.status(400).send(responseBody)
+    }
   }
 }

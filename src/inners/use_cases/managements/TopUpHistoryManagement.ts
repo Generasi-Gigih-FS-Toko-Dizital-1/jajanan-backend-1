@@ -23,7 +23,7 @@ export default class TopUpHistoryManagement {
     this.objectUtility = objectUtility
   }
 
-  readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Result<TopUpHistory[]>> => {
+  readMany = async (pagination: Pagination, whereInput: any, includeInput: any): Promise<Result<TopUpHistory[] | TopUpHistoryAggregate[]>> => {
     const args: RepositoryArgument = new RepositoryArgument(
       whereInput,
       includeInput,
@@ -117,14 +117,62 @@ export default class TopUpHistoryManagement {
     return new Result<TopUpHistory | null>(200, 'TopUpHistory patch one by id succeed.', patchedTopUpHistory)
   }
 
-  deleteOneById = async (id: string): Promise<Result<TopUpHistory | null>> => {
-    const args: RepositoryArgument = new RepositoryArgument(
-      { id }
-    )
-    const deletedTopUpHistory: TopUpHistory | TopUpHistoryAggregate = await this.topUpHistoryRepository.deleteOne(args)
-
+  deleteHardOneById = async (id: string): Promise<Result<TopUpHistory | null>> => {
+    let deletedTopUpHistory: TopUpHistory
+    try {
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        undefined
+      )
+      deletedTopUpHistory = await this.topUpHistoryRepository.deleteOne(args)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'TopUpHistory delete one by id failed, top up history is not found.',
+        null
+      )
+    }
     return new Result<TopUpHistory>(
-      200, 'TopUpHistory delete one by id succeed.', deletedTopUpHistory
+      200,
+      'TopUpHistory delete one by id succeed.',
+      deletedTopUpHistory
+    )
+  }
+
+  deleteSoftOneById = async (id: string): Promise<Result<TopUpHistory | null>> => {
+    let deletedTopUpHistory: TopUpHistory
+    try {
+      const foundTopUpHistory: Result<TopUpHistory | null> = await this.readOneById(id)
+      if (foundTopUpHistory.status !== 200 || foundTopUpHistory.data === null) {
+        return new Result<null>(
+          foundTopUpHistory.status,
+          'TopUpHistory delete soft one by id failed, top up history is not found.',
+          null
+        )
+      }
+
+      foundTopUpHistory.data.deletedAt = new Date()
+
+      const args: RepositoryArgument = new RepositoryArgument(
+        { id },
+        undefined,
+        undefined,
+        foundTopUpHistory.data
+      )
+      deletedTopUpHistory = await this.topUpHistoryRepository.patchOne(args)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        'TopUpHistory delete soft one by id failed, top up history is not found.',
+        null
+      )
+    }
+    return new Result<TopUpHistory>(
+      200,
+      'TopUpHistory delete one by id succeed.',
+      deletedTopUpHistory
     )
   }
 }

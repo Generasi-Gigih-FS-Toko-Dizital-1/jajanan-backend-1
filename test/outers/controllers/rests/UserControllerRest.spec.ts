@@ -227,8 +227,8 @@ describe('UserControllerRest', () => {
       response.body.data.should.has.property('experience').equal(requestUser.experience)
       response.body.data.should.has.property('last_latitude').equal(requestUser.lastLatitude)
       response.body.data.should.has.property('last_longitude').equal(requestUser.lastLongitude)
-      response.body.data.should.has.property('updated_at').equal(requestUser.updatedAt.toISOString())
       response.body.data.should.has.property('created_at').equal(requestUser.createdAt.toISOString())
+      response.body.data.should.has.property('updated_at').equal(requestUser.updatedAt.toISOString())
     })
   })
 
@@ -319,7 +319,7 @@ describe('UserControllerRest', () => {
     })
   })
 
-  describe('DELETE /api/v1/users/:id', () => {
+  describe('DELETE /api/v1/users/:id?method=hard', () => {
     it('should return 200 OK', async () => {
       const requestUser: User = oneSeeder.userMock.data[0]
       const requestNotificationHistories: NotificationHistory[] = oneSeeder.notificationHistoryMock.data.filter((notificationHistory: NotificationHistory) => notificationHistory.userId === requestUser.id)
@@ -368,7 +368,7 @@ describe('UserControllerRest', () => {
       })
 
       const response = await agent
-        .delete(`/api/v1/users/${requestUser.id}`)
+        .delete(`/api/v1/users/${requestUser.id}?method=hard`)
         .set('Authorization', authorization.convertToString())
         .send()
 
@@ -384,6 +384,35 @@ describe('UserControllerRest', () => {
         }
       })
       assert.isNull(result)
+    })
+  })
+
+  describe('DELETE /api/v1/users/:id?method=soft', () => {
+    it('should return 200 OK', async () => {
+      const requestUser: User = oneSeeder.userMock.data[0]
+
+      const response = await agent
+        .delete(`/api/v1/users/${requestUser.id}?method=soft`)
+        .set('Authorization', authorization.convertToString())
+        .send()
+
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      assert.isNull(response.body.data)
+
+      if (oneDatastore.client === undefined) {
+        throw new Error('oneDatastore client is undefined')
+      }
+
+      const result: User | null = await oneDatastore.client.user.findFirst({
+        where: {
+          id: requestUser.id
+        }
+      })
+      assert.isNotNull(result)
+      assert.isNotNull(result?.deletedAt)
     })
   })
 })

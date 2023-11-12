@@ -65,9 +65,9 @@ export default class SessionManagement {
     )
   }
 
-  deleteOneById = async (sessionId: string): Promise<Result<null>> => {
+  deleteOneById = async (id: string): Promise<Result<null>> => {
     try {
-      await this.sessionRepository.deleteOneById(sessionId)
+      await this.sessionRepository.deleteOneById(id)
     } catch (error) {
       return new Result<null>(
         404,

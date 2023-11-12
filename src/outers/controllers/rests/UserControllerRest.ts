@@ -201,20 +201,49 @@ export default class UserControllerRest {
 
   deleteOneById = (request: Request, response: Response): void => {
     const { id } = request.params
-    this.userManagement
-      .deleteOneById(id)
-      .then((result: Result<User | null>) => {
-        const responseBody: ResponseBody<null> = new ResponseBody<null>(
-          result.message,
-          null
-        )
-        response
-          .status(result.status)
-          .send(responseBody)
-        response.status(result.status).send()
-      })
-      .catch((error: Error) => {
-        response.status(500).send(error.message)
-      })
+    const { method } = request.query
+
+    if (method === undefined || method === null) {
+      const responseBody: ResponseBody<null> = new ResponseBody<null>(
+        'Query parameter method is required.',
+        null
+      )
+      response.status(400).send(responseBody)
+      return
+    }
+
+    if (method === 'soft') {
+      this.userManagement
+        .deleteSoftOneById(id)
+        .then((result: Result<User | null>) => {
+          const responseBody: ResponseBody<null> = new ResponseBody<null>(
+            result.message,
+            null
+          )
+          response.status(result.status).send(responseBody)
+        })
+        .catch((error: Error) => {
+          response.status(500).send(error.message)
+        })
+    } else if (method === 'hard') {
+      this.userManagement
+        .deleteHardOneById(id)
+        .then((result: Result<User | null>) => {
+          const responseBody: ResponseBody<null> = new ResponseBody<null>(
+            result.message,
+            null
+          )
+          response.status(result.status).send(responseBody)
+        })
+        .catch((error: Error) => {
+          response.status(500).send(error.message)
+        })
+    } else {
+      const responseBody: ResponseBody<null> = new ResponseBody<null>(
+        'Query parameter method is invalid.',
+        null
+      )
+      response.status(400).send(responseBody)
+    }
   }
 }

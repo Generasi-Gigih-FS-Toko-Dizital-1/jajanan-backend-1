@@ -255,7 +255,7 @@ describe('CategoryControllerRest', () => {
     })
   })
 
-  describe('DELETE /api/v1/categories/:id', () => {
+  describe('DELETE /api/v1/categories/:id?method=hard', () => {
     it('should return 200 OK', async () => {
       const requestCategory: Category = oneSeeder.categoryMock.data[0]
       const requestJajanItems: JajanItem[] = oneSeeder.jajanItemMock.data.filter((jajanItem: JajanItem) => jajanItem.categoryId === requestCategory.id)
@@ -297,7 +297,7 @@ describe('CategoryControllerRest', () => {
       })
 
       const response = await agent
-        .delete(`/api/v1/categories/${requestCategory.id}`)
+        .delete(`/api/v1/categories/${requestCategory.id}?method=hard`)
         .set('Authorization', authorization.convertToString())
         .send()
 
@@ -313,6 +313,33 @@ describe('CategoryControllerRest', () => {
         }
       })
       assert.isNull(result)
+    })
+  })
+
+  describe('DELETE /api/v1/categories/:id?method=soft', () => {
+    it('should return 200 OK', async () => {
+      const requestCategory: Category = oneSeeder.categoryMock.data[0]
+      const response = await agent
+        .delete(`/api/v1/categories/${requestCategory.id}?method=soft`)
+        .set('Authorization', authorization.convertToString())
+        .send()
+
+      response.should.has.status(200)
+      response.body.should.be.an('object')
+      response.body.should.has.property('message')
+      response.body.should.has.property('data')
+      assert.isNull(response.body.data)
+
+      if (oneDatastore.client === undefined) {
+        throw new Error('oneDatastore client is undefined')
+      }
+      const result: Category | null = await oneDatastore.client.category.findFirst({
+        where: {
+          id: requestCategory.id
+        }
+      })
+      assert.isNotNull(result)
+      assert.isNotNull(result?.deletedAt)
     })
   })
 })
