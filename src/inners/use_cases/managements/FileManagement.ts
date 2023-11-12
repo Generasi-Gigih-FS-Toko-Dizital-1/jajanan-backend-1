@@ -18,7 +18,7 @@ export default class FileManagement {
     try {
       const uploadFileResponse: any = await this.cloudinaryGateway.uploadFile(file)
       return new Result<string>(
-        200,
+        201,
         'FileManagement upload succeed.',
         uploadFileResponse.secure_url
       )

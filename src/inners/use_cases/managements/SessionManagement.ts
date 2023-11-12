@@ -12,20 +12,38 @@ export default class SessionManagement {
     this.objectUtility = objectUtility
   }
 
-  readOneById = async (id: string): Promise<Result<Session | null>> => {
+  readOneByAuthorizationId = async (id: string): Promise<Result<Session | null>> => {
     let foundSession: Session
     try {
-      foundSession = await this.sessionRepository.readOneById(id)
+      foundSession = await this.sessionRepository.readOneByAuthorizationId(id)
     } catch (error) {
       return new Result<null>(
         404,
-        'Session read one by id failed, unknown id.',
+        `Session read one by id failed,${(error as Error).message}.`,
         null
       )
     }
     return new Result<Session>(
       200,
       'Session read one by id succeed.',
+      foundSession
+    )
+  }
+
+  readOneByAccountId = async (accountId: string): Promise<Result<Session | null>> => {
+    let foundSession: Session
+    try {
+      foundSession = await this.sessionRepository.readOneByAccountId(accountId)
+    } catch (error) {
+      return new Result<null>(
+        404,
+        `Session read one by account id failed, ${(error as Error).message}.`,
+        null
+      )
+    }
+    return new Result<Session>(
+      200,
+      'Session read one by account id succeed.',
       foundSession
     )
   }
@@ -53,7 +71,7 @@ export default class SessionManagement {
     } catch (error) {
       return new Result<null>(
         404,
-        'Session delete one failed, unknown id.',
+        `Session delete one failed, ${(error as Error).message}.`,
         null
       )
     }

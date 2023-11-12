@@ -53,7 +53,7 @@ export default class FileControllerRest {
         .uploadFile(fileValues[0].filepath)
         .then((result: Result<string | null>) => {
           let data: SingleFileUploadResponse | null
-          if (result.status === 200 && result.data !== null) {
+          if (result.status === 201 && result.data !== null) {
             data = new SingleFileUploadResponse(
               result.data
             )

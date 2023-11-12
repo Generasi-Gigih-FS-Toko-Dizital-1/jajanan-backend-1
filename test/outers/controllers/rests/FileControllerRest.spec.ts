@@ -10,6 +10,8 @@ import AdminMock from '../../../mocks/AdminMock'
 import AdminLoginByEmailAndPasswordRequest
   from '../../../../src/inners/models/value_objects/requests/authentications/admins/AdminLoginByEmailAndPasswordRequest'
 import OneSeeder from '../../../../src/outers/seeders/OneSeeder'
+import CloudinaryGateway from '../../../../src/outers/gateways/CloudinaryGateway'
+import CloudinaryUtility from '../../../../src/outers/utilities/CloudinaryUtility'
 
 chai.use(chaiHttp)
 chai.should()
@@ -17,6 +19,8 @@ chai.should()
 describe('FileControllerRest', () => {
   const oneDatastore: OneDatastore = new OneDatastore()
   const authAdminMock: AdminMock = new AdminMock()
+  const cloudinaryGateway: CloudinaryGateway = new CloudinaryGateway()
+  const cloudinaryUtility: CloudinaryUtility = new CloudinaryUtility()
   let oneSeeder: OneSeeder
   let agent: ChaiHttp.Agent
   let authorization: Authorization
@@ -92,6 +96,36 @@ describe('FileControllerRest', () => {
   })
 
   describe('POST /api/v1/files', () => {
+    it('should return 201 OK', async () => {
+      const filePath: string = 'test/assets/400x400.svg'
+      const uploadResponse: any = await new Promise((resolve, reject) => {
+        agent.post('/api/v1/files')
+          .set('Authorization', authorization.convertToString())
+          .set('Content-Type', 'multipart/form-data')
+          .attach('file', filePath)
+          .end((error: any, response: any) => {
+            if (error !== undefined && error !== null) {
+              reject(new Error(error))
+            } else {
+              resolve(response)
+            }
+          })
+      })
+
+      uploadResponse.should.have.status(201)
+      uploadResponse.body.should.be.an('object')
+      uploadResponse.body.should.have.property('message')
+      uploadResponse.body.should.have.property('data')
+      uploadResponse.body.data.should.be.an('object')
+      uploadResponse.body.data.should.have.property('url')
+
+      const publicId: string = cloudinaryUtility.extractPublicIdFromUrl(uploadResponse.body.data.url)
+      const deleteResponse: any = await cloudinaryGateway.deleteFile(publicId)
+      deleteResponse.should.have.property('result').equal('ok')
+    })
+  })
+
+  describe('DELETE /api/v1/files', () => {
     it('should return 200 OK', async () => {
       const filePath: string = 'test/assets/400x400.svg'
       const uploadResponse: any = await new Promise((resolve, reject) => {
@@ -108,29 +142,23 @@ describe('FileControllerRest', () => {
           })
       })
 
-      uploadResponse.should.have.status(200)
+      uploadResponse.should.have.status(201)
       uploadResponse.body.should.be.an('object')
       uploadResponse.body.should.have.property('message')
       uploadResponse.body.should.have.property('data')
       uploadResponse.body.data.should.be.an('object')
       uploadResponse.body.data.should.have.property('url')
 
-      describe('DELETE /api/v1/files', () => {
-        it('should return 200 OK', async () => {
-          const url: string = uploadResponse.body.data.url
+      const deleteResponse = await agent.delete('/api/v1/files')
+        .set('Authorization', authorization.convertToString())
+        .query({ url: uploadResponse.body.data.url })
+        .send()
 
-          const deleteResponse = await agent.delete('/api/v1/files')
-            .set('Authorization', authorization.convertToString())
-            .query({ url })
-            .send()
-
-          deleteResponse.should.have.status(200)
-          deleteResponse.body.should.be.an('object')
-          deleteResponse.body.should.have.property('message')
-          deleteResponse.body.should.have.property('data')
-          assert.isNull(deleteResponse.body.data)
-        })
-      })
+      deleteResponse.should.have.status(200)
+      deleteResponse.body.should.be.an('object')
+      deleteResponse.body.should.have.property('message')
+      deleteResponse.body.should.have.property('data')
+      assert.isNull(deleteResponse.body.data)
     })
   })
 })
