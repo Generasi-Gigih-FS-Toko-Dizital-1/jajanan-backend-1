@@ -121,6 +121,7 @@ describe('TransactionHistoryControllerRest', () => {
         transactionHistory.should.has.property('last_longitude')
         transactionHistory.should.has.property('updated_at')
         transactionHistory.should.has.property('created_at')
+        transactionHistory.should.has.property('deleted_at')
       })
     })
   })
@@ -162,6 +163,7 @@ describe('TransactionHistoryControllerRest', () => {
         transactionHistory.should.has.property('last_longitude').equal(requestTransactionHistory.lastLongitude)
         transactionHistory.should.has.property('updated_at').equal(requestTransactionHistory.updatedAt.toISOString())
         transactionHistory.should.has.property('created_at').equal(requestTransactionHistory.createdAt.toISOString())
+        transactionHistory.should.has.property('deleted_at')
         transactionHistory.should.has.property('user').deep.equal(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestUser))))
         transactionHistory.should.has.property('transaction_items').deep.members(
           requestTransactionItemHistories.map((transactionItemHistory: TransactionItemHistory) => humps.decamelizeKeys(JSON.parse(JSON.stringify(transactionItemHistory))))
@@ -190,6 +192,7 @@ describe('TransactionHistoryControllerRest', () => {
       response.body.data.should.has.property('last_longitude').equal(requestTransactionHistory.lastLongitude)
       response.body.data.should.has.property('updated_at').equal(requestTransactionHistory.updatedAt.toISOString())
       response.body.data.should.has.property('created_at').equal(requestTransactionHistory.createdAt.toISOString())
+      response.body.data.should.has.property('deleted_at').equal(null)
     })
   })
 
@@ -219,6 +222,7 @@ describe('TransactionHistoryControllerRest', () => {
       response.body.data.should.has.property('last_longitude').equal(requestBody.lastLongitude)
       response.body.data.should.has.property('updated_at')
       response.body.data.should.has.property('created_at')
+      response.body.data.should.has.property('deleted_at')
 
       if (oneDatastore.client === undefined) {
         throw new Error('oneDatastore client is undefined')
@@ -259,6 +263,7 @@ describe('TransactionHistoryControllerRest', () => {
       response.body.data.should.has.property('last_longitude').equal(requestBody.lastLongitude)
       response.body.data.should.has.property('updated_at')
       response.body.data.should.has.property('created_at')
+      response.body.data.should.has.property('deleted_at')
     })
   })
 

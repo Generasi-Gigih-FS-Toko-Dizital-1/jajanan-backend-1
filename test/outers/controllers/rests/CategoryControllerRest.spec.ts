@@ -126,6 +126,7 @@ describe('CategoryControllerRest', () => {
         category.should.has.property('icon_url')
         category.should.has.property('created_at')
         category.should.has.property('updated_at')
+        category.should.has.property('deleted_at')
       })
     })
   })
@@ -192,6 +193,7 @@ describe('CategoryControllerRest', () => {
       response.body.data.should.has.property('icon_url').equal(requestCategory.iconUrl)
       response.body.data.should.has.property('updated_at').equal(requestCategory.updatedAt.toISOString())
       response.body.data.should.has.property('created_at').equal(requestCategory.createdAt.toISOString())
+      response.body.data.should.has.property('deleted_at').equal(null)
     })
   })
 
@@ -216,6 +218,7 @@ describe('CategoryControllerRest', () => {
       response.body.data.should.has.property('name').equal(requestBody.name)
       response.body.data.should.has.property('updated_at')
       response.body.data.should.has.property('created_at')
+      response.body.data.should.has.property('deleted_at')
 
       if (oneDatastore.client === undefined) {
         throw new Error('oneDatastore client is undefined')
@@ -252,6 +255,7 @@ describe('CategoryControllerRest', () => {
       response.body.data.should.has.property('icon_url').equal(requestBody.iconUrl)
       response.body.data.should.has.property('updated_at')
       response.body.data.should.has.property('created_at')
+      response.body.data.should.has.property('deleted_at')
     })
   })
 
