@@ -130,6 +130,7 @@ describe('TopUpHistoryControllerRest', () => {
       response.body.data.top_up_histories[0].should.has.property('amount').equal(requestTopUpHistory.amount)
       response.body.data.top_up_histories[0].should.has.property('created_at').equal(requestTopUpHistory.createdAt.toISOString())
       response.body.data.top_up_histories[0].should.has.property('updated_at').equal(requestTopUpHistory.updatedAt.toISOString())
+      response.body.data.top_up_histories[0].should.has.property('deleted_at')
       response.body.data.top_up_histories[0].should.has.property('user').deep.equal(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestUser))))
     })
   })
@@ -152,6 +153,7 @@ describe('TopUpHistoryControllerRest', () => {
       response.body.data.should.has.property('amount').equal(requestTopUpHistory.amount)
       response.body.data.should.has.property('created_at').equal(requestTopUpHistory.createdAt.toISOString())
       response.body.data.should.has.property('updated_at').equal(requestTopUpHistory.updatedAt.toISOString())
+      response.body.data.should.has.property('deleted_at')
     })
   })
 
@@ -180,6 +182,7 @@ describe('TopUpHistoryControllerRest', () => {
       response.body.data.should.has.property('media').equal(requestBody.media)
       response.body.data.should.has.property('created_at')
       response.body.data.should.has.property('updated_at')
+      response.body.data.should.has.property('deleted_at')
 
       if (oneDatastore.client === undefined) {
         throw new Error('oneDatastore client is undefined')
@@ -219,6 +222,7 @@ describe('TopUpHistoryControllerRest', () => {
       response.body.data.should.has.property('media').equal(requestBody.media)
       response.body.data.should.has.property('created_at')
       response.body.data.should.has.property('updated_at')
+      response.body.data.should.has.property('deleted_at')
     })
   })
 

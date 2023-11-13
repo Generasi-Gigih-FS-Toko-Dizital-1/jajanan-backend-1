@@ -136,6 +136,7 @@ describe('UserControllerRest', () => {
         user.should.has.property('last_longitude')
         user.should.has.property('created_at')
         user.should.has.property('updated_at')
+        user.should.has.property('deleted_at')
       })
     })
   })
@@ -188,6 +189,7 @@ describe('UserControllerRest', () => {
         user.should.has.property('last_longitude').equal(requestUser.lastLongitude)
         user.should.has.property('created_at').equal(requestUser.createdAt.toISOString())
         user.should.has.property('updated_at').equal(requestUser.updatedAt.toISOString())
+        user.should.has.property('deleted_at')
         user.should.has.property('notification_histories').deep.members(
           requestNotificationHistories.map((notificationHistory: NotificationHistory) => humps.decamelizeKeys(JSON.parse(JSON.stringify(notificationHistory))))
         )
@@ -229,6 +231,7 @@ describe('UserControllerRest', () => {
       response.body.data.should.has.property('last_longitude').equal(requestUser.lastLongitude)
       response.body.data.should.has.property('created_at').equal(requestUser.createdAt.toISOString())
       response.body.data.should.has.property('updated_at').equal(requestUser.updatedAt.toISOString())
+      response.body.data.should.has.property('deleted_at').equal(null)
     })
   })
 
@@ -267,6 +270,7 @@ describe('UserControllerRest', () => {
       response.body.data.should.has.property('last_longitude')
       response.body.data.should.has.property('created_at')
       response.body.data.should.has.property('updated_at')
+      response.body.data.should.has.property('deleted_at')
 
       if (oneDatastore.client === undefined) {
         throw new Error('oneDatastore client is undefined')
@@ -316,6 +320,7 @@ describe('UserControllerRest', () => {
       response.body.data.should.has.property('last_longitude')
       response.body.data.should.has.property('created_at')
       response.body.data.should.has.property('updated_at')
+      response.body.data.should.has.property('deleted_at')
     })
   })
 

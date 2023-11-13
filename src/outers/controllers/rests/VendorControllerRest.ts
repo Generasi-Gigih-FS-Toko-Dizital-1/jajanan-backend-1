@@ -76,6 +76,7 @@ export default class VendorControllerRest {
               vendor.lastLongitude,
               vendor.createdAt,
               vendor.updatedAt,
+              vendor.deletedAt,
               (vendor as VendorAggregate).notificationHistories,
               (vendor as VendorAggregate).jajanItems,
               (vendor as VendorAggregate).jajanItemSnapshots,
@@ -150,7 +151,8 @@ export default class VendorControllerRest {
             result.data.lastLatitude,
             result.data.lastLongitude,
             result.data.createdAt,
-            result.data.updatedAt
+            result.data.updatedAt,
+            result.data.deletedAt
           )
         } else {
           data = null
@@ -190,7 +192,8 @@ export default class VendorControllerRest {
             result.data.lastLatitude,
             result.data.lastLongitude,
             result.data.createdAt,
-            result.data.updatedAt
+            result.data.updatedAt,
+            result.data.deletedAt
           )
         } else {
           data = null
@@ -231,7 +234,8 @@ export default class VendorControllerRest {
             result.data.lastLatitude,
             result.data.lastLongitude,
             result.data.createdAt,
-            result.data.updatedAt
+            result.data.updatedAt,
+            result.data.deletedAt
           )
         } else {
           data = null

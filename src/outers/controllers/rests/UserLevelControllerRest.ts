@@ -62,7 +62,8 @@ export default class UserLevelControllerRest {
               userLevel.minimumExperience,
               userLevel.iconUrl,
               userLevel.createdAt,
-              userLevel.updatedAt
+              userLevel.updatedAt,
+              userLevel.deletedAt
             )
           )
         )
@@ -90,7 +91,8 @@ export default class UserLevelControllerRest {
             result.data.minimumExperience,
             result.data.iconUrl,
             result.data.createdAt,
-            result.data.updatedAt
+            result.data.updatedAt,
+            result.data.deletedAt
           )
         } else {
           data = null
@@ -129,7 +131,8 @@ export default class UserLevelControllerRest {
             result.data.minimumExperience,
             result.data.iconUrl,
             result.data.createdAt,
-            result.data.updatedAt
+            result.data.updatedAt,
+            result.data.deletedAt
           )
         } else {
           data = null
@@ -157,7 +160,8 @@ export default class UserLevelControllerRest {
             result.data.minimumExperience,
             result.data.iconUrl,
             result.data.createdAt,
-            result.data.updatedAt
+            result.data.updatedAt,
+            result.data.deletedAt
           )
         } else {
           data = null
@@ -186,7 +190,8 @@ export default class UserLevelControllerRest {
             result.data.minimumExperience,
             result.data.iconUrl,
             result.data.createdAt,
-            result.data.updatedAt
+            result.data.updatedAt,
+            result.data.deletedAt
           )
         } else {
           data = null

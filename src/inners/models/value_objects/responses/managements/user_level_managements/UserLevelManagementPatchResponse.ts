@@ -5,6 +5,7 @@ export default class UserLevelManagementPatchResponse {
   iconUrl: string
   createdAt: Date
   updatedAt: Date
+  deletedAt: Date | null
 
   constructor (
     id: string,
@@ -12,7 +13,8 @@ export default class UserLevelManagementPatchResponse {
     minimumExperience: number,
     iconUrl: string,
     createdAt: Date,
-    updatedAt: Date
+    updatedAt: Date,
+    deletedAt: Date | null = null
   ) {
     this.id = id
     this.name = name
@@ -20,5 +22,6 @@ export default class UserLevelManagementPatchResponse {
     this.iconUrl = iconUrl
     this.createdAt = createdAt
     this.updatedAt = updatedAt
+    this.deletedAt = deletedAt
   }
 }

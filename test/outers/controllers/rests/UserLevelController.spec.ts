@@ -119,6 +119,7 @@ describe('UserLevelControllerRest', () => {
         userLevel.should.has.property('icon_url')
         userLevel.should.has.property('updated_at')
         userLevel.should.has.property('created_at')
+        userLevel.should.has.property('deleted_at')
       })
     })
   })
@@ -152,6 +153,7 @@ describe('UserLevelControllerRest', () => {
         userLevel.should.has.property('icon_url').equal(requestUserLevel.iconUrl)
         userLevel.should.has.property('updated_at').equal(requestUserLevel.updatedAt.toISOString())
         userLevel.should.has.property('created_at').equal(requestUserLevel.createdAt.toISOString())
+        userLevel.should.has.property('deleted_at')
       })
     })
   })
@@ -175,6 +177,7 @@ describe('UserLevelControllerRest', () => {
       response.body.data.should.has.property('icon_url').equal(requestUserLevel.iconUrl)
       response.body.data.should.has.property('updated_at').equal(requestUserLevel.updatedAt.toISOString())
       response.body.data.should.has.property('created_at').equal(requestUserLevel.createdAt.toISOString())
+      response.body.data.should.has.property('deleted_at').equal(null)
     })
   })
 
@@ -202,6 +205,7 @@ describe('UserLevelControllerRest', () => {
       response.body.data.should.has.property('icon_url').equal(requestBody.iconUrl)
       response.body.data.should.has.property('updated_at')
       response.body.data.should.has.property('created_at')
+      response.body.data.should.has.property('deleted_at')
 
       if (oneDatastore.client === undefined) {
         throw new Error('oneDatastore client is undefined')
@@ -240,6 +244,7 @@ describe('UserLevelControllerRest', () => {
       response.body.data.should.has.property('icon_url').equal(requestBody.iconUrl)
       response.body.data.should.has.property('updated_at')
       response.body.data.should.has.property('created_at')
+      response.body.data.should.has.property('deleted_at')
     })
   })
 

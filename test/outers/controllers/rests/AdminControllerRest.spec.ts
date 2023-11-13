@@ -121,6 +121,7 @@ describe('AdminControllerRest', () => {
         admin.should.has.property('gender')
         admin.should.has.property('created_at')
         admin.should.has.property('updated_at')
+        admin.should.has.property('deleted_at')
       })
     })
   })
@@ -156,6 +157,7 @@ describe('AdminControllerRest', () => {
         admin.should.has.property('gender').equal(requestAdmin.gender)
         admin.should.has.property('created_at').equal(requestAdmin.createdAt.toISOString())
         admin.should.has.property('updated_at').equal(requestAdmin.updatedAt.toISOString())
+        admin.should.has.property('deleted_at').equal(null)
       })
     })
   })
@@ -180,6 +182,7 @@ describe('AdminControllerRest', () => {
       response.body.data.should.has.property('gender').equal(requestAdmin.gender)
       response.body.data.should.has.property('updated_at').equal(requestAdmin.updatedAt.toISOString())
       response.body.data.should.has.property('created_at').equal(requestAdmin.updatedAt.toISOString())
+      response.body.data.should.has.property('deleted_at').equal(null)
     })
   })
 
@@ -208,6 +211,7 @@ describe('AdminControllerRest', () => {
       response.body.data.should.has.property('gender').equal(requestBody.gender)
       response.body.data.should.has.property('updated_at')
       response.body.data.should.has.property('created_at')
+      response.body.data.should.has.property('deleted_at').equal(null)
 
       if (oneDatastore.client === undefined) {
         throw new Error('oneDatastore client is undefined')
@@ -248,6 +252,7 @@ describe('AdminControllerRest', () => {
       response.body.data.should.has.property('gender').equal(requestBody.gender)
       response.body.data.should.has.property('updated_at')
       response.body.data.should.has.property('created_at')
+      response.body.data.should.has.property('deleted_at').equal(null)
     })
   })
 

@@ -65,6 +65,7 @@ export default class JajanItemControllerRest {
               jajanItem.imageUrl,
               jajanItem.createdAt,
               jajanItem.updatedAt,
+              jajanItem.deletedAt,
               (jajanItem as JajanItemAggregate).vendor,
               (jajanItem as JajanItemAggregate).category,
               (jajanItem as JajanItemAggregate).snapshots
@@ -97,7 +98,8 @@ export default class JajanItemControllerRest {
             result.data.price,
             result.data.imageUrl,
             result.data.createdAt,
-            result.data.updatedAt
+            result.data.updatedAt,
+            result.data.deletedAt
           )
         } else {
           data = null
@@ -127,7 +129,8 @@ export default class JajanItemControllerRest {
             result.data.price,
             result.data.imageUrl,
             result.data.createdAt,
-            result.data.updatedAt
+            result.data.updatedAt,
+            result.data.deletedAt
           )
         } else {
           data = null
@@ -158,7 +161,8 @@ export default class JajanItemControllerRest {
             result.data.price,
             result.data.imageUrl,
             result.data.createdAt,
-            result.data.updatedAt
+            result.data.updatedAt,
+            result.data.deletedAt
           )
         } else {
           data = null

@@ -12,8 +12,9 @@ export default class JajanItemManagementReadOneResponse {
   vendor?: Vendor
   category?: Category
   snapshots?: JajanItemSnapshot[]
+  deletedAt: Date | null
 
-  constructor (id: string, vendorId: string, categoryId: string, name: string, price: number, imageUrl: string, createdAt: Date, updatedAt: Date, vendor?: Vendor, category?: Category, snapshots?: JajanItemSnapshot[]) {
+  constructor (id: string, vendorId: string, categoryId: string, name: string, price: number, imageUrl: string, createdAt: Date, updatedAt: Date, deletedAt: Date | null = null, vendor?: Vendor, category?: Category, snapshots?: JajanItemSnapshot[]) {
     this.id = id
     this.vendorId = vendorId
     this.categoryId = categoryId
@@ -25,5 +26,6 @@ export default class JajanItemManagementReadOneResponse {
     this.vendor = vendor
     this.category = category
     this.snapshots = snapshots
+    this.deletedAt = deletedAt
   }
 }

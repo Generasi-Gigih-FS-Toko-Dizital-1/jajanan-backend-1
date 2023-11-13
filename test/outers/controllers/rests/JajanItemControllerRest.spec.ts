@@ -130,6 +130,7 @@ describe('JajanItemControllerRest', () => {
         jajanItem.should.has.property('image_url')
         jajanItem.should.has.property('updated_at')
         jajanItem.should.has.property('created_at')
+        jajanItem.should.has.property('deleted_at')
       })
     })
   })
@@ -174,6 +175,7 @@ describe('JajanItemControllerRest', () => {
         jajanItem.should.has.property('image_url').equal(requestJajanItem.imageUrl)
         jajanItem.should.has.property('updated_at').equal(requestJajanItem.updatedAt.toISOString())
         jajanItem.should.has.property('created_at').equal(requestJajanItem.createdAt.toISOString())
+        jajanItem.should.has.property('deleted_at')
         jajanItem.should.has.property('vendor').deep.equal(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestVendor))))
         jajanItem.should.has.property('category').deep.equal(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestCategory))))
         jajanItem.should.has.property('snapshots').deep.members(
@@ -204,6 +206,7 @@ describe('JajanItemControllerRest', () => {
       response.body.data.should.has.property('image_url').equal(requestJajanItem.imageUrl)
       response.body.data.should.has.property('updated_at').equal(requestJajanItem.updatedAt.toISOString())
       response.body.data.should.has.property('created_at').equal(requestJajanItem.createdAt.toISOString())
+      response.body.data.should.has.property('deleted_at').equal(null)
     })
   })
 
@@ -235,6 +238,7 @@ describe('JajanItemControllerRest', () => {
       response.body.data.should.has.property('image_url').equal(requestBody.imageUrl)
       response.body.data.should.has.property('updated_at')
       response.body.data.should.has.property('created_at')
+      response.body.data.should.has.property('deleted_at')
 
       if (oneDatastore.client === undefined) {
         throw new Error('oneDatastore client is undefined')
@@ -277,6 +281,7 @@ describe('JajanItemControllerRest', () => {
       response.body.data.should.has.property('image_url').equal(requestBody.imageUrl)
       response.body.data.should.has.property('updated_at')
       response.body.data.should.has.property('created_at')
+      response.body.data.should.has.property('deleted_at')
     })
   })
 

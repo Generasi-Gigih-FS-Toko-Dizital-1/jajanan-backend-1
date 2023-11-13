@@ -131,6 +131,7 @@ describe('PayoutHistoryControllerRest', () => {
       response.body.data.payout_histories[0].should.has.property('amount').equal(requestPayoutHistory.amount)
       response.body.data.payout_histories[0].should.has.property('created_at').equal(requestPayoutHistory.createdAt.toISOString())
       response.body.data.payout_histories[0].should.has.property('updated_at').equal(requestPayoutHistory.updatedAt.toISOString())
+      response.body.data.payout_histories[0].should.has.property('deleted_at')
       response.body.data.payout_histories[0].should.has.property('vendor').deep.equal(humps.decamelizeKeys(JSON.parse(JSON.stringify(requestVendor))))
     })
   })
@@ -154,6 +155,7 @@ describe('PayoutHistoryControllerRest', () => {
       response.body.data.should.has.property('amount').equal(requestPayoutHistory.amount)
       response.body.data.should.has.property('created_at').equal(requestPayoutHistory.createdAt.toISOString())
       response.body.data.should.has.property('updated_at').equal(requestPayoutHistory.updatedAt.toISOString())
+      response.body.data.should.has.property('deleted_at').equal(null)
     })
   })
 
@@ -183,6 +185,7 @@ describe('PayoutHistoryControllerRest', () => {
       response.body.data.should.has.property('media').equal(requestBody.media)
       response.body.data.should.has.property('created_at')
       response.body.data.should.has.property('updated_at')
+      response.body.data.should.has.property('deleted_at')
 
       if (oneDatastore.client === undefined) {
         throw new Error('oneDatastore client is undefined')
@@ -223,6 +226,7 @@ describe('PayoutHistoryControllerRest', () => {
       response.body.data.should.has.property('media').equal(requestBody.media)
       response.body.data.should.has.property('created_at')
       response.body.data.should.has.property('updated_at')
+      response.body.data.should.has.property('deleted_at')
     })
   })
 

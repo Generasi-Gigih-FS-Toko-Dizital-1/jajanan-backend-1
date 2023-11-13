@@ -62,6 +62,7 @@ export default class CategoryControllerRest {
               category.iconUrl,
               category.createdAt,
               category.updatedAt,
+              category.deletedAt,
               (category as CategoryAggregate).jajanItems,
               (category as CategoryAggregate).jajanItemSnapshots,
               (category as CategoryAggregate).userSubscriptions
@@ -91,7 +92,8 @@ export default class CategoryControllerRest {
             result.data.name,
             result.data.iconUrl,
             result.data.createdAt,
-            result.data.updatedAt
+            result.data.updatedAt,
+            result.data.deletedAt
           )
         } else {
           data = null
@@ -118,7 +120,8 @@ export default class CategoryControllerRest {
             result.data.name,
             result.data.iconUrl,
             result.data.createdAt,
-            result.data.updatedAt
+            result.data.updatedAt,
+            result.data.deletedAt
           )
         } else {
           data = null
@@ -146,7 +149,8 @@ export default class CategoryControllerRest {
             result.data.name,
             result.data.iconUrl,
             result.data.createdAt,
-            result.data.updatedAt
+            result.data.updatedAt,
+            result.data.deletedAt
           )
         } else {
           data = null

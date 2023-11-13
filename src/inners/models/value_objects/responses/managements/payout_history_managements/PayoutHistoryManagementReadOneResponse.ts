@@ -9,6 +9,7 @@ export default class PayoutHistoryManagementReadOneResponse {
     public media: string,
     public updatedAt: Date,
     public createdAt: Date,
+    public deletedAt: Date | null = null,
     public vendor?: Vendor
   ) {}
 }

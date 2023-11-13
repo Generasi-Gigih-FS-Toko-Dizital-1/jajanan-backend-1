@@ -140,6 +140,7 @@ describe('VendorControllerRest', () => {
         vendor.should.has.property('last_longitude')
         vendor.should.has.property('created_at')
         vendor.should.has.property('updated_at')
+        vendor.should.has.property('deleted_at')
       })
     })
   })
@@ -195,6 +196,7 @@ describe('VendorControllerRest', () => {
         vendor.should.has.property('last_longitude').equal(requestVendor.lastLongitude)
         vendor.should.has.property('created_at').equal(requestVendor.createdAt.toISOString())
         vendor.should.has.property('updated_at').equal(requestVendor.updatedAt.toISOString())
+        vendor.should.has.property('deleted_at')
         vendor.should.has.property('notification_histories').deep.members(
           requestNotificationHistories.map((notificationHistory: NotificationHistory) => humps.decamelizeKeys(JSON.parse(JSON.stringify(notificationHistory))))
         )
@@ -250,6 +252,7 @@ describe('VendorControllerRest', () => {
         nearbyVendor.vendor.should.has.property('last_longitude')
         nearbyVendor.vendor.should.has.property('created_at')
         nearbyVendor.vendor.should.has.property('updated_at')
+        nearbyVendor.vendor.should.has.property('deleted_at')
         nearbyVendor.should.has.property('distance')
         nearbyVendor.distance.should.be.lessThanOrEqual(distance)
       })
@@ -285,6 +288,7 @@ describe('VendorControllerRest', () => {
       response.body.data.should.has.property('last_longitude').equal(requestVendor.lastLongitude)
       response.body.data.should.has.property('updated_at').equal(requestVendor.updatedAt.toISOString())
       response.body.data.should.has.property('created_at').equal(requestVendor.createdAt.toISOString())
+      response.body.data.should.has.property('deleted_at').equal(null)
     })
   })
 
@@ -331,6 +335,7 @@ describe('VendorControllerRest', () => {
       response.body.data.should.has.property('last_longitude').equal(requestBody.lastLongitude)
       response.body.data.should.has.property('updated_at')
       response.body.data.should.has.property('created_at')
+      response.body.data.should.has.property('deleted_at')
 
       if (oneDatastore.client === undefined) {
         throw new Error('oneDatastore client is undefined')
@@ -388,6 +393,7 @@ describe('VendorControllerRest', () => {
       response.body.data.should.has.property('last_longitude').equal(requestBody.lastLongitude)
       response.body.data.should.has.property('updated_at')
       response.body.data.should.has.property('created_at')
+      response.body.data.should.has.property('deleted_at')
     })
   })
 

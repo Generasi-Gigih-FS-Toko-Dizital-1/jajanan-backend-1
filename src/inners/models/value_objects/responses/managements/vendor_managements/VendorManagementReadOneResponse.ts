@@ -24,12 +24,13 @@ export default class VendorManagementReadOneResponse {
   lastLongitude: number
   createdAt: Date
   updatedAt: Date
+  deletedAt: Date | null
   notificationHistories?: NotificationHistory[]
   jajanItems?: JajanItem[]
   jajanItemSnapshots?: JajanItemSnapshot[]
   payoutHistories?: PayoutHistory[]
 
-  constructor (id: string, fullName: string, gender: Gender, address: string, username: string, email: string, balance: number, experience: number, jajanImageUrl: string, jajanName: string, jajanDescription: string, status: Status, lastLatitude: number, lastLongitude: number, createdAt: Date, updatedAt: Date, notificationHistories?: NotificationHistory[], jajanItems?: JajanItem[], jajanItemSnapshots?: JajanItemSnapshot[], payoutHistories?: PayoutHistory[]) {
+  constructor (id: string, fullName: string, gender: Gender, address: string, username: string, email: string, balance: number, experience: number, jajanImageUrl: string, jajanName: string, jajanDescription: string, status: Status, lastLatitude: number, lastLongitude: number, createdAt: Date, updatedAt: Date, deletedAt: Date | null = null, notificationHistories?: NotificationHistory[], jajanItems?: JajanItem[], jajanItemSnapshots?: JajanItemSnapshot[], payoutHistories?: PayoutHistory[]) {
     this.id = id
     this.fullName = fullName
     this.gender = gender
@@ -50,5 +51,6 @@ export default class VendorManagementReadOneResponse {
     this.jajanItems = jajanItems
     this.jajanItemSnapshots = jajanItemSnapshots
     this.payoutHistories = payoutHistories
+    this.deletedAt = deletedAt
   }
 }

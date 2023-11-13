@@ -7,6 +7,7 @@ export default class JajanItemManagementPatchResponse {
   imageUrl: string
   createdAt: Date
   updatedAt: Date
+  deletedAt: Date | null
 
   constructor (
     id: string,
@@ -16,7 +17,8 @@ export default class JajanItemManagementPatchResponse {
     price: number,
     imageUrl: string,
     createdAt: Date,
-    updatedAt: Date
+    updatedAt: Date,
+    deletedAt: Date | null = null
   ) {
     this.id = id
     this.vendorId = vendorId
@@ -26,5 +28,6 @@ export default class JajanItemManagementPatchResponse {
     this.imageUrl = imageUrl
     this.createdAt = createdAt
     this.updatedAt = updatedAt
+    this.deletedAt = deletedAt
   }
 }
