@@ -7,6 +7,7 @@ export default class AdminManagementPatchResponse {
   email: string
   createdAt: Date
   updatedAt: Date
+  deletedAt: Date | null
 
   constructor (
     id: string,
@@ -14,7 +15,9 @@ export default class AdminManagementPatchResponse {
     gender: Gender,
     email: string,
     createdAt: Date,
-    updatedAt: Date
+    updatedAt: Date,
+    deletedAt: Date | null = null
+
   ) {
     this.id = id
     this.fullName = fullName
@@ -22,5 +25,6 @@ export default class AdminManagementPatchResponse {
     this.email = email
     this.createdAt = createdAt
     this.updatedAt = updatedAt
+    this.deletedAt = deletedAt
   }
 }

@@ -69,6 +69,7 @@ export default class UserControllerRest {
               user.lastLongitude,
               user.createdAt,
               user.updatedAt,
+              user.deletedAt,
               (user as UserAggregate).notificationHistories,
               (user as UserAggregate).topUpHistories,
               (user as UserAggregate).transactionHistories,
@@ -108,7 +109,8 @@ export default class UserControllerRest {
             result.data.lastLatitude,
             result.data.lastLongitude,
             result.data.createdAt,
-            result.data.updatedAt
+            result.data.updatedAt,
+            result.data.deletedAt
           )
         } else {
           data = null
@@ -144,7 +146,8 @@ export default class UserControllerRest {
             result.data.lastLatitude,
             result.data.lastLongitude,
             result.data.createdAt,
-            result.data.updatedAt
+            result.data.updatedAt,
+            result.data.deletedAt
           )
         } else {
           data = null
@@ -181,7 +184,8 @@ export default class UserControllerRest {
             result.data.lastLatitude,
             result.data.lastLongitude,
             result.data.createdAt,
-            result.data.updatedAt
+            result.data.updatedAt,
+            result.data.deletedAt
           )
         } else {
           data = null

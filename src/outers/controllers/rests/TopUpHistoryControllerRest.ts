@@ -63,6 +63,7 @@ export default class TopUpHistoryController {
               topUpHistory.media,
               topUpHistory.updatedAt,
               topUpHistory.createdAt,
+              topUpHistory.deletedAt,
               (topUpHistory as TopUpHistoryAggregate).user
             )
           )
@@ -92,7 +93,8 @@ export default class TopUpHistoryController {
             result.data.amount,
             result.data.media,
             result.data.updatedAt,
-            result.data.createdAt
+            result.data.createdAt,
+            result.data.deletedAt
           )
         } else {
           data = null
@@ -122,7 +124,8 @@ export default class TopUpHistoryController {
             result.data.amount,
             result.data.media,
             result.data.updatedAt,
-            result.data.createdAt
+            result.data.createdAt,
+            result.data.deletedAt
           )
         } else {
           data = null
@@ -153,7 +156,8 @@ export default class TopUpHistoryController {
             result.data.amount,
             result.data.media,
             result.data.updatedAt,
-            result.data.createdAt
+            result.data.createdAt,
+            result.data.deletedAt
           )
         } else {
           data = null

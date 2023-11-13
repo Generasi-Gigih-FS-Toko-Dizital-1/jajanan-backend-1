@@ -62,7 +62,8 @@ export default class VendorLevelControllerRest {
               vendorLevel.minimumExperience,
               vendorLevel.iconUrl,
               vendorLevel.createdAt,
-              vendorLevel.updatedAt
+              vendorLevel.updatedAt,
+              vendorLevel.deletedAt
             )
           )
         )
@@ -90,7 +91,8 @@ export default class VendorLevelControllerRest {
             result.data.minimumExperience,
             result.data.iconUrl,
             result.data.createdAt,
-            result.data.updatedAt
+            result.data.updatedAt,
+            result.data.deletedAt
           )
         } else {
           data = null
@@ -129,7 +131,8 @@ export default class VendorLevelControllerRest {
             result.data.minimumExperience,
             result.data.iconUrl,
             result.data.createdAt,
-            result.data.updatedAt
+            result.data.updatedAt,
+            result.data.deletedAt
           )
         } else {
           data = null
@@ -157,7 +160,8 @@ export default class VendorLevelControllerRest {
             result.data.minimumExperience,
             result.data.iconUrl,
             result.data.createdAt,
-            result.data.updatedAt
+            result.data.updatedAt,
+            result.data.deletedAt
           )
         } else {
           data = null
@@ -186,7 +190,8 @@ export default class VendorLevelControllerRest {
             result.data.minimumExperience,
             result.data.iconUrl,
             result.data.createdAt,
-            result.data.updatedAt
+            result.data.updatedAt,
+            result.data.deletedAt
           )
         } else {
           data = null

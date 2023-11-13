@@ -8,6 +8,7 @@ export default class TopUpHistoryManagementReadOneResponse {
   media: string
   updatedAt: Date
   createdAt: Date
+  deletedAt: Date | null
   user?: User
 
   constructor (id: string,
@@ -17,7 +18,10 @@ export default class TopUpHistoryManagementReadOneResponse {
     media: string,
     updatedAt: Date,
     createdAt: Date,
-    user?: User) {
+    deletedAt: Date | null = null,
+    user?: User
+
+  ) {
     this.id = id
     this.userId = userId
     this.xenditInvoiceId = xenditInvoiceId
@@ -26,5 +30,6 @@ export default class TopUpHistoryManagementReadOneResponse {
     this.updatedAt = updatedAt
     this.createdAt = createdAt
     this.user = user
+    this.deletedAt = deletedAt
   }
 }

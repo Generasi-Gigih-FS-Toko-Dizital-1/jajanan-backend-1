@@ -6,6 +6,7 @@ export default class TopUpHistoryManagementPatchResponse {
   media: string
   updatedAt: Date
   createdAt: Date
+  deletedAt: Date | null
 
   constructor (id: string,
     userId: string,
@@ -13,7 +14,9 @@ export default class TopUpHistoryManagementPatchResponse {
     amount: number,
     media: string,
     updatedAt: Date,
-    createdAt: Date) {
+    createdAt: Date,
+    deletedAt: Date | null = null
+  ) {
     this.id = id
     this.userId = userId
     this.xenditInvoiceId = xenditInvoiceId
@@ -21,5 +24,6 @@ export default class TopUpHistoryManagementPatchResponse {
     this.media = media
     this.updatedAt = updatedAt
     this.createdAt = createdAt
+    this.deletedAt = deletedAt
   }
 }

@@ -19,12 +19,13 @@ export default class UserManagementReadOneResponse {
   lastLongitude: number
   createdAt: Date
   updatedAt: Date
+  deletedAt: Date | null
   notificationHistories?: NotificationHistory[]
   topUpHistories?: TopUpHistory[]
   transactionHistories?: TransactionHistory[]
   userSubscriptions?: UserSubscription[]
 
-  constructor (id: string, fullName: string, gender: Gender, address: string, username: string, email: string, balance: number, experience: number, lastLatitude: number, lastLongitude: number, createdAt: Date, updatedAt: Date, notificationHistories?: NotificationHistory[], topUpHistories?: TopUpHistory[], transactionHistories?: TransactionHistory[], userSubscriptions?: UserSubscription[]) {
+  constructor (id: string, fullName: string, gender: Gender, address: string, username: string, email: string, balance: number, experience: number, lastLatitude: number, lastLongitude: number, createdAt: Date, updatedAt: Date, deletedAt: Date | null = null, notificationHistories?: NotificationHistory[], topUpHistories?: TopUpHistory[], transactionHistories?: TransactionHistory[], userSubscriptions?: UserSubscription[]) {
     this.id = id
     this.fullName = fullName
     this.gender = gender
@@ -41,5 +42,6 @@ export default class UserManagementReadOneResponse {
     this.topUpHistories = topUpHistories
     this.transactionHistories = transactionHistories
     this.userSubscriptions = userSubscriptions
+    this.deletedAt = deletedAt
   }
 }

@@ -6,6 +6,7 @@ export default class UserSubscriptionManagementReadOneResponse {
   categoryId: string
   createdAt: Date
   updatedAt: Date
+  deletedAt: Date | null
   user?: User
   category?: Category
 
@@ -15,6 +16,7 @@ export default class UserSubscriptionManagementReadOneResponse {
     categoryId: string,
     createdAt: Date,
     updatedAt: Date,
+    deletedAt: Date | null = null,
     user?: User,
     category?: Category
   ) {
@@ -25,5 +27,6 @@ export default class UserSubscriptionManagementReadOneResponse {
     this.updatedAt = updatedAt
     this.user = user
     this.category = category
+    this.deletedAt = deletedAt
   }
 }

@@ -8,10 +8,11 @@ export default class TransactionHistoryManagementReadOneResponse {
   lastLongitude: number
   updatedAt: Date
   createdAt: Date
+  deletedAt: Date | null
   user?: User
   transactionItems?: TransactionItemHistory[]
 
-  constructor (id: string, userId: string, paymentMethod: PaymentMethod, lastLatitude: number, lastLongitude: number, updatedAt: Date, createdAt: Date, user?: User, transactionItems?: TransactionItemHistory[]) {
+  constructor (id: string, userId: string, paymentMethod: PaymentMethod, lastLatitude: number, lastLongitude: number, updatedAt: Date, createdAt: Date, deletedAt: Date | null = null, user?: User, transactionItems?: TransactionItemHistory[]) {
     this.id = id
     this.userId = userId
     this.paymentMethod = paymentMethod
@@ -21,5 +22,6 @@ export default class TransactionHistoryManagementReadOneResponse {
     this.createdAt = createdAt
     this.user = user
     this.transactionItems = transactionItems
+    this.deletedAt = deletedAt
   }
 }

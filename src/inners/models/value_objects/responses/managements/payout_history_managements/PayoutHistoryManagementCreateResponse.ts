@@ -6,6 +6,7 @@ export default class PayoutHistoryManagementCreateResponse {
     public amount: number,
     public media: string,
     public updatedAt: Date,
-    public createdAt: Date
+    public createdAt: Date,
+    public deletedAt: Date | null = null
   ) {}
 }

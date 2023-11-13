@@ -8,8 +8,9 @@ export default class TransactionHistoryManagementPatchResponse {
   lastLongitude: number
   updatedAt: Date
   createdAt: Date
+  deletedAt: Date | null
 
-  constructor (id: string, userId: string, paymentMethod: PaymentMethod, lastLatitude: number, lastLongitude: number, updatedAt: Date, createdAt: Date) {
+  constructor (id: string, userId: string, paymentMethod: PaymentMethod, lastLatitude: number, lastLongitude: number, updatedAt: Date, createdAt: Date, deletedAt: Date | null = null) {
     this.id = id
     this.userId = userId
     this.paymentMethod = paymentMethod
@@ -17,5 +18,6 @@ export default class TransactionHistoryManagementPatchResponse {
     this.lastLongitude = lastLongitude
     this.updatedAt = updatedAt
     this.createdAt = createdAt
+    this.deletedAt = deletedAt
   }
 }

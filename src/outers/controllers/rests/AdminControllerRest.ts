@@ -66,7 +66,8 @@ export default class AdminControllerRest {
                   admin.gender,
                   admin.email,
                   admin.createdAt,
-                  admin.updatedAt
+                  admin.updatedAt,
+                  admin.deletedAt
                 )
             )
           )
@@ -95,8 +96,10 @@ export default class AdminControllerRest {
             result.data.gender,
             result.data.email,
             result.data.createdAt,
-            result.data.updatedAt
+            result.data.updatedAt,
+            result.data.deletedAt
           )
+          console.log(data)
         } else {
           data = null
         }
@@ -123,7 +126,8 @@ export default class AdminControllerRest {
             result.data.gender,
             result.data.email,
             result.data.createdAt,
-            result.data.updatedAt
+            result.data.updatedAt,
+            result.data.deletedAt
           )
         const responseBody: ResponseBody<AdminManagementCreateResponse> =
           new ResponseBody<AdminManagementCreateResponse>(result.message, data)
@@ -147,7 +151,8 @@ export default class AdminControllerRest {
             result.data.gender,
             result.data.email,
             result.data.createdAt,
-            result.data.updatedAt
+            result.data.updatedAt,
+            result.data.deletedAt
           )
         } else {
           data = null

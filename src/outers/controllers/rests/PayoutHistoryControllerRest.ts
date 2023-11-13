@@ -61,6 +61,7 @@ export default class PayoutHistoryController {
               payoutHistory.media,
               payoutHistory.createdAt,
               payoutHistory.updatedAt,
+              payoutHistory.deletedAt,
               (payoutHistory as PayoutHistoryAggregate).vendor
             )
           )
@@ -92,7 +93,8 @@ export default class PayoutHistoryController {
             result.data.amount,
             result.data.media,
             result.data.createdAt,
-            result.data.updatedAt
+            result.data.updatedAt,
+            result.data.deletedAt
           )
         } else {
           data = null
@@ -122,7 +124,8 @@ export default class PayoutHistoryController {
             result.data.amount,
             result.data.media,
             result.data.createdAt,
-            result.data.updatedAt
+            result.data.updatedAt,
+            result.data.deletedAt
           )
         } else {
           data = null
@@ -153,7 +156,8 @@ export default class PayoutHistoryController {
             result.data.amount,
             result.data.media,
             result.data.createdAt,
-            result.data.updatedAt
+            result.data.updatedAt,
+            result.data.deletedAt
           )
         } else {
           data = null

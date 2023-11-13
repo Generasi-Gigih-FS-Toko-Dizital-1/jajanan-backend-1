@@ -64,6 +64,7 @@ export default class TransactionHistoryControllerRest {
               transactionHistory.lastLongitude,
               transactionHistory.updatedAt,
               transactionHistory.createdAt,
+              transactionHistory.deletedAt,
               (transactionHistory as TransactionHistoryAggregate).user,
               (transactionHistory as TransactionHistoryAggregate).transactionItems
             )
@@ -94,7 +95,8 @@ export default class TransactionHistoryControllerRest {
             result.data.lastLatitude,
             result.data.lastLongitude,
             result.data.updatedAt,
-            result.data.createdAt
+            result.data.createdAt,
+            result.data.deletedAt
           )
         } else {
           data = null
@@ -123,7 +125,8 @@ export default class TransactionHistoryControllerRest {
             result.data.lastLatitude,
             result.data.lastLongitude,
             result.data.updatedAt,
-            result.data.createdAt
+            result.data.createdAt,
+            result.data.deletedAt
           )
         } else {
           data = null
@@ -153,7 +156,8 @@ export default class TransactionHistoryControllerRest {
             result.data.lastLatitude,
             result.data.lastLongitude,
             result.data.updatedAt,
-            result.data.createdAt
+            result.data.createdAt,
+            result.data.deletedAt
           )
         } else {
           data = null
