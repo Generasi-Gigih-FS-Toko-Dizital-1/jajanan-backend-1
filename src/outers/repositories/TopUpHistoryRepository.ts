@@ -13,6 +13,18 @@ export default class TopUpHistoryRepository {
     this.oneDatastore = oneDatastore
   }
 
+  count = async (repositoryArgument: RepositoryArgument): Promise<number> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
+
+    if (this.oneDatastore.client === undefined) {
+      throw new Error('oneDatastore client is undefined.')
+    }
+
+    const count: number = await this.oneDatastore.client.topUpHistory.count(args)
+
+    return count
+  }
+
   readMany = async (repositoryArgument: RepositoryArgument): Promise<TopUpHistory[] | TopUpHistoryAggregate[]> => {
     const args: any = repositoryArgument.convertToPrismaArgs()
 

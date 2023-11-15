@@ -10,6 +10,18 @@ export default class TransactionHistoryRepository {
     this.oneDatastore = oneDatastore
   }
 
+  count = async (repositoryArgument: RepositoryArgument): Promise<number> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
+
+    if (this.oneDatastore.client === undefined) {
+      throw new Error('oneDatastore client is undefined.')
+    }
+
+    const count: number = await this.oneDatastore.client.transactionHistory.count(args)
+
+    return count
+  }
+
   readMany = async (repositoryArgument: RepositoryArgument): Promise<TransactionHistory[] | TransactionHistoryAggregate[]> => {
     const args: any = repositoryArgument.convertToPrismaArgs()
 

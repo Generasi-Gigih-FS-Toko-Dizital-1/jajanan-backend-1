@@ -5,7 +5,24 @@ import type RepositoryArgument from '../../inners/models/value_objects/Repositor
 import type PayoutHistoryAggregate from '../../inners/models/aggregates/PayoutHistoryAggregate'
 
 export default class PayoutHistoryRepository {
-  constructor (private readonly oneDatastore: OneDatastore) {
+  oneDatastore: OneDatastore
+
+  constructor (
+    oneDatastore: OneDatastore
+  ) {
+    this.oneDatastore = oneDatastore
+  }
+
+  count = async (repositoryArgument: RepositoryArgument): Promise<number> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
+
+    if (this.oneDatastore.client === undefined) {
+      throw new Error('oneDatastore client is undefined.')
+    }
+
+    const count: number = await this.oneDatastore.client.payoutHistory.count(args)
+
+    return count
   }
 
   readMany = async (repositoryArgument: RepositoryArgument): Promise<PayoutHistory[] | PayoutHistoryAggregate[]> => {

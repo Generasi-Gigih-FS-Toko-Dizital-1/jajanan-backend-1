@@ -15,6 +15,18 @@ export default class VendorRepository {
     this.oneDatastore = oneDatastore
   }
 
+  count = async (repositoryArgument: RepositoryArgument): Promise<number> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
+
+    if (this.oneDatastore.client === undefined) {
+      throw new Error('oneDatastore client is undefined.')
+    }
+
+    const count: number = await this.oneDatastore.client.vendor.count(args)
+
+    return count
+  }
+
   readManyByDistanceAndSubscribedUserIds = async (distance: number, userIds: string[], include: any): Promise<Vendor[] | VendorAggregate[]> => {
     if (this.oneDatastore.client === undefined) {
       throw new Error('oneDatastore client is undefined.')
