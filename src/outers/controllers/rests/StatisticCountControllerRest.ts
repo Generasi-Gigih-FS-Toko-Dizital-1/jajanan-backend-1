@@ -68,7 +68,7 @@ export default class StatisticCountControllerRest {
     reader.then(result => {
       response.status(200).send(
         new ResponseBody(
-          'Read count statistic success.',
+          `Read count statistic ${entity as string} succeed.`,
           new StatisticCountResponse(result)
         )
       )
