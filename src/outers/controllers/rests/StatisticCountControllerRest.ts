@@ -65,13 +65,12 @@ export default class StatisticCountControllerRest {
       reader = this.transactionHistoryStatistic.count()
     }
 
-    reader.then(result => {
-      response.status(200).send(
-        new ResponseBody(
-          `Read count statistic ${entity as string} succeed.`,
-          new StatisticCountResponse(result)
-        )
+    reader.then((result: number) => {
+      const responseBody: ResponseBody<StatisticCountResponse> = new ResponseBody<StatisticCountResponse>(
+            `Read count statistic ${entity as string} succeed.`,
+            new StatisticCountResponse(result)
       )
+      response.status(200).send(responseBody)
     }).catch(error => {
       response.status(500).send(error.message)
     })
