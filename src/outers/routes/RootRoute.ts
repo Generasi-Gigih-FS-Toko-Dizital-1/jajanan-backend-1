@@ -76,6 +76,13 @@ import CloudinaryUtility from '../utilities/CloudinaryUtility'
 import FileControllerRest from '../controllers/rests/FileControllerRest'
 import TransactionItemHistoryManagement from '../../inners/use_cases/managements/TransactionItemHistoryManagement'
 import TransactionItemHistoryRepository from '../repositories/TransactionItemHistoryRepository'
+import AdminStatistic from '../../inners/use_cases/statistics/AdminStatistic'
+import UserStatistic from '../../inners/use_cases/statistics/UserStatistic'
+import VendorStatistic from '../../inners/use_cases/statistics/VendorStatistic'
+import PayoutHistoryStatistic from '../../inners/use_cases/statistics/PayoutHistoryStatistic'
+import TopUpHistoryStatistic from '../../inners/use_cases/statistics/TopUpHistoryStatistic'
+import TransactionHistoryStatistic from '../../inners/use_cases/statistics/TransactionHistoryStatistic'
+import StatisticCountControllerRest from '../controllers/rests/StatisticCountControllerRest'
 
 export default class RootRoute {
   app: Application
@@ -158,6 +165,26 @@ export default class RootRoute {
     const payout: Payout = new Payout(vendorPayoutRepository, paymentGateway, vendorManagement)
 
     const locationSync: LocationSync = new LocationSync(userManagement, vendorManagement, sessionManagement, firebaseGateway, objectUtility)
+
+    const adminStatistic: AdminStatistic = new AdminStatistic(adminRepository)
+    const userStatistic: UserStatistic = new UserStatistic(userRepository)
+    const vendorStatistic: VendorStatistic = new VendorStatistic(vendorRepository)
+    const payoutHistoryStatistic: PayoutHistoryStatistic = new PayoutHistoryStatistic(payoutHistoryRepository)
+    const topUpHistoryStatistic: TopUpHistoryStatistic = new TopUpHistoryStatistic(topUpHistoryRepository)
+    const transactionHistoryStatistic: TransactionHistoryStatistic = new TransactionHistoryStatistic(transactionHistoryRepository)
+
+    const statisticCountControllerRest: StatisticCountControllerRest = new StatisticCountControllerRest(
+      Router(),
+      authenticationValidation,
+      adminStatistic,
+      userStatistic,
+      vendorStatistic,
+      payoutHistoryStatistic,
+      topUpHistoryStatistic,
+      transactionHistoryStatistic
+    )
+    statisticCountControllerRest.registerRoutes()
+    routerVersionOne.use('/statistics/counts', statisticCountControllerRest.router)
 
     const userControllerRest: UserControllerRest = new UserControllerRest(
       Router(),

@@ -99,7 +99,6 @@ export default class AdminControllerRest {
             result.data.updatedAt,
             result.data.deletedAt
           )
-          console.log(data)
         } else {
           data = null
         }

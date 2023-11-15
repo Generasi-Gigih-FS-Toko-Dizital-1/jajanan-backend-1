@@ -9,6 +9,18 @@ export default class AdminRepository {
     this.oneDatastore = oneDatastore
   }
 
+  count = async (repositoryArgument: RepositoryArgument): Promise<number> => {
+    const args: any = repositoryArgument.convertToPrismaArgs()
+
+    if (this.oneDatastore.client === undefined) {
+      throw new Error('oneDatastore client is undefined.')
+    }
+
+    const count: number = await this.oneDatastore.client.admin.count(args)
+
+    return count
+  }
+
   readMany = async (repositoryArgument: RepositoryArgument): Promise<Admin[] > => {
     const args: any = repositoryArgument.convertToPrismaArgs()
 
