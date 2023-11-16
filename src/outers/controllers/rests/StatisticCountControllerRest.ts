@@ -48,21 +48,29 @@ export default class StatisticCountControllerRest {
   }
 
   readCount = (request: Request, response: Response): void => {
-    const { entity } = request.query
+    const { entity, where } = request.query
 
-    let reader: Promise<number> = Promise.reject(new Error('Read count statistic failed, invalid entity.'))
+    const whereInput: any =
+        where === undefined
+          ? {}
+          : JSON.parse(decodeURIComponent(where as string))
+
+    let reader = new Promise<number>((resolve, reject) => {
+      reject(new Error('Invalid entity'))
+    })
+
     if (entity === 'admin') {
-      reader = this.adminStatistic.count()
+      reader = this.adminStatistic.count(whereInput)
     } else if (entity === 'user') {
-      reader = this.userStatistic.count()
+      reader = this.userStatistic.count(whereInput)
     } else if (entity === 'vendor') {
-      reader = this.vendorStatistic.count()
+      reader = this.vendorStatistic.count(whereInput)
     } else if (entity === 'payout_history') {
-      reader = this.payoutHistoryStatistic.count()
+      reader = this.payoutHistoryStatistic.count(whereInput)
     } else if (entity === 'top_up_history') {
-      reader = this.topUpHistoryStatistic.count()
+      reader = this.topUpHistoryStatistic.count(whereInput)
     } else if (entity === 'transaction_history') {
-      reader = this.transactionHistoryStatistic.count()
+      reader = this.transactionHistoryStatistic.count(whereInput)
     }
 
     reader.then((result: number) => {

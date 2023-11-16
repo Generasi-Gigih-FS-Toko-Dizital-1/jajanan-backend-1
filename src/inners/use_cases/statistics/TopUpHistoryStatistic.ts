@@ -8,11 +8,9 @@ export default class TopUpHistoryStatistic {
     this.topUpHistoryRepository = topUpHistoryRepository
   }
 
-  count = async (): Promise<number> => {
+  count = async (whereInput: any): Promise<number> => {
     const args: RepositoryArgument = new RepositoryArgument(
-      {
-        deletedAt: null
-      }
+      whereInput
     )
 
     const count: number = await this.topUpHistoryRepository.count(args)

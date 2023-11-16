@@ -8,11 +8,9 @@ export default class VendorStatistic {
     this.vendorRepository = vendorRepository
   }
 
-  count = async (): Promise<number> => {
+  count = async (whereInput: any): Promise<number> => {
     const args: RepositoryArgument = new RepositoryArgument(
-      {
-        deletedAt: null
-      }
+      whereInput
     )
 
     const count: number = await this.vendorRepository.count(args)
