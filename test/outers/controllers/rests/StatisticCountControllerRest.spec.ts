@@ -93,8 +93,12 @@ describe('StatisticControllerRest', () => {
 
   describe('GET /api/v1/statistics/counts?entity=admin', () => {
     it('should return 200 OK', async () => {
+      const whereInput: any = {
+        deletedAt: null
+      }
+      const where = encodeURIComponent(JSON.stringify(whereInput))
       const response = await agent
-        .get('/api/v1/statistics/counts?entity=admin')
+        .get(`/api/v1/statistics/counts?entity=admin&where=${where}`)
         .set('Authorization', authorization.convertToString())
 
       response.should.has.status(200)
@@ -108,8 +112,12 @@ describe('StatisticControllerRest', () => {
 
   describe('GET /api/v1/statistics/counts?entity=user', () => {
     it('should return 200 OK', async () => {
+      const whereInput: any = {
+        deletedAt: null
+      }
+      const where = encodeURIComponent(JSON.stringify(whereInput))
       const response = await agent
-        .get('/api/v1/statistics/counts?entity=user')
+        .get(`/api/v1/statistics/counts?entity=user&where=${where}`)
         .set('Authorization', authorization.convertToString())
 
       response.should.has.status(200)
@@ -123,8 +131,12 @@ describe('StatisticControllerRest', () => {
 
   describe('GET /api/v1/statistics/counts?entity=vendor', () => {
     it('should return 200 OK', async () => {
+      const whereInput: any = {
+        deletedAt: null
+      }
+      const where = encodeURIComponent(JSON.stringify(whereInput))
       const response = await agent
-        .get('/api/v1/statistics/counts?entity=vendor')
+        .get(`/api/v1/statistics/counts?entity=vendor&where=${where}`)
         .set('Authorization', authorization.convertToString())
 
       response.should.has.status(200)
@@ -138,8 +150,12 @@ describe('StatisticControllerRest', () => {
 
   describe('GET /api/v1/statistics/counts?entity=top_up_history', () => {
     it('should return 200 OK', async () => {
+      const whereInput: any = {
+        deletedAt: null
+      }
+      const where = encodeURIComponent(JSON.stringify(whereInput))
       const response = await agent
-        .get('/api/v1/statistics/counts?entity=top_up_history')
+        .get(`/api/v1/statistics/counts?entity=top_up_history&where=${where}`)
         .set('Authorization', authorization.convertToString())
 
       response.should.has.status(200)
@@ -153,8 +169,12 @@ describe('StatisticControllerRest', () => {
 
   describe('GET /api/v1/statistics/counts?entity=transaction_history', () => {
     it('should return 200 OK', async () => {
+      const whereInput: any = {
+        deletedAt: null
+      }
+      const where = encodeURIComponent(JSON.stringify(whereInput))
       const response = await agent
-        .get('/api/v1/statistics/counts?entity=transaction_history')
+        .get(`/api/v1/statistics/counts?entity=transaction_history&where=${where}`)
         .set('Authorization', authorization.convertToString())
 
       response.should.has.status(200)
@@ -168,8 +188,12 @@ describe('StatisticControllerRest', () => {
 
   describe('GET /api/v1/statistics/counts?entity=payout_history', () => {
     it('should return 200 OK', async () => {
+      const whereInput: any = {
+        deletedAt: null
+      }
+      const where = encodeURIComponent(JSON.stringify(whereInput))
       const response = await agent
-        .get('/api/v1/statistics/counts?entity=payout_history')
+        .get(`/api/v1/statistics/counts?entity=transaction_history&where=${where}`)
         .set('Authorization', authorization.convertToString())
 
       response.should.has.status(200)

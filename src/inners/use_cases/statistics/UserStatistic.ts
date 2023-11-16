@@ -8,11 +8,9 @@ export default class UserStatistic {
     this.userRepository = userRepository
   }
 
-  count = async (): Promise<number> => {
+  count = async (whereInput: any): Promise<number> => {
     const args: RepositoryArgument = new RepositoryArgument(
-      {
-        deletedAt: null
-      }
+      whereInput
     )
 
     const count: number = await this.userRepository.count(args)
