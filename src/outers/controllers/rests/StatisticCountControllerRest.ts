@@ -79,7 +79,7 @@ export default class StatisticCountControllerRest {
             new StatisticCountResponse(result)
       )
       response.status(200).send(responseBody)
-    }).catch(error => {
+    }).catch((error: Error) => {
       response.status(500).send(error.message)
     })
   }
