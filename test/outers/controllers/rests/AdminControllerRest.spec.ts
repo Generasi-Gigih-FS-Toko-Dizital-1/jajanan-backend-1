@@ -134,7 +134,7 @@ describe('AdminControllerRest', () => {
       const whereInput: any = {
         id: requestAdmin.id
       }
-      const where = encodeURIComponent(JSON.stringify(whereInput))
+      const where: string = encodeURIComponent(JSON.stringify(whereInput))
 
       const response = await agent
         .get(`/api/v1/admins?page_number=${pageNumber}&page_size=${pageSize}&where=${where}`)

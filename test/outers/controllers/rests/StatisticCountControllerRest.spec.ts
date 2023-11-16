@@ -96,7 +96,7 @@ describe('StatisticControllerRest', () => {
       const whereInput: any = {
         deletedAt: null
       }
-      const where = encodeURIComponent(JSON.stringify(whereInput))
+      const where: string = encodeURIComponent(JSON.stringify(whereInput))
       const response = await agent
         .get(`/api/v1/statistics/counts?entity=admin&where=${where}`)
         .set('Authorization', authorization.convertToString())
@@ -115,7 +115,7 @@ describe('StatisticControllerRest', () => {
       const whereInput: any = {
         deletedAt: null
       }
-      const where = encodeURIComponent(JSON.stringify(whereInput))
+      const where: string = encodeURIComponent(JSON.stringify(whereInput))
       const response = await agent
         .get(`/api/v1/statistics/counts?entity=user&where=${where}`)
         .set('Authorization', authorization.convertToString())
@@ -134,7 +134,7 @@ describe('StatisticControllerRest', () => {
       const whereInput: any = {
         deletedAt: null
       }
-      const where = encodeURIComponent(JSON.stringify(whereInput))
+      const where: string = encodeURIComponent(JSON.stringify(whereInput))
       const response = await agent
         .get(`/api/v1/statistics/counts?entity=vendor&where=${where}`)
         .set('Authorization', authorization.convertToString())
@@ -153,7 +153,7 @@ describe('StatisticControllerRest', () => {
       const whereInput: any = {
         deletedAt: null
       }
-      const where = encodeURIComponent(JSON.stringify(whereInput))
+      const where: string = encodeURIComponent(JSON.stringify(whereInput))
       const response = await agent
         .get(`/api/v1/statistics/counts?entity=top_up_history&where=${where}`)
         .set('Authorization', authorization.convertToString())
@@ -172,7 +172,7 @@ describe('StatisticControllerRest', () => {
       const whereInput: any = {
         deletedAt: null
       }
-      const where = encodeURIComponent(JSON.stringify(whereInput))
+      const where: string = encodeURIComponent(JSON.stringify(whereInput))
       const response = await agent
         .get(`/api/v1/statistics/counts?entity=transaction_history&where=${where}`)
         .set('Authorization', authorization.convertToString())
@@ -191,7 +191,7 @@ describe('StatisticControllerRest', () => {
       const whereInput: any = {
         deletedAt: null
       }
-      const where = encodeURIComponent(JSON.stringify(whereInput))
+      const where: string = encodeURIComponent(JSON.stringify(whereInput))
       const response = await agent
         .get(`/api/v1/statistics/counts?entity=transaction_history&where=${where}`)
         .set('Authorization', authorization.convertToString())
