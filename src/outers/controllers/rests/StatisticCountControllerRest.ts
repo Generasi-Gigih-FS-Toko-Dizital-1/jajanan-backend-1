@@ -55,9 +55,7 @@ export default class StatisticCountControllerRest {
           ? {}
           : JSON.parse(decodeURIComponent(where as string))
 
-    let reader = new Promise<number>((resolve, reject) => {
-      reject(new Error('Invalid entity'))
-    })
+    let reader: Promise<number> | undefined
 
     if (entity === 'admin') {
       reader = this.adminStatistic.count(whereInput)
@@ -71,6 +69,15 @@ export default class StatisticCountControllerRest {
       reader = this.topUpHistoryStatistic.count(whereInput)
     } else if (entity === 'transaction_history') {
       reader = this.transactionHistoryStatistic.count(whereInput)
+    }
+
+    if (reader === undefined) {
+      const responseBody: ResponseBody<null> = new ResponseBody<null>(
+        'Query parameter entity is invalid.',
+        null
+      )
+      response.status(400).send(responseBody)
+      return
     }
 
     reader.then((result: number) => {
