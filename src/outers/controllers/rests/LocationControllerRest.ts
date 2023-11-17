@@ -31,7 +31,20 @@ export default class LocationControllerRest {
     const {
       include
     } = request.query
-    const includeInput: any = include === undefined ? {} : JSON.parse(decodeURIComponent(include as string))
+
+    let includeInput: any = {}
+    if (include !== undefined && include !== null) {
+      try {
+        includeInput = JSON.parse(decodeURIComponent(include as string))
+      } catch (error) {
+        const responseBody: ResponseBody<null> = new ResponseBody<null>(
+          'Query parameter include is invalid.',
+          null
+        )
+        response.status(400).send(responseBody)
+        return
+      }
+    }
     this.locationSync
       .syncUserLocation(request.body, includeInput)
       .then((result: Result<UserLocationSyncResponse | null>) => {
@@ -51,7 +64,20 @@ export default class LocationControllerRest {
     const {
       include
     } = request.query
-    const includeInput: any = include === undefined ? {} : JSON.parse(decodeURIComponent(include as string))
+
+    let includeInput: any = {}
+    if (include !== undefined && include !== null) {
+      try {
+        includeInput = JSON.parse(decodeURIComponent(include as string))
+      } catch (error) {
+        const responseBody: ResponseBody<null> = new ResponseBody<null>(
+          'Query parameter include is invalid.',
+          null
+        )
+        response.status(400).send(responseBody)
+        return
+      }
+    }
     this.locationSync
       .syncVendorLocation(request.body, includeInput)
       .then((result: Result<VendorLocationSyncResponse | null>) => {

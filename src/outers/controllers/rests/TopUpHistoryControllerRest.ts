@@ -47,8 +47,35 @@ export default class TopUpHistoryController {
       pageNumber === undefined ? 1 : Number(pageNumber),
       pageSize === undefined ? 10 : Number(pageSize)
     )
-    const whereInput: any = where === undefined ? {} : JSON.parse(decodeURIComponent(where as string))
-    const includeInput: any = include === undefined ? {} : JSON.parse(decodeURIComponent(include as string))
+
+    let whereInput: any = {}
+    if (where !== undefined && where !== null) {
+      try {
+        whereInput = JSON.parse(decodeURIComponent(where as string))
+      } catch (error) {
+        const responseBody: ResponseBody<null> = new ResponseBody<null>(
+          'Query parameter where is invalid.',
+          null
+        )
+        response.status(400).send(responseBody)
+        return
+      }
+    }
+
+    let includeInput: any = {}
+    if (include !== undefined && include !== null) {
+      try {
+        includeInput = JSON.parse(decodeURIComponent(include as string))
+      } catch (error) {
+        const responseBody: ResponseBody<null> = new ResponseBody<null>(
+          'Query parameter include is invalid.',
+          null
+        )
+        response.status(400).send(responseBody)
+        return
+      }
+    }
+
     this.topUpHistoryManagement
       .readMany(pagination, whereInput, includeInput)
       .then((result: Result<TopUpHistory[] | TopUpHistoryAggregate[]>) => {

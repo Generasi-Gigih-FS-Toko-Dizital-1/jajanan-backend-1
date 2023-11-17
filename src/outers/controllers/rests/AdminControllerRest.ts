@@ -48,10 +48,20 @@ export default class AdminControllerRest {
       pageNumber === undefined ? 1 : Number(pageNumber),
       pageSize === undefined ? 10 : Number(pageSize)
     )
-    const whereInput: any =
-      where === undefined
-        ? {}
-        : JSON.parse(decodeURIComponent(where as string))
+
+    let whereInput: any = {}
+    if (where !== undefined && where !== null) {
+      try {
+        whereInput = JSON.parse(decodeURIComponent(where as string))
+      } catch (error) {
+        const responseBody: ResponseBody<null> = new ResponseBody<null>(
+          'Query parameter where is invalid.',
+          null
+        )
+        response.status(400).send(responseBody)
+        return
+      }
+    }
     this.adminManagement
       .readMany(pagination, whereInput)
       .then((result: Result<Admin[]>) => {
